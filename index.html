@@ -1,17 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>我的网站</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>笑话分享网站</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
             text-align: center;
-            margin-top: 100px;
+            color: #333;
+        }
+
+       .joke-container {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px auto;
+            width: 600px;
+        }
+
+       .joke-text {
+            margin-bottom: 10px;
+        }
+
+       .joke-author {
+            color: #777;
+            font-style: italic;
+        }
+
+       .add-joke-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+       .add-joke-form input[type="text"] {
+            padding: 10px;
+            width: 400px;
+            margin-right: 10px;
+        }
+
+       .add-joke-form input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
+
 <body>
-    <h1>恭喜！网站搭建成功！</h1>
-    <p>这是用GitHub Pages创建的网站</p>
+    <h1>笑话分享网站</h1>
+    {% for joke in jokes %}
+    <div class="joke-container">
+        <p class="joke-text">{{ joke[1] }}</p>
+        <p class="joke-author">—— {{ joke[2] }}</p>
+    </div>
+    {% endfor %}
+    <form class="add-joke-form" id="addJokeForm">
+        <input type="text" id="jokeText" placeholder="在这里输入你的笑话">
+        <input type="text" id="userName" placeholder="你的名字（可选）">
+        <input type="submit" value="提交笑话">
+    </form>
+
+    <script>
+        document.getElementById('addJokeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const jokeText = document.getElementById('jokeText').value;
+            const userName = document.getElementById('userName').value;
+
+            fetch('/add_joke', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    joke_text: jokeText,
+                    user_name: userName
+                })
+            })
+           .then(response => response.json())
+           .then(data => {
+                if (data.message === "笑话添加成功") {
+                    alert("笑话提交成功！");
+                    location.reload();
+                } else {
+                    alert("提交失败，请重试。");
+                }
+            })
+           .catch(error => {
+                console.error('Error:', error);
+                alert("发生错误，请检查网络连接。");
+            });
+        });
+    </script>
 </body>
+
 </html>
