@@ -32,17 +32,17 @@
             overflow: hidden;
         }
 
-        /* 注册和登录页面样式 */
-       .auth-page {
+        /* 初始用户名输入页面样式 */
+       .init-page {
             padding: 20px;
+            text-align: center;
         }
 
-       .auth-page h2 {
-            text-align: center;
+       .init-page h2 {
             margin-bottom: 20px;
         }
 
-       .auth-page input {
+       .init-page input {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -50,7 +50,7 @@
             border-radius: 5px;
         }
 
-       .auth-page button {
+       .init-page button {
             width: 100%;
             padding: 10px;
             background-color: #007BFF;
@@ -58,16 +58,6 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-
-       .auth-page p {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-       .auth-page a {
-            color: #007BFF;
-            text-decoration: none;
         }
 
         /* 主页面样式 */
@@ -91,27 +81,6 @@
 
        .user-info h3 {
             margin: 0;
-        }
-
-       .recommend-users {
-            margin-bottom: 20px;
-        }
-
-       .recommend-users h2 {
-            margin-bottom: 10px;
-        }
-
-       .recommend-user {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-       .recommend-user img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
         }
 
        .chat-section {
@@ -200,39 +169,76 @@
             cursor: pointer;
         }
 
-       .friend-list {
+       .friend-requests {
             list-style-type: none;
             padding: 0;
+            margin-bottom: 10px;
         }
 
-       .friend-list li {
+       .friend-requests li {
             margin-bottom: 5px;
             padding: 5px 10px;
             background-color: #f4f4f4;
             border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+       .friend-requests button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+       .chat-container {
+            display: none;
+        }
+
+        /* 我的主页样式 */
+       .my-profile-page {
+            padding: 20px;
+            display: none;
+            text-align: center;
+        }
+
+       .my-profile-page h2 {
+            margin-bottom: 20px;
+        }
+
+       .my-profile-page img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+       .my-profile-page p {
+            margin-bottom: 5px;
+        }
+
+       .my-profile-page button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
-    <!-- 注册页面 -->
-    <div id="register-page" class="container auth-page">
-        <h2>注册</h2>
-        <input type="text" placeholder="用户名" id="register-username">
-        <input type="password" placeholder="密码" id="register-password">
-        <button onclick="register()">注册</button>
-        <p>已有账号？<a href="#" onclick="showLoginPage()">登录</a></p>
+    <!-- 初始用户名输入页面 -->
+    <div id="init-page" class="container init-page">
+        <h2>请输入您的用户名</h2>
+        <input type="text" placeholder="用户名" id="init-username">
+        <button onclick="register()">注册并开始使用</button>
     </div>
-
-    <!-- 登录页面 -->
-    <div id="login-page" class="container auth-page" style="display: none;">
-        <h2>登录</h2>
-        <input type="text" placeholder="用户名" id="login-username">
-        <input type="password" placeholder="密码" id="login-password">
-        <button onclick="login()">登录</button>
-        <p>没有账号？<a href="#" onclick="showRegisterPage()">注册</a></p>
-    </div>
-
     <!-- 主页面 -->
     <div id="main-page" class="container main-page">
         <div class="user-info">
@@ -241,24 +247,13 @@
         </div>
         <div class="add-friend-section">
             <input type="text" placeholder="输入好友用户名" id="add-friend-username">
-            <button onclick="addFriendManually()">添加好友</button>
+            <button onclick="sendFriendRequest()">添加好友</button>
         </div>
-        <div class="friend-list" id="friend-list">
-            <h3>好友列表</h3>
+        <div class="friend-requests" id="friend-requests">
+            <h3>好友申请列表</h3>
         </div>
-        <div class="recommend-users">
-            <h2>推荐用户</h2>
-            <div class="recommend-user" onclick="showUserProfile('推荐用户1', 'https://via.placeholder.com/40')">
-                <img src="https://via.placeholder.com/40" alt="推荐用户头像">
-                <span>推荐用户1</span>
-            </div>
-            <div class="recommend-user" onclick="showUserProfile('推荐用户2', 'https://via.placeholder.com/40')">
-                <img src="https://via.placeholder.com/40" alt="推荐用户头像">
-                <span>推荐用户2</span>
-            </div>
-        </div>
-        <div class="chat-section">
-            <h2>聊天</h2>
+        <div id="chat-container" class="chat-container">
+            <div id="chat-header"></div>
             <div id="chat-messages"></div>
             <div class="chat-input">
                 <input type="text" placeholder="输入消息" id="chat-input">
@@ -266,94 +261,58 @@
                 <button onclick="showEmojiPicker()">表情</button>
             </div>
             <div id="emoji-picker" class="emoji-picker">
-                <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/325/grinning-face_1f600.png" alt="😀">
-                <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/325/smiling-face-with-open-mouth_1f603.png" alt="😃">
-                <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/325/rolling-on-the-floor-laughing_1f923.png" alt="🤣">
+                <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/325/grinning-face_1f600.png"
+                    alt="😀">
+                <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/325/smiling-face-with-open-mouth_1f603.png"
+                    alt="😃">
+                <img src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/325/rolling-on-the-floor-laughing_1f923.png"
+                    alt="🤣">
             </div>
         </div>
+        <button onclick="showMyProfile()">我的主页</button>
     </div>
-
+    <!-- 我的主页页面 -->
+    <div id="my-profile-page" class="container my-profile-page">
+        <h2>我的主页</h2>
+        <img src="https://via.placeholder.com/100" alt="用户头像">
+        <p id="profile-username"></p>
+        <p>好友数量：<span id="friend-count"></span></p>
+        <button onclick="showMainPage()">返回主页面</button>
+    </div>
     <script>
-        // 从localStorage中获取已注册用户数据
+        // 从 localStorage 中获取已注册用户数据
         const users = JSON.parse(localStorage.getItem('users')) || {};
-        // 从localStorage中获取好友列表数据
+        // 从 localStorage 中获取好友列表数据
         const friendLists = JSON.parse(localStorage.getItem('friendLists')) || {};
+        // 存储聊天记录
+        const chatHistories = JSON.parse(localStorage.getItem('chatHistories')) || {};
+        // 存储好友申请数据
+        const friendRequests = JSON.parse(localStorage.getItem('friendRequests')) || {};
 
         function register() {
-            const username = document.getElementById('register-username').value;
-            const password = document.getElementById('register-password').value;
-
-            if (username && password) {
-                users[username] = password;
+            const username = document.getElementById('init-username').value;
+            if (username) {
+                if (Object.keys(users).includes(username)) {
+                    alert('该用户名已被使用，请选择其他用户名');
+                    return;
+                }
+                users[username] = true; // 简单标记用户已注册
                 localStorage.setItem('users', JSON.stringify(users));
-                alert('注册成功！');
-                showMainPage(username);
+                document.getElementById('init-page').style.display = 'none';
+                document.getElementById('main-page').style.display = 'block';
+                document.getElementById('user-username').textContent = username;
+                // 隐藏聊天窗口
+                document.getElementById('chat-container').style.display = 'none';
             } else {
-                alert('请输入用户名和密码');
+                alert('请输入用户名');
             }
-        }
-
-        function login() {
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-
-            if (users[username] === password) {
-                alert('登录成功！');
-                showMainPage(username);
-            } else {
-                alert('用户名或密码错误');
-            }
-        }
-
-        function showRegisterPage() {
-            document.getElementById('register-page').style.display = 'block';
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-page').style.display = 'none';
-        }
-
-        function showLoginPage() {
-            document.getElementById('register-page').style.display = 'none';
-            document.getElementById('login-page').style.display = 'block';
-            document.getElementById('main-page').style.display = 'none';
-        }
-
-        function showMainPage(username) {
-            document.getElementById('register-page').style.display = 'none';
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-page').style.display = 'block';
-            document.getElementById('user-username').textContent = username;
-
-            // 从localStorage中获取聊天记录并显示
-            const chatHistory = localStorage.getItem(`chat_${username}`);
-            if (chatHistory) {
-                const chatMessages = JSON.parse(chatHistory);
-                const chatSection = document.getElementById('chat-messages');
-                chatMessages.forEach(message => {
-                    const chatMessage = document.createElement('div');
-                    chatMessage.classList.add('chat-message', message.self? 'chat-message-self' : '');
-                    chatMessage.innerHTML = `
-                        <img src="https://via.placeholder.com/40" alt="用户头像">
-                        <div class="chat-content">${message.text}</div>
-                    `;
-                    chatSection.appendChild(chatMessage);
-                });
-            }
-
-            // 从localStorage中获取好友列表并显示
-            const friendList = friendLists[username] || [];
-            const friendListElement = document.getElementById('friend-list');
-            friendListElement.innerHTML = '<h3>好友列表</h3>';
-            friendList.forEach(friend => {
-                const listItem = document.createElement('li');
-                listItem.textContent = friend;
-                friendListElement.appendChild(listItem);
-            });
         }
 
         function sendMessage() {
             const chatInput = document.getElementById('chat-input').value;
             if (chatInput) {
-                const username = document.getElementById('user-username').textContent;
+                const currentUsername = document.getElementById('user-username').textContent;
+                const friendUsername = document.getElementById('chat-header').textContent.split(' ')[2];
                 const chatSection = document.getElementById('chat-messages');
                 const chatMessage = document.createElement('div');
                 chatMessage.classList.add('chat-message', 'chat-message-self');
@@ -362,13 +321,12 @@
                     <div class="chat-content">${chatInput}</div>
                 `;
                 chatSection.appendChild(chatMessage);
-
-                // 保存聊天记录到localStorage
-                const chatHistory = localStorage.getItem(`chat_${username}`);
-                const messages = chatHistory? JSON.parse(chatHistory) : [];
-                messages.push({ text: chatInput, self: true });
-                localStorage.setItem(`chat_${username}`, JSON.stringify(messages));
-
+                // 保存聊天记录到 localStorage
+                let chatHistory = chatHistories[currentUsername] || {};
+                chatHistory[friendUsername] = chatHistory[friendUsername] || [];
+                chatHistory[friendUsername].push({ text: chatInput, self: true });
+                chatHistories[currentUsername] = chatHistory;
+                localStorage.setItem('chatHistories', JSON.stringify(chatHistories));
                 document.getElementById('chat-input').value = '';
             }
         }
@@ -378,41 +336,119 @@
             emojiPicker.style.display = emojiPicker.style.display === 'none'? 'block' : 'none';
         }
 
-        function showUserProfile(username, avatar) {
-            const choice = confirm(`是否添加 ${username} 为好友？`);
-            if (choice) {
-                const currentUsername = document.getElementById('user-username').textContent;
-                let friendList = friendLists[currentUsername] || [];
-                if (!friendList.includes(username)) {
-                    friendList.push(username);
-                    friendLists[currentUsername] = friendList;
-                    localStorage.setItem('friendLists', JSON.stringify(friendLists));
-                    alert(`${username} 已添加为好友！`);
-                    showMainPage(currentUsername); // 更新好友列表显示
-                } else {
-                    alert(`${username} 已经在你的好友列表中了！`);
-                }
-            }
-        }
-
-        function addFriendManually() {
+        function sendFriendRequest() {
             const currentUsername = document.getElementById('user-username').textContent;
             const friendUsername = document.getElementById('add-friend-username').value;
-
             if (friendUsername) {
-                let friendList = friendLists[currentUsername] || [];
-                if (!friendList.includes(friendUsername)) {
-                    friendList.push(friendUsername);
-                    friendLists[currentUsername] = friendList;
-                    localStorage.setItem('friendLists', JSON.stringify(friendLists));
-                    alert(`${friendUsername} 已添加为好友！`);
-                    showMainPage(currentUsername); // 更新好友列表显示
+                if (currentUsername === friendUsername) {
+                    alert('不能添加自己为好友');
+                    return;
+                }
+                let requests = friendRequests[friendUsername] || [];
+                if (!requests.includes(currentUsername)) {
+                    requests.push(currentUsername);
+                    friendRequests[friendUsername] = requests;
+                    localStorage.setItem('friendRequests', JSON.stringify(friendRequests));
+                    alert(`已向 ${friendUsername} 发送好友申请`);
                 } else {
-                    alert(`${friendUsername} 已经在你的好友列表中了！`);
+                    alert(`已向 ${friendUsername} 发送过好友申请`);
                 }
             } else {
                 alert('请输入好友的用户名');
             }
+        }
+
+        function acceptFriendRequest(currentUsername, requestUsername) {
+            let friendList = friendLists[currentUsername] || [];
+            if (!friendList.includes(requestUsername)) {
+                friendList.push(requestUsername);
+                friendLists[currentUsername] = friendList;
+                localStorage.setItem('friendLists', JSON.stringify(friendLists));
+                alert(`${requestUsername} 已成为你的好友`);
+                showMainPage(currentUsername);
+            } else {
+                alert(`${requestUsername} 已经在你的好友列表中`);
+            }
+            // 从好友申请列表中移除该申请
+            let requests = friendRequests[currentUsername] || [];
+            const index = requests.indexOf(requestUsername);
+            if (index > -1) {
+                requests.splice(index, 1);
+                friendRequests[currentUsername] = requests;
+                localStorage.setItem('friendRequests', JSON.stringify(friendRequests));
+            }
+            showMainPage(currentUsername);
+        }
+
+        function declineFriendRequest(currentUsername, requestUsername) {
+            // 从好友申请列表中移除该申请
+            let requests = friendRequests[currentUsername] || [];
+            const index = requests.indexOf(requestUsername);
+            if (index > -1) {
+                requests.splice(index, 1);
+                friendRequests[currentUsername] = requests;
+                localStorage.setItem('friendRequests', JSON.stringify(friendRequests));
+            }
+            alert(`已拒绝 ${requestUsername} 的好友申请`);
+            showMainPage(currentUsername);
+        }
+
+        function showChatWindow(currentUsername, friendUsername) {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.style.display = 'block';
+            const chatHeader = document.getElementById('chat-header');
+            chatHeader.textContent = `与 ${friendUsername} 聊天`;
+            const chatSection = document.getElementById('chat-messages');
+            chatSection.innerHTML = '';
+            const chatHistory = chatHistories[currentUsername] || {};
+            const messages = chatHistory[friendUsername] || [];
+            messages.forEach(message => {
+                const chatMessage = document.createElement('div');
+                chatMessage.classList.add('chat-message', message.self? 'chat-message-self' : '');
+                chatMessage.innerHTML = `
+                    <img src="https://via.placeholder.com/40" alt="用户头像">
+                    <div class="chat-content">${message.text}</div>
+                `;
+                chatSection.appendChild(chatMessage);
+            });
+        }
+
+        function showMainPage(username) {
+            const friendList = friendLists[username] || [];
+            const friendListElement = document.getElementById('friend-list');
+            friendListElement.innerHTML = '<h3>好友列表</h3>';
+            const requests = friendRequests[username] || [];
+            const requestsElement = document.getElementById('friend-requests');
+            requestsElement.innerHTML = '<h3>好友申请列表</h3>';
+            requests.forEach(request => {
+                const listItem = document.createElement('li');
+                listItem.textContent = request;
+                const acceptButton = document.createElement('button');
+                acceptButton.textContent = '同意';
+                acceptButton.addEventListener('click', () => acceptFriendRequest(username, request));
+                const declineButton = document.createElement('button');
+                declineButton.textContent = '拒绝';
+                declineButton.addEventListener('click', () => declineFriendRequest(username, request));
+                listItem.appendChild(acceptButton);
+                listItem.appendChild(declineButton);
+                requestsElement.appendChild(listItem);
+            });
+            // 隐藏聊天窗口
+            document.getElementById('chat-container').style.display = 'none';
+        }
+
+        function showMyProfile() {
+            const currentUsername = document.getElementById('user-username').textContent;
+            document.getElementById('main-page').style.display = 'none';
+            document.getElementById('my-profile-page').style.display = 'block';
+            document.getElementById('profile-username').textContent = `用户名：${currentUsername}`;
+            const friendCount = (friendLists[currentUsername] || []).length;
+            document.getElementById('friend-count').textContent = friendCount;
+        }
+
+        function showMainPage() {
+            document.getElementById('my-profile-page').style.display = 'none';
+            document.getElementById('main-page').style.display = 'block';
         }
     </script>
 </body>
