@@ -1,388 +1,87 @@
-以下是整合在一起的“人脉星球”游戏代码，包含了注册、登录、动态发布与互动、群组功能、每日签到、限时任务、虚拟道具交易、排行榜、成就系统等功能。代码中使用了HTML构建页面结构，CSS进行样式设置，JavaScript实现功能逻辑。由于代码量较大，请注意仔细阅读和理解。
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        section {
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-
-        form {
-            margin-bottom: 10px;
-        }
-
-        button {
-            padding: 5px 10px;
-            margin-right: 5px;
-        }
-    </style>
-    <title>人脉星球</title>
+    <title>联机猜数字游戏</title>
 </head>
 
 <body>
-    <header>
-        <h1>人脉星球</h1>
-    </header>
-    <main>
-        <section id="login-register">
-            <h2>登录/注册</h2>
-            <form id="login-form">
-                <label for="username">用户名:</label>
-                <input type="text" id="username" placeholder="请输入用户名">
-                <label for="password">密码:</label>
-                <input type="password" id="password" placeholder="请输入密码">
-                <button type="button" id="login-btn">登录</button>
-                <button type="button" id="register-btn">注册</button>
-            </form>
-        </section>
-        <section id="user-dashboard" style="display: none;">
-            <h2>用户面板</h2>
-            <p id="username-display"></p>
-            <p>积分: <span id="points-display">0</span></p>
-            <p>星脉币: <span id="coins-display">0</span></p>
-            <button type="button" id="sign-in-btn">每日签到</button>
-            <button type="button" id="view-tasks-btn">查看限时任务</button>
-            <button type="button" id="view-rankings-btn">查看排行榜</button>
-            <button type="button" id="view-achievements-btn">查看成就</button>
-            <button type="button" id="create-group-btn">创建群组</button>
-            <button type="button" id="join-group-btn">加入群组</button>
-            <button type="button" id="go-to-market-btn">进入交易市场</button>
-        </section>
-        <section id="dynamic-section" style="display: none;">
-            <h2>动态</h2>
-            <form id="post-dynamic-form">
-                <textarea id="dynamic-content" placeholder="分享你的想法吧..."></textarea>
-                <input type="file" id="dynamic-image" accept="image/*">
-                <button type="button" id="post-dynamic-btn">发布动态</button>
-            </form>
-            <div id="dynamic-list"></div>
-        </section>
-        <section id="group-section" style="display: none;">
-            <h2>群组</h2>
-            <div id="group-list"></div>
-        </section>
-        <section id="tasks-section" style="display: none;">
-            <h2>限时任务</h2>
-            <div id="task-list"></div>
-        </section>
-        <section id="rankings-section" style="display: none;">
-            <h2>排行榜</h2>
-            <div id="wealth-ranking"></div>
-            <div id="network-ranking"></div>
-        </section>
-        <section id="achievements-section" style="display: none;">
-            <h2>成就</h2>
-            <div id="achievement-list"></div>
-        </section>
-        <section id="market-section" style="display: none;">
-            <h2>交易市场</h2>
-            <div id="item-list"></div>
-            <form id="buy-item-form">
-                <label for="item-id">购买道具ID:</label>
-                <input type="text" id="item-id" placeholder="请输入道具ID">
-                <button type="button" id="buy-item-btn">购买</button>
-            </form>
-        </section>
-    </main>
+    <h1>联机猜数字游戏</h1>
+    <div id="roomActions">
+        <input type="text" id="roomName" placeholder="房间名">
+        <button onclick="createRoom()">创建房间</button>
+        <button onclick="joinRoom()">加入房间</button>
+    </div>
+    <div id="gameArea" style="display: none;">
+        <h2>游戏房间</h2>
+        <div id="messages"></div>
+        <input type="number" id="guessInput" placeholder="猜数字">
+        <button onclick="makeGuess()">猜</button>
+        <div id="turnInfo"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        // 模拟用户数据存储
-        const users = {};
-        let currentUser;
+        const socket = io();
+        let roomName;
 
-        // 模拟群组数据存储
-        const groups = [];
+        function createRoom() {
+            roomName = document.getElementById('roomName').value;
+            socket.emit('createRoom', roomName);
+        }
 
-        // 模拟动态数据存储
-        const dynamics = [];
+        function joinRoom() {
+            roomName = document.getElementById('roomName').value;
+            socket.emit('joinRoom', roomName);
+        }
 
-        // 模拟任务数据存储
-        const tasks = [
-            { id: 1, title: "邀请5位好友", description: "成功邀请5位好友加入人脉星球", reward: 100 },
-            { id: 2, title: "发布3条动态", description: "发布3条有趣的动态", reward: 80 }
-        ];
-
-        // 模拟排行榜数据存储
-        const wealthRanking = [];
-        const networkRanking = [];
-
-        // 模拟成就数据存储
-        const achievements = [
-            { id: 1, title: "初来乍到", description: "成功注册人脉星球", reward: 50 },
-            { id: 2, title: "社交达人", description: "拥有10位好友", reward: 100 }
-        ];
-
-        // 模拟道具数据存储
-        const items = [
-            { id: 1, name: "个性头像框", price: 50, description: "独特的头像框，让你与众不同" },
-            { id: 2, name: "经验加成卡", price: 80, description: "使用后任务经验加成20%" }
-        ];
-
-        // 注册功能
-        document.getElementById('register-btn').addEventListener('click', () => {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            if (users[username]) {
-                alert('用户名已存在');
-                return;
-            }
-            users[username] = {
-                password,
-                points: 0,
-                coins: 0,
-                friends: [],
-                groups: [],
-                dynamics: [],
-                completedTasks: [],
-                completedAchievements: []
-            };
-            currentUser = users[username];
-            document.getElementById('login-register').style.display = 'none';
-            document.getElementById('user-dashboard').style.display = 'block';
-            document.getElementById('username-display').textContent = `用户名: ${username}`;
-            alert('注册成功');
-            // 完成注册时解锁“初来乍到”成就
-            const achievement = achievements.find(a => a.id === 1);
-            if (achievement &&!currentUser.completedAchievements.includes(achievement.id)) {
-                currentUser.points += achievement.reward;
-                currentUser.completedAchievements.push(achievement.id);
-                document.getElementById('points-display').textContent = currentUser.points;
-                alert(`解锁成就：${achievement.title}，获得${achievement.reward}积分`);
-            }
+        socket.on('roomCreated', (room) => {
+            roomName = room;
+            document.getElementById('roomActions').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
         });
 
-        // 登录功能
-        document.getElementById('login-btn').addEventListener('click', () => {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            if (!users[username] || users[username].password!== password) {
-                alert('用户名或密码错误');
-                return;
-            }
-            currentUser = users[username];
-            document.getElementById('login-register').style.display = 'none';
-            document.getElementById('user-dashboard').style.display = 'block';
-            document.getElementById('username-display').textContent = `用户名: ${username}`;
-            document.getElementById('points-display').textContent = currentUser.points;
-            document.getElementById('coins-display').textContent = currentUser.coins;
-            alert('登录成功');
+        socket.on('roomExists', (room) => {
+            alert(`房间 ${room} 已存在`);
         });
 
-        // 每日签到功能
-        document.getElementById('sign-in-btn').addEventListener('click', () => {
-            currentUser.points += 20;
-            document.getElementById('points-display').textContent = currentUser.points;
-            alert('签到成功，获得20积分');
+        socket.on('roomNotFound', (room) => {
+            alert(`房间 ${room} 不存在`);
         });
 
-        // 查看限时任务功能
-        document.getElementById('view-tasks-btn').addEventListener('click', () => {
-            const taskList = document.getElementById('task-list');
-            taskList.innerHTML = '';
-            tasks.forEach(task => {
-                const taskElement = document.createElement('div');
-                taskElement.innerHTML = `
-                    <h3>${task.title}</h3>
-                    <p>${task.description}</p>
-                    <p>奖励: ${task.reward}积分</p>
-                    ${currentUser.completedTasks.includes(task.id)? '<p>已完成</p>' : '<button data-task-id="'+task.id+'" class="complete-task-btn">完成任务</button>'}
-                `;
-                taskList.appendChild(taskElement);
-            });
-            document.getElementById('tasks-section').style.display = 'block';
+        socket.on('playerJoined', (playerId) => {
+            const messagesDiv = document.getElementById('messages');
+            const p = document.createElement('p');
+            p.textContent = `玩家 ${playerId} 加入了房间`;
+            messagesDiv.appendChild(p);
         });
 
-        // 完成任务功能
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('complete-task-btn')) {
-                const taskId = parseInt(e.target.dataset.taskId);
-                const task = tasks.find(t => t.id === taskId);
-                if (task &&!currentUser.completedTasks.includes(taskId)) {
-                    currentUser.points += task.reward;
-                    currentUser.completedTasks.push(taskId);
-                    document.getElementById('points-display').textContent = currentUser.points;
-                    alert(`任务完成，获得${task.reward}积分`);
-                    // 检查是否解锁成就
-                    if (task.id === 1 && currentUser.friends.length >= 5) {
-                        const achievement = achievements.find(a => a.id === 2);
-                        if (achievement &&!currentUser.completedAchievements.includes(achievement.id)) {
-                            currentUser.points += achievement.reward;
-                            currentUser.completedAchievements.push(achievement.id);
-                            document.getElementById('points-display').textContent = currentUser.points;
-                            alert(`解锁成就：${achievement.title}，获得${achievement.reward}积分`);
-                        }
-                    }
-                    const taskList = document.getElementById('task-list');
-                    taskList.innerHTML = '';
-                    tasks.forEach(t => {
-                        const taskElement = document.createElement('div');
-                        taskElement.innerHTML = `
-                            <h3>${t.title}</h3>
-                            <p>${t.description}</p>
-                            <p>奖励: ${t.reward}积分</p>
-                            ${currentUser.completedTasks.includes(t.id)? '<p>已完成</p>' : '<button data-task-id="'+t.id+'" class="complete-task-btn">完成任务</button>'}
-                        `;
-                        taskList.appendChild(taskElement);
-                    });
-                }
-            }
+        function makeGuess() {
+            const guess = parseInt(document.getElementById('guessInput').value);
+            socket.emit('guess', roomName, guess);
+        }
+
+        socket.on('message', (msg) => {
+            const messagesDiv = document.getElementById('messages');
+            const p = document.createElement('p');
+            p.textContent = msg;
+            messagesDiv.appendChild(p);
         });
 
-        // 发布动态功能
-        document.getElementById('post-dynamic-btn').addEventListener('click', () => {
-            const content = document.getElementById('dynamic-content').value;
-            const image = document.getElementById('dynamic-image').files[0];
-            const newDynamic = {
-                id: dynamics.length + 1,
-                content,
-                image: image? URL.createObjectURL(image) : null,
-                likes: 0,
-                comments: [],
-                publisher: currentUser.username
-            };
-            dynamics.push(newDynamic);
-            currentUser.dynamics.push(newDynamic.id);
-            const dynamicList = document.getElementById('dynamic-list');
-            const dynamicElement = document.createElement('div');
-            dynamicElement.innerHTML = `
-                <p><strong>${newDynamic.publisher}:</strong> ${newDynamic.content}</p>
-                ${newDynamic.image? `<img src="${newDynamic.image}" alt="动态图片" width="200">` : ''}
-                <p>点赞: ${newDynamic.likes} 评论: ${newDynamic.comments.length}</p>
-                <button data-dynamic-id="${newDynamic.id}" class="like-btn">点赞</button>
-                <button data-dynamic-id="${newDynamic.id}" class="comment-btn">评论</button>
-            `;
-            dynamicList.appendChild(dynamicElement);
-            document.getElementById('dynamic-content').value = '';
-            document.getElementById('dynamic-image').value = '';
+        socket.on('gameOver', (msg) => {
+            const messagesDiv = document.getElementById('messages');
+            const p = document.createElement('p');
+            p.textContent = msg;
+            messagesDiv.appendChild(p);
+            document.getElementById('guessInput').disabled = true;
         });
 
-        // 动态点赞功能
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('like-btn')) {
-                const dynamicId = parseInt(e.target.dataset.dynamicId);
-                const dynamic = dynamics.find(d => d.id === dynamicId);
-                if (dynamic) {
-                    dynamic.likes++;
-                    const dynamicElement = e.target.closest('div');
-                    dynamicElement.querySelector('p').textContent = `点赞: ${dynamic.likes} 评论: ${dynamic.comments.length}`;
-                    alert('点赞成功');
-                }
-            }
+        socket.on('turnChanged', (playerId) => {
+            const turnInfoDiv = document.getElementById('turnInfo');
+            turnInfoDiv.textContent = `轮到玩家 ${playerId} 猜数字`;
         });
+    </script>
+</body>
 
-        // 动态评论功能
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('comment-btn')) {
-                const dynamicId = parseInt(e.target.dataset.dynamicId);
-                const dynamic = dynamics.find(d => d.id === dynamicId);
-                if (dynamic) {
-                    const comment = prompt('请输入你的评论');
-                    if (comment) {
-                        dynamic.comments.push(comment);
-                        const dynamicElement = e.target.closest('div');
-                        dynamicElement.querySelector('p').textContent = `点赞: ${dynamic.likes} 评论: ${dynamic.comments.length}`;
-                        const commentList = document.createElement('ul');
-                        dynamic.comments.forEach(c => {
-                            const commentItem = document.createElement('li');
-                            commentItem.textContent = c;
-                            commentList.appendChild(commentItem);
-                        });
-                        dynamicElement.appendChild(commentList);
-                        alert('评论成功');
-                    }
-                }
-            }
-        });
-
-        // 创建群组功能
-        document.getElementById('create-group-btn').addEventListener('click', () => {
-            const groupName = prompt('请输入群组名称');
-            const groupDescription = prompt('请输入群组描述');
-            if (groupName && groupDescription) {
-                const newGroup = {
-                    id: groups.length + 1,
-                    name: groupName,
-                    description: groupDescription,
-                    members: [currentUser.username],
-                    posts: []
-                };
-                groups.push(newGroup);
-                currentUser.groups.push(newGroup.id);
-                const groupList = document.getElementById('group-list');
-                const groupElement = document.createElement('div');
-                groupElement.innerHTML = `
-                    <h3>${newGroup.name}</h3>
-                    <p>${newGroup.description}</p>
-                    <p>成员: ${newGroup.members.join(', ')}</p>
-                `;
-                groupList.appendChild(groupElement);
-                alert('群组创建成功');
-            }
-        });
-
-        // 加入群组功能
-        document.getElementById('join-group-btn').addEventListener('click', () => {
-            const groupId = parseInt(prompt('请输入要加入的群组ID'));
-            const group = groups.find(g => g.id === groupId);
-            if (group &&!currentUser.groups.includes(group.id)) {
-                group.members.push(currentUser.username);
-                currentUser.groups.push(group.id);
-                const groupList = document.getElementById('group-list');
-                const groupElement = document.createElement('div');
-                groupElement.innerHTML = `
-                    <h3>${group.name}</h3>
-                    <p>${group.description}</p>
-                    <p>成员: ${group.members.join(', ')}</p>
-                `;
-                groupList.appendChild(groupElement);
-                alert('成功加入群组');
-            } else {
-                alert('群组不存在或你已加入该群组');
-            }
-        });
-
-        // 查看排行榜功能
-        document.getElementById('view-rankings-btn').addEventListener('click', () => {
-            // 财富排行榜模拟数据生成
-            const usersWithCoins = Object.entries(users).map(([username, user]) => ({ username, coins: user.coins }));
-            usersWithCoins.sort((a, b) => b.coins - a.coins);
-            wealthRanking.length = 0;
-            usersWithCoins.forEach((user, index) => {
-                wealthRanking.push({ rank: index + 1, username: user.username, coins: user.coins });
-            });
-
-            // 人脉排行榜模拟数据生成
-            const usersWithFriends = Object.entries(users).map(([username, user]) => ({ username, friends: user.friends.length }));
-            usersWithFriends.sort((a, b) => b.friends - a.friends);
-            networkRanking.length = 0;
-            usersWithFriends.forEach((user, index) => {
-                networkRanking.push({ rank: index + 1, username: user.username, friends: user.friends.length });
-            });
-
-            const wealthRankingElement = document.getElementById('wealth-ranking');
-            wealthRankingElement.innerHTML = '<h3>财富排行榜</h3>';
-            wealthRanking.forEach(rank => {
-                const rankElement = document.createElement('p');
-                rankElement.textContent = `${rank.rank}. ${rank.username} - 星脉币: ${rank.coins}`;
-                wealthRankingElement.appendChild(rankElement);
-            });
-
-            const networkRankingElement = document.getElementById('network-ranking');
-            networkRankingElement.innerHTML = '<h3>人脉排行榜</h3>';
-            networkRanking.forEach(rank => {
-                const rankElement = document.createElement('p');
+</html>
