@@ -1,87 +1,489 @@
-<!DOCTYPE html>
-<html lang="en">
+from flask import Flask, render_template_string, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+import os
+from datetime import datetime
 
+app = Flask(__name__)
+app.config['SECRET_KEY'] ='some_secret_key'
+# 设置SQLite数据库路径
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///' + os.path.join(basedir, 'app.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+
+# 用户模型
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    # 可以添加更多用户信息字段，如个人简介、头像路径等
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+
+    @property
+    def connections(self):
+        return Connection.query.filter(
+            (Connection.user1_id == self.id) | (Connection.user2_id == self.id)
+        ).all()
+
+
+# 人脉关系模型（双向关注）
+class Connection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    user1 = db.relationship('User', foreign_keys=[user1_id])
+    user2 = db.relationship('User', foreign_keys=[user2_id])
+
+
+# 私信模型
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# 创建数据库表
+with app.app_context():
+    db.create_all()
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+@app.route('/')
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return render_template_string('''
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>联机猜数字游戏</title>
+    <title>人脉星球</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+       .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>联机猜数字游戏</h1>
-    <div id="roomActions">
-        <input type="text" id="roomName" placeholder="房间名">
-        <button onclick="createRoom()">创建房间</button>
-        <button onclick="joinRoom()">加入房间</button>
-    </div>
-    <div id="gameArea" style="display: none;">
-        <h2>游戏房间</h2>
-        <div id="messages"></div>
-        <input type="number" id="guessInput" placeholder="猜数字">
-        <button onclick="makeGuess()">猜</button>
-        <div id="turnInfo"></div>
-    </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        let roomName;
-
-        function createRoom() {
-            roomName = document.getElementById('roomName').value;
-            socket.emit('createRoom', roomName);
-        }
-
-        function joinRoom() {
-            roomName = document.getElementById('roomName').value;
-            socket.emit('joinRoom', roomName);
-        }
-
-        socket.on('roomCreated', (room) => {
-            roomName = room;
-            document.getElementById('roomActions').style.display = 'none';
-            document.getElementById('gameArea').style.display = 'block';
-        });
-
-        socket.on('roomExists', (room) => {
-            alert(`房间 ${room} 已存在`);
-        });
-
-        socket.on('roomNotFound', (room) => {
-            alert(`房间 ${room} 不存在`);
-        });
-
-        socket.on('playerJoined', (playerId) => {
-            const messagesDiv = document.getElementById('messages');
-            const p = document.createElement('p');
-            p.textContent = `玩家 ${playerId} 加入了房间`;
-            messagesDiv.appendChild(p);
-        });
-
-        function makeGuess() {
-            const guess = parseInt(document.getElementById('guessInput').value);
-            socket.emit('guess', roomName, guess);
-        }
-
-        socket.on('message', (msg) => {
-            const messagesDiv = document.getElementById('messages');
-            const p = document.createElement('p');
-            p.textContent = msg;
-            messagesDiv.appendChild(p);
-        });
-
-        socket.on('gameOver', (msg) => {
-            const messagesDiv = document.getElementById('messages');
-            const p = document.createElement('p');
-            p.textContent = msg;
-            messagesDiv.appendChild(p);
-            document.getElementById('guessInput').disabled = true;
-        });
-
-        socket.on('turnChanged', (playerId) => {
-            const turnInfoDiv = document.getElementById('turnInfo');
-            turnInfoDiv.textContent = `轮到玩家 ${playerId} 猜数字`;
-        });
-    </script>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <form action="/login" method="post">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="登录">
+    </form>
+    <p>还没有账号？<a href="/register">注册</a></p>
 </body>
-
 </html>
+    ''')
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    user = User.query.filter_by(username=username, password=password).first()
+    if user:
+        login_user(user)
+        return redirect(url_for('dashboard'))
+    else:
+        return render_template_string('''
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>人脉星球</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+       .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <p class="error">用户名或密码错误</p>
+    <form action="/login" method="post">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="登录">
+    </form>
+    <p>还没有账号？<a href="/register">注册</a></p>
+</body>
+</html>
+        ''')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        new_username = request.form.get('username')
+        new_password = request.form.get('password')
+        existing_user = User.query.filter_by(username=new_username).first()
+        if existing_user:
+            return render_template_string('''
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>人脉星球</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+       .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <p class="error">用户名已存在，请选择其他用户名</p>
+    <form action="/register" method="post">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="注册">
+    </form>
+    <p>已有账号？<a href="/">登录</a></p>
+</body>
+</html>
+            ''')
+        else:
+            new_user = User(username=new_username, password=new_password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('index'))
+    return render_template_string('''
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>人脉星球</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <form action="/register" method="post">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="注册">
+    </form>
+    <p>已有账号？<a href="/">登录</a></p>
+</body>
+</html>
+    ''')
+
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
+def dashboard():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+
+        current_user.name = name
+        current_user.email = email
+        current_user.phone = phone
+
+        db.session.commit()
+
+    return render_template_string('''
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>人脉星球 - 个人面板</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            width: 400px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            width: 400px;
+        }
+        li {
+            margin-bottom: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        a {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>人脉星球 - 个人面板</h1>
+    </header>
+    <form action="/dashboard" method="post">
+        <label for="name">姓名:</label>
+        <input type="text" id="name" name="name" value="{{ current_user.name or '' }}">
+        <label for="email">邮箱:</label>
+        <input type="text" id="email" name="email" value="{{ current_user.email or '' }}">
+        <label for="phone">电话:</label>
+        <input type="text" id="phone" name="phone" value="{{ current_user.phone or '' }}">
+        <input type="submit" value="保存更改">
+    </form>
+    <h2>搜索用户</h2>
+    <form action="/search_users" method="post">
+        <label for="search_term">搜索关键词:</label>
+        <input type="text" id="search_term" name="search_term" required>
+        <input type="submit" value="搜索">
+    </form>
+    <h2>人脉列表</h2>
+    <ul>
+        {% for connection in current_user.connections %}
+        <li>
+            {{ connection.user2.username if connection.user1_id == current_user.id else connection.user1.username }}
+            <div>
+                {% if connection.user1_id == current_user.id %}
+                    <a href="{{ url_for('send_message', user_id=connection.user2_id) }}">发消息</a>
+                    <a href="{{ url_for('remove_connection', connection_id=connection.id) }}">移除人脉</a>
+                {% else %}
+                    <a href="{{ url_for('send_message', user_id=connection.user1_id) }}">发消息</a>
+                    <a href="{{ url_for('remove_connection', connection_id=connection.id) }}">移除人脉</a>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+    ''', current_user=current_user)
+
+
+@app.route('/search_users', methods=['POST'])
+@login_required
+def search_users():
+    search_term = request.form.get('search_term')
+    users = User.query.filter(
+        (User.username.contains(search_term)) |
+        (User.name.contains(search_term)) |
+        (User.email.contains(search_term))
+    ).all()
+
+    return render_template_string('''
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>人脉星球 - 搜索结果</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            width: 400px;
+        }
+        li {
+            margin-bottom: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        a {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>搜索结果</
