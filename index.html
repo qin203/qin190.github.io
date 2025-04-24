@@ -2,414 +2,456 @@
 <html lang="zh-CN">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>人脉星球</title>
-  <style>
-    /* 整体样式 */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人脉星球</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
 
-    /* 头部样式 */
-    header {
-      background-color: #333;
-      padding: 20px;
-      text-align: center;
-    }
+        /* 表单样式 */
+       .form-container {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            width: 300px;
+            margin: 20px auto;
+        }
 
-    /* 主内容区域样式 */
-    main {
-      padding: 20px;
-    }
+       .form-container h2 {
+            text-align: center;
+        }
 
-    /* 登录注册表单样式 */
-   .form-container {
-      width: 300px;
-      margin: 0 auto;
-      background-color: #444;
-      padding: 20px;
-      border-radius: 10px;
-    }
+       .form-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
 
-   .form-container label {
-      display: block;
-      margin-bottom: 5px;
-    }
+       .form-container input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
 
-   .form-container input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 5px;
-    }
+       .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
 
-   .form-container button {
-      width: 100%;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        /* 用户相关样式 */
+       .user-section {
+            padding: 20px;
+        }
 
-    /* 人脉卡片样式 */
-   .person-card {
-      background-color: #444;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 10px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+       .user-item {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
 
-   .person-card img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-    }
+       .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: block;
+        }
 
-    /* 聊天窗口样式 */
-   .chat-container {
-      width: 400px;
-      margin: 20px auto;
-      background-color: #444;
-      padding: 20px;
-      border-radius: 10px;
-    }
+       .close-btn {
+            float: right;
+            cursor: pointer;
+        }
 
-   .chat-messages {
-      height: 300px;
-      overflow-y: auto;
-      border-bottom: 1px solid #666;
-      margin-bottom: 10px;
-    }
+        /* 聊天窗口样式 */
+       .chat-section {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px;
+            height: 300px;
+            overflow-y: auto;
+        }
 
-   .chat-message {
-      margin: 5px 0;
-    }
+       .chat-input {
+            width: 100%;
+            margin-top: 10px;
+        }
 
-   .chat-input {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-    }
+        /* 搜索样式 */
+       .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    /* 图片样式 */
-   .chat-image {
-      max-width: 100%;
-      max-height: 200px;
-      border-radius: 5px;
-    }
+        /* 群聊相关样式 */
+       .group-chat-form {
+            display: none;
+        }
 
-    /* 添加好友输入框和按钮样式 */
-   .add-friend-container {
-      width: 300px;
-      margin: 20px auto;
-      background-color: #444;
-      padding: 20px;
-      border-radius: 10px;
-    }
+       .group-member-list {
+            list-style-type: none;
+            padding: 0;
+        }
 
-    /* 好友列表页面样式 */
-   .friend-list-container {
-      width: 400px;
-      margin: 20px auto;
-      background-color: #444;
-      padding: 20px;
-      border-radius: 10px;
-    }
-
-    /* 切换按钮样式 */
-   .tab-button {
-      background-color: #555;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 0 5px;
-    }
-  </style>
+       .group-member-item {
+            margin-bottom: 5px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+    </style>
 </head>
 
 <body>
-  <header>
-    <h1>人脉星球</h1>
-  </header>
-  <main>
-    <!-- 登录注册区域 -->
-    <div id="login-registration" class="form-container">
-      <h2>登录</h2>
-      <label for="username">用户名:</label>
-      <input type="text" id="username" placeholder="请输入用户名">
-      <label for="password">密码:</label>
-      <input type="password" id="password" placeholder="请输入密码">
-      <button id="login-button">登录</button>
-      <p>没有账号？<a href="#" id="register-link">注册</a></p>
+    <!-- 注册表单 -->
+    <div id="register-form" class="form-container">
+        <h2>注册</h2>
+        <label for="register-phone">手机号:</label>
+        <input type="text" id="register-phone" placeholder="请输入手机号" required>
+        <label for="register-password">密码:</label>
+        <input type="password" id="register-password" placeholder="请输入密码" required>
+        <button id="register-btn">注册</button>
     </div>
 
-    <!-- 注册表单区域（初始隐藏） -->
-    <div id="registration-form" class="form-container" style="display: none;">
-      <h2>注册</h2>
-      <label for="new-username">用户名:</label>
-      <input type="text" id="new-username" placeholder="请输入用户名">
-      <label for="new-password">密码:</label>
-      <input type="password" id="new-password" placeholder="请输入密码">
-      <button id="register-button">注册</button>
-      <p>已有账号？<a href="#" id="login-link">登录</a></p>
+    <!-- 登录表单 -->
+    <div id="login-form" class="form-container">
+        <h2>登录</h2>
+        <label for="login-phone">手机号:</label>
+        <input type="text" id="login-phone" placeholder="请输入手机号" required>
+        <label for="login-password">密码:</label>
+        <input type="password" id="login-password" placeholder="请输入密码" required>
+        <button id="login-btn">登录</button>
     </div>
 
-    <!-- 添加好友区域 -->
-    <div id="add-friend-section" class="add-friend-container" style="display: none;">
-      <label for="add-friend-input">输入账号或手机号:</label>
-      <input type="text" id="add-friend-input" placeholder="请输入账号或手机号">
-      <button id="add-friend-button">添加好友</button>
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <input type="text" id="search-phone" placeholder="搜索手机号">
+        <button id="search-btn">搜索</button>
     </div>
 
-    <!-- 页面切换按钮 -->
-    <div id="tab-buttons" style="display: none;">
-      <button class="tab-button" id="chat-tab">聊天</button>
-      <button class="tab-button" id="friend-list-tab">好友列表</button>
+    <!-- 用户列表 -->
+    <div id="user-list" class="user-section">
+        <h2>用户列表</h2>
     </div>
 
-    <!-- 聊天窗口区域 -->
-    <div id="chat-section" class="chat-container" style="display: none;">
-      <div class="chat-messages" id="chat-messages"></div>
-      <input type="text" class="chat-input" id="chat-input" placeholder="发送消息">
-      <input type="file" id="imageInput" style="display: none;" accept="image/*">
-      <button id="send-button">发送</button>
-      <button id="sendImageButton">发送图片</button>
+    <!-- 用户详情 -->
+    <div id="user-detail" class="user-section" style="display: none;">
+        <span class="close-btn">&times;</span>
+        <img id="detail-avatar" class="avatar" src="https://via.placeholder.com/80" alt="头像">
+        <h2 id="detail-username"></h2>
+        <p id="detail-company"></p>
+        <p id="detail-position"></p>
+        <button id="add-friend-btn">加为好友</button>
+        <button id="start-chat-btn">开始聊天</button>
+        <button id="modify-info-btn">修改信息</button>
     </div>
 
-    <!-- 好友列表区域 -->
-    <div id="friend-list-section" class="friend-list-container" style="display: none;">
-      <h2>好友列表</h2>
-      <div id="friend-list"></div>
+    <!-- 好友列表 -->
+    <div id="friend-list" class="user-section" style="display: none;">
+        <h2>好友列表</h2>
+        <ul id="friend-list-items"></ul>
+    </div>
+
+    <!-- 聊天窗口 -->
+    <div id="chat-window" class="chat-section" style="display: none;">
+        <h2 id="chat-with"></h2>
+        <div id="chat-messages"></div>
+        <input type="text" class="chat-input" placeholder="输入消息">
+        <button id="send-message-btn">发送</button>
+    </div>
+
+    <!-- 修改信息表单 -->
+    <div id="modify-info-form" class="form-container" style="display: none;">
+        <h2>修改信息</h2>
+        <label for="new-username">新用户名:</label>
+        <input type="text" id="new-username" placeholder="请输入新用户名">
+        <label for="new-avatar">新头像URL:</label>
+        <input type="text" id="new-avatar" placeholder="请输入新头像URL">
+        <button id="save-modify-btn">保存修改</button>
+    </div>
+
+    <!-- 创建群聊表单 -->
+    <div id="create-group-chat-form" class="group-chat-form form-container">
+        <h2>创建群聊</h2>
+        <label for="group-chat-name">群聊名称:</label>
+        <input type="text" id="group-chat-name" placeholder="请输入群聊名称" required>
+        <label for="group-members">选择群成员:</label>
+        <ul id="group-members" class="group-member-list"></ul>
+        <button id="add-group-member-btn">添加群成员</button>
+        <button id="create-group-btn">创建群聊</button>
     </div>
 
     <script>
-      // 获取元素
-      const loginButton = document.getElementById('login-button');
-      const registerLink = document.getElementById('register-link');
-      const registrationForm = document.getElementById('registration-form');
-      const loginForm = document.getElementById('login-registration');
-      const registerButton = document.getElementById('register-button');
-      const loginLink = document.getElementById('login-link');
-      const personList = document.getElementById('person-list');
-      const chatSection = document.getElementById('chat-section');
-      const chatMessages = document.getElementById('chat-messages');
-      const chatInput = document.getElementById('chat-input');
-      const sendButton = document.getElementById('send-button');
-      const sendImageButton = document.getElementById('sendImageButton');
-      const imageInput = document.getElementById('imageInput');
-      const addFriendInput = document.getElementById('add-friend-input');
-      const addFriendButton = document.getElementById('add-friend-button');
-      const addFriendSection = document.getElementById('add-friend-section');
-      const tabButtons = document.getElementById('tab-buttons');
-      const chatTab = document.getElementById('chat-tab');
-      const friendListTab = document.getElementById('friend-list-tab');
-      const friendListSection = document.getElementById('friend-list-section');
-      const friendList = document.getElementById('friend-list');
+        // 存储好友列表
+        const friends = [];
+        // 存储当前登录用户信息
+        let currentUser = {};
+        // 模拟所有用户数据，实际应用中应从后端获取
+        const allUsers = [
+            { phone: '13800138000', username: '张三', company: 'ABC公司', position: '工程师', avatar: 'https://via.placeholder.com/80' },
+            { phone: '13900139000', username: '李四', company: 'XYZ公司', position: '设计师', avatar: 'https://via.placeholder.com/80' },
+            { phone: '13600136000', username: '王五', company: 'DEF公司', position: '产品经理', avatar: 'https://via.placeholder.com/80' }
+        ];
+        // 存储群聊信息
+        const groupChats = [];
 
-      // 模拟用户数据存储（实际需用数据库）
-      const users = [];
-      // 模拟好友关系存储，以用户名作为键，值为好友用户名数组
-      const friendships = {};
-
-      // 注册功能
-      registerButton.addEventListener('click', () => {
-        const newUsername = document.getElementById('new-username').value;
-        const newPassword = document.getElementById('new-password').value;
-        if (newUsername && newPassword) {
-          users.push({ username: newUsername, password: newPassword });
-          alert('注册成功，请登录');
-          registrationForm.style.display = 'none';
-          loginForm.style.display = 'block';
-        } else {
-          alert('请填写完整的用户名和密码');
-        }
-      });
-
-      // 切换到注册表单
-      registerLink.addEventListener('click', () => {
-        registrationForm.style.display = 'block';
-        loginForm.style.display = 'none';
-      });
-
-      // 切换到登录表单
-      loginLink.addEventListener('click', () => {
-        registrationForm.style.display = 'none';
-        loginForm.style.display = 'block';
-      });
-
-      // 登录功能
-      loginButton.addEventListener('click', () => {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const user = users.find(u => u.username === username && u.password === password);
-        if (user) {
-          alert('登录成功');
-          loginForm.style.display = 'none';
-          addFriendSection.style.display = 'block';
-          tabButtons.style.display = 'block';
-          // 模拟人脉数据
-          const people = [
-            { name: '张三', id: 1, username: 'zhangsan' },
-            { name: '李四', id: 2, username: 'lisi' },
-            { name: '王五', id: 3, username: 'wangwu' }
-          ];
-          people.forEach(person => {
-            const card = document.createElement('div');
-            card.classList.add('person-card');
-            card.innerHTML = `
-              <div>
-                <img src="https://via.placeholder.com/60" alt="头像">
-                <span>${person.name}</span>
-              </div>
-              <button data-username="${person.username}">添加联系</button>
-            `;
-            personList.appendChild(card);
-          });
-
-          // 连接 WebSocket
-          const socket = new WebSocket('ws://localhost:8080');
-          socket.onopen = function () {
-            console.log('WebSocket 连接成功');
-          };
-
-          socket.onmessage = function (event) {
-            const message = JSON.parse(event.data);
-            if (message.type === 'text' || message.type === 'image') {
-              const messageElement = document.createElement('div');
-              messageElement.classList.add('chat-message');
-              if (message.type === 'text') {
-                messageElement.textContent = `${message.username}: ${message.text}`;
-              } else if (message.type === 'image') {
-                const img = document.createElement('img');
-                img.classList.add('chat-image');
-                img.src = message.image;
-                messageElement.appendChild(img);
-              }
-              chatMessages.appendChild(messageElement);
-            } else if (message.type === 'friend-added') {
-              // 更新好友列表
-              if (!friendships[username]) {
-                friendships[username] = [];
-              }
-              friendships[username].push(message.to);
-              renderFriendList(username);
-            }
-          };
-
-          sendButton.addEventListener('click', () => {
-            const inputText = chatInput.value;
-            if (inputText) {
-              const message = {
-                username: username,
-                type: 'text',
-                text: inputText
-              };
-              socket.send(JSON.stringify(message));
-              chatInput.value = '';
-            }
-          });
-
-          sendImageButton.addEventListener('click', () => {
-            imageInput.click();
-          });
-
-          imageInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = function (event) {
-                const imageData = event.target.result;
-                const message = {
-                  username: username,
-                  type: 'image',
-                  image: imageData
-                };
-                socket.send(JSON.stringify(message));
-              };
-              reader.readAsDataURL(file);
-            }
-          });
-
-          // 添加联系按钮点击事件
-          const addButtons = document.querySelectorAll('button');
-          addButtons.forEach(button => {
-            button.addEventListener('click', function () {
-              const targetUsername = this.dataset.username;
-              if (!friendships[username]) {
-                friendships[username] = [];
-              }
-              friendships[username].push(targetUsername);
-              alert(`已添加 ${targetUsername} 为好友`);
-              // 实际中需要发送请求到服务器添加联系等操作
-              // 发送添加好友通知给服务器
-              const addFriendMessage = {
-                username: username,
-                type: 'add-friend',
-                value: targetUsername
-              };
-              socket.send(JSON.stringify(addFriendMessage));
+        // 注册功能
+        function register() {
+            const registerBtn = document.getElementById('register-btn');
+            registerBtn.addEventListener('click', function () {
+                const phone = document.getElementById('register-phone').value;
+                const password = document.getElementById('register-password').value;
+                localStorage.setItem(phone, password);
+                alert('注册成功，请登录！');
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
             });
-          });
-
-          // 通过账号或手机号添加好友按钮点击事件
-          addFriendButton.addEventListener('click', () => {
-            const inputValue = addFriendInput.value;
-            if (inputValue) {
-              const message = {
-                username: username,
-                type: 'add-friend',
-                value: inputValue
-              };
-              socket.send(JSON.stringify(message));
-              addFriendInput.value = '';
-            } else {
-              alert('请输入账号或手机号');
-            }
-          });
-
-          // 聊天和好友列表页面切换事件
-          chatTab.addEventListener('click', () => {
-            chatSection.style.display = 'block';
-            friendListSection.style.display = 'none';
-          });
-
-          friendListTab.addEventListener('click', () => {
-            friendListSection.style.display = 'block';
-            chatSection.style.display = 'none';
-            renderFriendList(username);
-          });
-        } else {
-          alert('用户名或密码错误');
         }
-      });
 
-      // 渲染好友列表
-      function renderFriendList(username) {
-        friendList.innerHTML = '';
-        if (friendships[username]) {
-          friendships[username].forEach(friend => {
-            const friendCard = document.createElement('div');
-            friendCard.textContent = friend;
-            friendList.appendChild(friendCard);
-          });
+        // 登录功能
+        function login() {
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.addEventListener('click', function () {
+                const phone = document.getElementById('login-phone').value;
+                const password = document.getElementById('login-password').value;
+                const storedPassword = localStorage.getItem(phone);
+                if (storedPassword === password) {
+                    alert('登录成功！');
+                    const user = allUsers.find(u => u.phone === phone);
+                    if (user) {
+                        currentUser = {
+                            phone: phone,
+                            username: user.username,
+                            avatar: user.avatar
+                        };
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        document.getElementById('login-form').style.display = 'none';
+                        displayUserList();
+                    }
+                } else {
+                    alert('手机号或密码错误，请重试！');
+                }
+            });
         }
-      }
-    </script>
-  </main>
-</body>
 
-</html>
+        // 显示用户列表
+        function displayUserList() {
+            const userListDiv = document.getElementById('user-list');
+            userListDiv.innerHTML = '<h2>用户列表</h2>';
+            allUsers.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.classList.add('user-item');
+                userItem.dataset.phone = user.phone;
+                userItem.innerHTML = `
+                    <img class="avatar" src="${user.avatar}" alt="头像">
+                    <h3>${user.username}</h3>
+                    <p>公司: ${user.company}</p>
+                    <p>职位: ${user.position}</p>
+                `;
+                userItem.addEventListener('click', function () {
+                    displayUserDetail(user);
+                });
+                userListDiv.appendChild(userItem);
+            });
+        }
+
+        // 显示用户详情
+        function displayUserDetail(user) {
+            const userDetailDiv = document.getElementById('user-detail');
+            userDetailDiv.style.display = 'block';
+            const detailAvatar = document.getElementById('detail-avatar');
+            const detailUsername = document.getElementById('detail-username');
+            const detailCompany = document.getElementById('detail-company');
+            const detailPosition = document.getElementById('detail-position');
+            detailAvatar.src = user.avatar;
+            detailUsername.textContent = user.username;
+            detailCompany.textContent = `公司: ${user.company}`;
+            detailPosition.textContent = `职位: ${user.position}`;
+        }
+
+        // 关闭用户详情
+        function closeUserDetail() {
+            const closeBtn = document.querySelector('.close-btn');
+            closeBtn.addEventListener('click', function () {
+                document.getElementById('user-detail').style.display = 'none';
+            });
+        }
+
+        // 加为好友功能
+        function addFriend() {
+            const addFriendBtn = document.getElementById('add-friend-btn');
+            addFriendBtn.addEventListener('click', function () {
+                const username = document.getElementById('detail-username').textContent;
+                if (!friends.includes(username)) {
+                    friends.push(username);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = username;
+                    document.getElementById('friend-list-items').appendChild(listItem);
+                    document.getElementById('friend-list').style.display = 'block';
+                } else {
+                    alert('该用户已经在你的好友列表中了！');
+                }
+            });
+        }
+
+        // 开始聊天功能
+        function startChat() {
+            const startChatBtn = document.getElementById('start-chat-btn');
+            startChatBtn.addEventListener('click', function () {
+                const username = document.getElementById('detail-username').textContent;
+                if (friends.includes(username)) {
+                    const chatWindow = document.getElementById('chat-window');
+                    chatWindow.style.display = 'block';
+                    const chatWith = document.getElementById('chat-with');
+                    chatWith.textContent = `与 ${username} 聊天`;
+
+                    // 加载聊天记录
+                    const chatHistory = localStorage.getItem(`chat_${currentUser.username}_${username}`);
+                    if (chatHistory) {
+                        const messages = JSON.parse(chatHistory);
+                        const chatMessages = document.getElementById('chat-messages');
+                        messages.forEach(message => {
+                            const messageElement = document.createElement('p');
+                            messageElement.textContent = message;
+                            chatMessages.appendChild(messageElement);
+                        });
+                    }
+                } else {
+                    alert('请先将对方加为好友再进行聊天！');
+                }
+            });
+        }
+
+        // 发送消息功能
+        function sendMessage() {
+            const sendMessageBtn = document.getElementById('send-message-btn');
+            sendMessageBtn.addEventListener('click', function () {
+                const chatInput = document.querySelector('.chat-input');
+                const message = chatInput.value;
+                if (message.trim()!== '') {
+                    const messageElement = document.createElement('p');
+                    messageElement.textContent = `你: ${message}`;
+                    const chatMessages = document.getElementById('chat-messages');
+                    chatMessages.appendChild(messageElement);
+                    chatInput.value = '';
+
+                    // 保存聊天记录
+                    const chatPartner = document.getElementById('chat-with').textContent.split('与 ')[1].split(' 聊天')[0];
+                    let chatHistory = localStorage.getItem(`chat_${currentUser.username}_${chatPartner}`);
+                    if (!chatHistory) {
+                        chatHistory = [];
+                    } else {
+                        chatHistory = JSON.parse(chatHistory);
+                    }
+                    chatHistory.push(`你: ${message}`);
+                    localStorage.setItem(`chat_${currentUser.username}_${chatPartner}`, JSON.stringify(chatHistory));
+                }
+            });
+        }
+
+        // 修改信息功能
+        function modifyInfo() {
+            const modifyInfoBtn = document.getElementById('modify-info-btn');
+            modifyInfoBtn.addEventListener('click', function () {
+                const modifyInfoForm = document.getElementById('modify-info-form');
+                modifyInfoForm.style.display = 'block';
+                const currentUsername = document.getElementById('detail-username').textContent;
+                document.getElementById('new-username').value = currentUsername;
+                const currentAvatar = document.getElementById('detail-avatar').src;
+                document.getElementById('new-avatar').value = currentAvatar;
+            });
+
+            const saveModifyBtn = document.getElementById('save-modify-btn');
+            saveModifyBtn.addEventListener('click', function () {
+                const newUsername = document.getElementById('new-username').value;
+                const newAvatar = document.getElementById('new-avatar').value;
+
+                if (newUsername) {
+                    const detailUsername = document.getElementById('detail-username');
+                    detailUsername.textContent = newUsername;
+                    currentUser.username = newUsername;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+                if (newAvatar) {
+                    const detailAvatar = document.getElementById('detail-avatar');
+                    detailAvatar.src = newAvatar;
+                }
+
+                document.getElementById('modify-info-form').style.display = 'none';
+            });
+        }
+
+        // 搜索账号功能
+        function searchUser() {
+            const searchBtn = document.getElementById('search-btn');
+            searchBtn.addEventListener('click', function () {
+                const searchPhone = document.getElementById('search-phone').value;
+                const foundUser = allUsers.find(user => user.phone === searchPhone);
+                if (foundUser) {
+                    displayUserDetail(foundUser);
+                } else {
+                    alert('未找到该用户，请确认手机号是否正确！');
+                }
+            });
+        }
+
+        // 添加群成员功能
+        function addGroupMember() {
+            const addGroupMemberBtn = document.getElementById('add-group-member-btn');
+            addGroupMemberBtn.addEventListener('click', function () {
+                const selectedFriend = document.createElement('li');
+                selectedFriend.classList.add('group-member-item');
+                const friendToAdd = document.createElement('span');
+                friendToAdd.textContent = friends[friends.length - 1];
+                const removeButton = document.createElement('button');
+                removeButton.textContent = '移除';
+                removeButton.addEventListener('click', function () {
+                    selectedFriend.remove();
+                });
+                selectedFriend.appendChild(friendToAdd);
+                selectedFriend.appendChild(removeButton);
+                document.getElementById('group-members').appendChild(selectedFriend);
+            });
+        }
+
+        // 创建群聊功能
+        function createGroupChat() {
+            const createGroupBtn = document.getElementById('create-group-btn');
+            createGroupBtn.addEventListener('click', function () {
+                const groupChatName = document.getElementById('group-chat-name').value;
+                const groupMembers = document.querySelectorAll('.group-member-item span');
+                const memberList = Array.from(groupMembers).map(span => span.textContent);
+                memberList.push(currentUser.username);
+
+                const newGroup = {
+                    name: groupChatName,
+                    members: memberList,
+                    messages: []
+                };
+                groupChats.push(newGroup);
+                alert('群聊创建成功！');
+
+                // 显示群聊聊天窗口
+                const chatWindow = document.getElementById('chat-window');
+                chatWindow.style.display = 'block';
+                const chatWith = document.getElementById('chat-with');
+                chatWith.textContent = `群聊: ${groupChatName}`;
+
+                //
