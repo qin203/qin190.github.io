@@ -1,489 +1,415 @@
-from flask import Flask, render_template_string, request, redirect, url_for, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-import os
-from datetime import datetime
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] ='some_secret_key'
-# 设置SQLite数据库路径
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///' + os.path.join(basedir, 'app.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-
-# 用户模型
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(120))
-    phone = db.Column(db.String(20))
-    # 可以添加更多用户信息字段，如个人简介、头像路径等
-
-    def __repr__(self):
-        return f'<User {self.username}>'
-
-    @property
-    def connections(self):
-        return Connection.query.filter(
-            (Connection.user1_id == self.id) | (Connection.user2_id == self.id)
-        ).all()
-
-
-# 人脉关系模型（双向关注）
-class Connection(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    user1 = db.relationship('User', foreign_keys=[user1_id])
-    user2 = db.relationship('User', foreign_keys=[user2_id])
-
-
-# 私信模型
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-# 创建数据库表
-with app.app_context():
-    db.create_all()
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-
-@app.route('/')
-def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-    return render_template_string('''
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-    <meta charset="UTF-8">
-    <title>人脉星球</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        input[type="submit"] {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-       .error {
-            color: red;
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人脉星球</title>
+  <style>
+    /* 整体样式 */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 头部样式 */
+    header {
+      background-color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* 主内容区域样式 */
+    main {
+      padding: 20px;
+    }
+
+    /* 登录注册表单样式 */
+   .form-container {
+      width: 300px;
+      margin: 0 auto;
+      background-color: #444;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+   .form-container label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+   .form-container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 5px;
+    }
+
+   .form-container button {
+      width: 100%;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* 人脉卡片样式 */
+   .person-card {
+      background-color: #444;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+   .person-card img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+    }
+
+    /* 聊天窗口样式 */
+   .chat-container {
+      width: 400px;
+      margin: 20px auto;
+      background-color: #444;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+   .chat-messages {
+      height: 300px;
+      overflow-y: auto;
+      border-bottom: 1px solid #666;
+      margin-bottom: 10px;
+    }
+
+   .chat-message {
+      margin: 5px 0;
+    }
+
+   .chat-input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    /* 图片样式 */
+   .chat-image {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 5px;
+    }
+
+    /* 添加好友输入框和按钮样式 */
+   .add-friend-container {
+      width: 300px;
+      margin: 20px auto;
+      background-color: #444;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    /* 好友列表页面样式 */
+   .friend-list-container {
+      width: 400px;
+      margin: 20px auto;
+      background-color: #444;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    /* 切换按钮样式 */
+   .tab-button {
+      background-color: #555;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+  </style>
 </head>
+
 <body>
-    {% if error %}
-    <p class="error">{{ error }}</p>
-    {% endif %}
-    <form action="/login" method="post">
-        <label for="username">用户名:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">密码:</label>
-        <input type="password" id="password" name="password" required>
-        <input type="submit" value="登录">
-    </form>
-    <p>还没有账号？<a href="/register">注册</a></p>
+  <header>
+    <h1>人脉星球</h1>
+  </header>
+  <main>
+    <!-- 登录注册区域 -->
+    <div id="login-registration" class="form-container">
+      <h2>登录</h2>
+      <label for="username">用户名:</label>
+      <input type="text" id="username" placeholder="请输入用户名">
+      <label for="password">密码:</label>
+      <input type="password" id="password" placeholder="请输入密码">
+      <button id="login-button">登录</button>
+      <p>没有账号？<a href="#" id="register-link">注册</a></p>
+    </div>
+
+    <!-- 注册表单区域（初始隐藏） -->
+    <div id="registration-form" class="form-container" style="display: none;">
+      <h2>注册</h2>
+      <label for="new-username">用户名:</label>
+      <input type="text" id="new-username" placeholder="请输入用户名">
+      <label for="new-password">密码:</label>
+      <input type="password" id="new-password" placeholder="请输入密码">
+      <button id="register-button">注册</button>
+      <p>已有账号？<a href="#" id="login-link">登录</a></p>
+    </div>
+
+    <!-- 添加好友区域 -->
+    <div id="add-friend-section" class="add-friend-container" style="display: none;">
+      <label for="add-friend-input">输入账号或手机号:</label>
+      <input type="text" id="add-friend-input" placeholder="请输入账号或手机号">
+      <button id="add-friend-button">添加好友</button>
+    </div>
+
+    <!-- 页面切换按钮 -->
+    <div id="tab-buttons" style="display: none;">
+      <button class="tab-button" id="chat-tab">聊天</button>
+      <button class="tab-button" id="friend-list-tab">好友列表</button>
+    </div>
+
+    <!-- 聊天窗口区域 -->
+    <div id="chat-section" class="chat-container" style="display: none;">
+      <div class="chat-messages" id="chat-messages"></div>
+      <input type="text" class="chat-input" id="chat-input" placeholder="发送消息">
+      <input type="file" id="imageInput" style="display: none;" accept="image/*">
+      <button id="send-button">发送</button>
+      <button id="sendImageButton">发送图片</button>
+    </div>
+
+    <!-- 好友列表区域 -->
+    <div id="friend-list-section" class="friend-list-container" style="display: none;">
+      <h2>好友列表</h2>
+      <div id="friend-list"></div>
+    </div>
+
+    <script>
+      // 获取元素
+      const loginButton = document.getElementById('login-button');
+      const registerLink = document.getElementById('register-link');
+      const registrationForm = document.getElementById('registration-form');
+      const loginForm = document.getElementById('login-registration');
+      const registerButton = document.getElementById('register-button');
+      const loginLink = document.getElementById('login-link');
+      const personList = document.getElementById('person-list');
+      const chatSection = document.getElementById('chat-section');
+      const chatMessages = document.getElementById('chat-messages');
+      const chatInput = document.getElementById('chat-input');
+      const sendButton = document.getElementById('send-button');
+      const sendImageButton = document.getElementById('sendImageButton');
+      const imageInput = document.getElementById('imageInput');
+      const addFriendInput = document.getElementById('add-friend-input');
+      const addFriendButton = document.getElementById('add-friend-button');
+      const addFriendSection = document.getElementById('add-friend-section');
+      const tabButtons = document.getElementById('tab-buttons');
+      const chatTab = document.getElementById('chat-tab');
+      const friendListTab = document.getElementById('friend-list-tab');
+      const friendListSection = document.getElementById('friend-list-section');
+      const friendList = document.getElementById('friend-list');
+
+      // 模拟用户数据存储（实际需用数据库）
+      const users = [];
+      // 模拟好友关系存储，以用户名作为键，值为好友用户名数组
+      const friendships = {};
+
+      // 注册功能
+      registerButton.addEventListener('click', () => {
+        const newUsername = document.getElementById('new-username').value;
+        const newPassword = document.getElementById('new-password').value;
+        if (newUsername && newPassword) {
+          users.push({ username: newUsername, password: newPassword });
+          alert('注册成功，请登录');
+          registrationForm.style.display = 'none';
+          loginForm.style.display = 'block';
+        } else {
+          alert('请填写完整的用户名和密码');
+        }
+      });
+
+      // 切换到注册表单
+      registerLink.addEventListener('click', () => {
+        registrationForm.style.display = 'block';
+        loginForm.style.display = 'none';
+      });
+
+      // 切换到登录表单
+      loginLink.addEventListener('click', () => {
+        registrationForm.style.display = 'none';
+        loginForm.style.display = 'block';
+      });
+
+      // 登录功能
+      loginButton.addEventListener('click', () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const user = users.find(u => u.username === username && u.password === password);
+        if (user) {
+          alert('登录成功');
+          loginForm.style.display = 'none';
+          addFriendSection.style.display = 'block';
+          tabButtons.style.display = 'block';
+          // 模拟人脉数据
+          const people = [
+            { name: '张三', id: 1, username: 'zhangsan' },
+            { name: '李四', id: 2, username: 'lisi' },
+            { name: '王五', id: 3, username: 'wangwu' }
+          ];
+          people.forEach(person => {
+            const card = document.createElement('div');
+            card.classList.add('person-card');
+            card.innerHTML = `
+              <div>
+                <img src="https://via.placeholder.com/60" alt="头像">
+                <span>${person.name}</span>
+              </div>
+              <button data-username="${person.username}">添加联系</button>
+            `;
+            personList.appendChild(card);
+          });
+
+          // 连接 WebSocket
+          const socket = new WebSocket('ws://localhost:8080');
+          socket.onopen = function () {
+            console.log('WebSocket 连接成功');
+          };
+
+          socket.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            if (message.type === 'text' || message.type === 'image') {
+              const messageElement = document.createElement('div');
+              messageElement.classList.add('chat-message');
+              if (message.type === 'text') {
+                messageElement.textContent = `${message.username}: ${message.text}`;
+              } else if (message.type === 'image') {
+                const img = document.createElement('img');
+                img.classList.add('chat-image');
+                img.src = message.image;
+                messageElement.appendChild(img);
+              }
+              chatMessages.appendChild(messageElement);
+            } else if (message.type === 'friend-added') {
+              // 更新好友列表
+              if (!friendships[username]) {
+                friendships[username] = [];
+              }
+              friendships[username].push(message.to);
+              renderFriendList(username);
+            }
+          };
+
+          sendButton.addEventListener('click', () => {
+            const inputText = chatInput.value;
+            if (inputText) {
+              const message = {
+                username: username,
+                type: 'text',
+                text: inputText
+              };
+              socket.send(JSON.stringify(message));
+              chatInput.value = '';
+            }
+          });
+
+          sendImageButton.addEventListener('click', () => {
+            imageInput.click();
+          });
+
+          imageInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (event) {
+                const imageData = event.target.result;
+                const message = {
+                  username: username,
+                  type: 'image',
+                  image: imageData
+                };
+                socket.send(JSON.stringify(message));
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+
+          // 添加联系按钮点击事件
+          const addButtons = document.querySelectorAll('button');
+          addButtons.forEach(button => {
+            button.addEventListener('click', function () {
+              const targetUsername = this.dataset.username;
+              if (!friendships[username]) {
+                friendships[username] = [];
+              }
+              friendships[username].push(targetUsername);
+              alert(`已添加 ${targetUsername} 为好友`);
+              // 实际中需要发送请求到服务器添加联系等操作
+              // 发送添加好友通知给服务器
+              const addFriendMessage = {
+                username: username,
+                type: 'add-friend',
+                value: targetUsername
+              };
+              socket.send(JSON.stringify(addFriendMessage));
+            });
+          });
+
+          // 通过账号或手机号添加好友按钮点击事件
+          addFriendButton.addEventListener('click', () => {
+            const inputValue = addFriendInput.value;
+            if (inputValue) {
+              const message = {
+                username: username,
+                type: 'add-friend',
+                value: inputValue
+              };
+              socket.send(JSON.stringify(message));
+              addFriendInput.value = '';
+            } else {
+              alert('请输入账号或手机号');
+            }
+          });
+
+          // 聊天和好友列表页面切换事件
+          chatTab.addEventListener('click', () => {
+            chatSection.style.display = 'block';
+            friendListSection.style.display = 'none';
+          });
+
+          friendListTab.addEventListener('click', () => {
+            friendListSection.style.display = 'block';
+            chatSection.style.display = 'none';
+            renderFriendList(username);
+          });
+        } else {
+          alert('用户名或密码错误');
+        }
+      });
+
+      // 渲染好友列表
+      function renderFriendList(username) {
+        friendList.innerHTML = '';
+        if (friendships[username]) {
+          friendships[username].forEach(friend => {
+            const friendCard = document.createElement('div');
+            friendCard.textContent = friend;
+            friendList.appendChild(friendCard);
+          });
+        }
+      }
+    </script>
+  </main>
 </body>
+
 </html>
-    ''')
-
-
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    user = User.query.filter_by(username=username, password=password).first()
-    if user:
-        login_user(user)
-        return redirect(url_for('dashboard'))
-    else:
-        return render_template_string('''
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>人脉星球</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        input[type="submit"] {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-       .error {
-            color: red;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <p class="error">用户名或密码错误</p>
-    <form action="/login" method="post">
-        <label for="username">用户名:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">密码:</label>
-        <input type="password" id="password" name="password" required>
-        <input type="submit" value="登录">
-    </form>
-    <p>还没有账号？<a href="/register">注册</a></p>
-</body>
-</html>
-        ''')
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        new_username = request.form.get('username')
-        new_password = request.form.get('password')
-        existing_user = User.query.filter_by(username=new_username).first()
-        if existing_user:
-            return render_template_string('''
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>人脉星球</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        input[type="submit"] {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-       .error {
-            color: red;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <p class="error">用户名已存在，请选择其他用户名</p>
-    <form action="/register" method="post">
-        <label for="username">用户名:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">密码:</label>
-        <input type="password" id="password" name="password" required>
-        <input type="submit" value="注册">
-    </form>
-    <p>已有账号？<a href="/">登录</a></p>
-</body>
-</html>
-            ''')
-        else:
-            new_user = User(username=new_username, password=new_password)
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect(url_for('index'))
-    return render_template_string('''
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>人脉星球</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        input[type="submit"] {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    <form action="/register" method="post">
-        <label for="username">用户名:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">密码:</label>
-        <input type="password" id="password" name="password" required>
-        <input type="submit" value="注册">
-    </form>
-    <p>已有账号？<a href="/">登录</a></p>
-</body>
-</html>
-    ''')
-
-
-@app.route('/dashboard', methods=['GET', 'POST'])
-@login_required
-def dashboard():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-
-        current_user.name = name
-        current_user.email = email
-        current_user.phone = phone
-
-        db.session.commit()
-
-    return render_template_string('''
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>人脉星球 - 个人面板</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        header {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        form {
-            width: 400px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        input[type="submit"] {
-            background-color: #007BFF;
-            color: white;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            width: 400px;
-        }
-        li {
-            margin-bottom: 10px;
-            background-color: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        a {
-            margin-right: 10px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>人脉星球 - 个人面板</h1>
-    </header>
-    <form action="/dashboard" method="post">
-        <label for="name">姓名:</label>
-        <input type="text" id="name" name="name" value="{{ current_user.name or '' }}">
-        <label for="email">邮箱:</label>
-        <input type="text" id="email" name="email" value="{{ current_user.email or '' }}">
-        <label for="phone">电话:</label>
-        <input type="text" id="phone" name="phone" value="{{ current_user.phone or '' }}">
-        <input type="submit" value="保存更改">
-    </form>
-    <h2>搜索用户</h2>
-    <form action="/search_users" method="post">
-        <label for="search_term">搜索关键词:</label>
-        <input type="text" id="search_term" name="search_term" required>
-        <input type="submit" value="搜索">
-    </form>
-    <h2>人脉列表</h2>
-    <ul>
-        {% for connection in current_user.connections %}
-        <li>
-            {{ connection.user2.username if connection.user1_id == current_user.id else connection.user1.username }}
-            <div>
-                {% if connection.user1_id == current_user.id %}
-                    <a href="{{ url_for('send_message', user_id=connection.user2_id) }}">发消息</a>
-                    <a href="{{ url_for('remove_connection', connection_id=connection.id) }}">移除人脉</a>
-                {% else %}
-                    <a href="{{ url_for('send_message', user_id=connection.user1_id) }}">发消息</a>
-                    <a href="{{ url_for('remove_connection', connection_id=connection.id) }}">移除人脉</a>
-                {% endif %}
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
-    ''', current_user=current_user)
-
-
-@app.route('/search_users', methods=['POST'])
-@login_required
-def search_users():
-    search_term = request.form.get('search_term')
-    users = User.query.filter(
-        (User.username.contains(search_term)) |
-        (User.name.contains(search_term)) |
-        (User.email.contains(search_term))
-    ).all()
-
-    return render_template_string('''
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>人脉星球 - 搜索结果</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            width: 400px;
-        }
-        li {
-            margin-bottom: 10px;
-            background-color: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        a {
-            margin-right: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h2>搜索结果</
