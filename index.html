@@ -3,1122 +3,1055 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高级聊天应用</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Quantum Chat</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #94a3b8;
-            --light-gray: #e2e8f0;
+            --primary: #00f7ff;
+            --secondary: #7b2dff;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --light: #e0e0ff;
         }
-
+        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', sans-serif;
         }
-
+        
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f1f5f9;
-            color: var(--dark);
-            min-height: 100vh;
+            background-color: var(--darker);
+            color: var(--light);
+            height: 100vh;
+            overflow: hidden;
         }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-            max-width: 1200px;
-            margin: 0 auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        
+        /* 页面容器 */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
-
-        /* 登录/注册页面 */
-        .auth-container {
-            display: flex;
+        
+        /* 页面切换 */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
             flex-direction: column;
+        }
+        
+        .page.active {
+            display: flex;
+        }
+        
+        /* 通用按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border: none;
+            border-radius: 25px;
+            color: var(--dark);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.4);
+        }
+        
+        /* 登录/注册页面 */
+        #auth-page {
             justify-content: center;
             align-items: center;
-            width: 100%;
             padding: 20px;
         }
-
+        
         .auth-box {
             width: 100%;
             max-width: 400px;
-            background-color: white;
-            border-radius: 12px;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
             padding: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 30px rgba(0, 247, 255, 0.2);
         }
-
+        
         .auth-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: var(--primary);
             text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
         }
-
-        .form-group {
+        
+        .input-group {
             margin-bottom: 20px;
         }
-
-        .form-group label {
+        
+        .input-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-size: 14px;
         }
-
-        .form-group input {
+        
+        .input-group input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid var(--light-gray);
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid var(--secondary);
             border-radius: 8px;
-            font-size: 15px;
+            color: var(--light);
+            font-size: 16px;
+            transition: all 0.3s;
         }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 15px;
-            width: 100%;
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
         }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
+        
+        .auth-actions {
+            margin-top: 25px;
         }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .auth-footer {
+        
+        .toggle-auth {
             text-align: center;
             margin-top: 20px;
-            color: var(--gray);
+            font-size: 14px;
         }
-
-        .auth-link {
+        
+        .toggle-auth a {
             color: var(--primary);
             cursor: pointer;
-            font-weight: 500;
+            text-decoration: none;
         }
-
-        /* 侧边栏样式 */
-        .sidebar {
-            width: 300px;
-            background-color: white;
-            border-right: 1px solid var(--light-gray);
-            display: flex;
-            flex-direction: column;
+        
+        .error-message {
+            color: #ff4d4d;
+            font-size: 13px;
+            margin-top: 5px;
             display: none;
         }
-
-        .sidebar.active {
-            display: flex;
+        
+        /* 主界面 */
+        #main-page {
+            display: none;
         }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--light-gray);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .user-profile {
+        
+        .header {
+            padding: 15px;
+            background: var(--dark);
+            border-bottom: 1px solid rgba(0, 247, 255, 0.1);
             display: flex;
             align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--light-gray);
         }
-
+        
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
             margin-right: 12px;
+            color: var(--dark);
+            font-weight: bold;
+            font-size: 18px;
         }
-
+        
+        .user-info {
+            flex: 1;
+        }
+        
         .user-name {
-            font-weight: 500;
-            flex-grow: 1;
+            font-weight: bold;
+            margin-bottom: 2px;
         }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--gray);
-            cursor: pointer;
-        }
-
-        /* 导航菜单 */
-        .nav-menu {
-            padding: 15px 0;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .nav-item:hover {
-            background-color: var(--light-gray);
-        }
-
-        .nav-item.active {
-            background-color: rgba(99, 102, 241, 0.1);
+        
+        .user-status {
+            font-size: 12px;
             color: var(--primary);
         }
-
-        .nav-item i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
         }
-
-        /* 好友列表 */
+        
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: var(--dark);
+            border-right: 1px solid rgba(0, 247, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .search-bar {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid var(--secondary);
+            border-radius: 20px;
+            color: var(--light);
+            font-size: 14px;
+        }
+        
         .friends-list {
-            flex-grow: 1;
+            flex: 1;
             overflow-y: auto;
+            padding: 5px 0;
         }
-
+        
         .friend-item {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
+            padding: 12px 15px;
             cursor: pointer;
-            transition: background-color 0.2s;
-            border-bottom: 1px solid var(--light-gray);
+            transition: all 0.2s;
         }
-
+        
         .friend-item:hover {
-            background-color: var(--light-gray);
+            background: rgba(0, 247, 255, 0.05);
         }
-
+        
         .friend-item.active {
-            background-color: rgba(99, 102, 241, 0.1);
+            background: rgba(0, 247, 255, 0.1);
         }
-
+        
         .friend-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background-color: var(--secondary);
-            color: white;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
             margin-right: 12px;
+            color: var(--dark);
+            font-weight: bold;
+            font-size: 16px;
         }
-
-        .friend-info {
-            flex-grow: 1;
-        }
-
+        
         .friend-name {
-            font-weight: 500;
-        }
-
-        .friend-status {
-            font-size: 12px;
-            color: var(--gray);
-        }
-
-        .friend-status.online {
-            color: var(--secondary);
-        }
-
-        .unread-count {
-            background-color: var(--danger);
-            color: white;
-            border-radius: 10px;
-            padding: 2px 8px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        /* 主内容区域 */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-            display: none;
-        }
-
-        .main-content.active {
-            display: flex;
-        }
-
-        /* 添加好友页面 */
-        .add-friend-container {
-            padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .add-friend-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-
-        .search-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .search-container input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid var(--light-gray);
-            border-radius: 8px;
+            flex: 1;
             font-size: 15px;
         }
-
-        .search-container button {
-            padding: 0 15px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--primary);
-            color: white;
-            cursor: pointer;
-        }
-
-        .search-results {
-            margin-top: 20px;
-        }
-
-        .search-result-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            border: 1px solid var(--light-gray);
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .search-result-avatar {
-            width: 40px;
-            height: 40px;
+        
+        .friend-status {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
+            background: #00ff55;
+        }
+        
+        /* 聊天区域 */
+        .chat-area {
+            flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 12px;
-        }
-
-        .search-result-info {
-            flex-grow: 1;
-        }
-
-        .search-result-name {
-            font-weight: 500;
-        }
-
-        .search-result-phone {
-            font-size: 12px;
-            color: var(--gray);
-        }
-
-        .add-friend-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            background-color: var(--secondary);
-            color: white;
-            cursor: pointer;
-        }
-
-        /* 聊天页面 */
-        .chat-page {
-            display: none;
             flex-direction: column;
-            height: 100%;
-            flex-grow: 1;
         }
-
-        .chat-page.active {
-            display: flex;
-        }
-
+        
         .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--light-gray);
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.1);
             display: flex;
             align-items: center;
+            background: var(--dark);
         }
-
-        .back-btn {
-            background: none;
-            border: none;
-            margin-right: 15px;
-            cursor: pointer;
-            color: var(--gray);
-        }
-
-        .chat-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .chat-container {
-            flex-grow: 1;
+        
+        .chat-messages {
+            flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background-color: #f8fafc;
+            background: linear-gradient(rgba(10, 10, 30, 0.9), rgba(10, 10, 30, 0.9));
         }
-
+        
         .message {
             margin-bottom: 15px;
             max-width: 70%;
         }
-
-        .message.sent {
-            margin-left: auto;
-        }
-
+        
         .message.received {
             margin-right: auto;
         }
-
+        
+        .message.sent {
+            margin-left: auto;
+        }
+        
         .message-content {
+            display: inline-block;
             padding: 12px 16px;
             border-radius: 18px;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-size: 15px;
+            line-height: 1.4;
         }
-
-        .message.sent .message-content {
-            background-color: var(--primary);
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
-
+        
         .message.received .message-content {
-            background-color: white;
-            border: 1px solid var(--light-gray);
+            background: rgba(123, 45, 255, 0.15);
+            border: 1px solid rgba(123, 45, 255, 0.3);
             border-bottom-left-radius: 5px;
         }
-
+        
+        .message.sent .message-content {
+            background: rgba(0, 247, 255, 0.15);
+            border: 1px solid rgba(0, 247, 255, 0.3);
+            border-bottom-right-radius: 5px;
+        }
+        
         .message-time {
-            font-size: 11px;
-            color: var(--gray);
+            font-size: 12px;
+            color: rgba(224, 224, 255, 0.6);
             margin-top: 5px;
         }
-
-        .message.received .message-time {
-            text-align: left;
-        }
-
-        .message.sent .message-time {
-            text-align: right;
-        }
-
-        .chat-input-container {
-            padding: 15px 20px;
-            border-top: 1px solid var(--light-gray);
+        
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid rgba(0, 247, 255, 0.1);
             display: flex;
-            gap: 10px;
+            background: var(--dark);
         }
-
-        #chat-message-input {
-            flex-grow: 1;
+        
+        .chat-input {
+            flex: 1;
             padding: 12px 15px;
-            border: 1px solid var(--light-gray);
-            border-radius: 8px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid var(--secondary);
+            border-radius: 25px;
+            color: var(--light);
             font-size: 15px;
+            margin-right: 10px;
         }
-
-        #send-message-btn {
+        
+        .send-btn {
             width: 50px;
             height: 50px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--primary);
-            color: white;
-            cursor: pointer;
+            border-radius: 50%;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
         }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-            }
+        
+        /* 添加好友页面 */
+        #add-friend-page {
+            display: none;
+            padding: 20px;
         }
-
-        /* 通知 */
-        .notification {
+        
+        .add-friend-box {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 0 30px rgba(0, 247, 255, 0.2);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .search-results {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .user-result {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+        }
+        
+        .user-result-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--dark);
+            font-weight: bold;
+        }
+        
+        .user-result-name {
+            flex: 1;
+            font-size: 15px;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .success {
+            color: #00ff55;
+        }
+        
+        .error {
+            color: #ff4d4d;
+        }
+        
+        /* 无内容提示 */
+        .empty-state {
+            text-align: center;
+            color: rgba(224, 224, 255, 0.5);
+            margin-top: 50%;
+            font-size: 14px;
+        }
+        
+        /* 浮动按钮 */
+        .float-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            to { opacity: 0; }
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <!-- 登录/注册页面 -->
-    <div class="auth-container" id="auth-container">
-        <div class="auth-box" id="login-box">
-            <h2 class="auth-title">登录</h2>
-            <div class="form-group">
-                <label for="login-username">用户名或手机号</label>
-                <input type="text" id="login-username" placeholder="输入用户名或手机号">
+    <div class="page-container">
+        <!-- 登录/注册页面 -->
+        <div id="auth-page" class="page active">
+            <div class="auth-box" id="login-box">
+                <h1 class="auth-title">QUANTUM CHAT</h1>
+                <div class="input-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" placeholder="输入用户名">
+                    <div class="error-message" id="login-username-error"></div>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" placeholder="输入密码">
+                    <div class="error-message" id="login-password-error"></div>
+                </div>
+                <div class="auth-actions">
+                    <button class="btn" id="login-btn">登录</button>
+                </div>
+                <div class="toggle-auth">
+                    没有账号? <a id="show-register">注册</a>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="login-password">密码</label>
-                <input type="password" id="login-password" placeholder="输入密码">
-            </div>
-            <button class="btn btn-primary" id="login-btn">登录</button>
-            <div class="auth-footer">
-                没有账号？<span class="auth-link" id="show-register">立即注册</span>
+            
+            <div class="auth-box" id="register-box" style="display: none;">
+                <h1 class="auth-title">注册账号</h1>
+                <div class="input-group">
+                    <label for="register-username">用户名</label>
+                    <input type="text" id="register-username" placeholder="创建用户名">
+                    <div class="error-message" id="register-username-error"></div>
+                </div>
+                <div class="input-group">
+                    <label for="register-password">密码</label>
+                    <input type="password" id="register-password" placeholder="创建密码">
+                    <div class="error-message" id="register-password-error"></div>
+                </div>
+                <div class="input-group">
+                    <label for="register-confirm-password">确认密码</label>
+                    <input type="password" id="register-confirm-password" placeholder="再次输入密码">
+                    <div class="error-message" id="register-confirm-error"></div>
+                </div>
+                <div class="auth-actions">
+                    <button class="btn" id="register-btn">注册</button>
+                </div>
+                <div class="toggle-auth">
+                    已有账号? <a id="show-login">登录</a>
+                </div>
             </div>
         </div>
-
-        <div class="auth-box" id="register-box" style="display: none;">
-            <h2 class="auth-title">注册</h2>
-            <div class="form-group">
-                <label for="register-username">用户名</label>
-                <input type="text" id="register-username" placeholder="输入用户名">
-            </div>
-            <div class="form-group">
-                <label for="register-phone">手机号</label>
-                <input type="tel" id="register-phone" placeholder="输入手机号">
-            </div>
-            <div class="form-group">
-                <label for="register-password">密码</label>
-                <input type="password" id="register-password" placeholder="输入密码">
-            </div>
-            <button class="btn btn-primary" id="register-btn">注册</button>
-            <div class="auth-footer">
-                已有账号？<span class="auth-link" id="show-login">立即登录</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 主应用容器 -->
-    <div class="app-container">
-        <!-- 侧边栏 -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">聊天应用</div>
-            </div>
-
-            <div class="user-profile">
+        
+        <!-- 主界面 -->
+        <div id="main-page" class="page">
+            <div class="header">
                 <div class="user-avatar" id="current-user-avatar">U</div>
                 <div class="user-info">
                     <div class="user-name" id="current-user-name">用户名</div>
-                </div>
-                <button class="logout-btn" id="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </div>
-
-            <div class="nav-menu">
-                <div class="nav-item active" id="nav-chat">
-                    <i class="fas fa-comment-dots"></i>
-                    <span>聊天</span>
-                </div>
-                <div class="nav-item" id="nav-friends">
-                    <i class="fas fa-user-friends"></i>
-                    <span>好友</span>
-                </div>
-                <div class="nav-item" id="nav-add-friend">
-                    <i class="fas fa-user-plus"></i>
-                    <span>添加好友</span>
+                    <div class="user-status">在线</div>
                 </div>
             </div>
-
-            <div class="friends-list" id="friends-list">
-                <!-- 好友列表将通过JavaScript动态生成 -->
+            
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="search-bar">
+                        <input type="text" id="search-friend" placeholder="搜索好友...">
+                    </div>
+                    
+                    <div class="friends-list" id="friends-list">
+                        <div class="empty-state">暂无好友，点击右下角按钮添加</div>
+                    </div>
+                </div>
+                
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <div class="user-avatar" id="chat-user-avatar">F</div>
+                        <div class="user-info">
+                            <div class="user-name" id="chat-user-name">选择好友开始聊天</div>
+                            <div class="user-status" id="chat-user-status"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="empty-state">选择好友开始聊天</div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="message-input" placeholder="输入消息..." disabled>
+                        <button class="btn send-btn" id="send-btn" disabled>→</button>
+                    </div>
+                </div>
             </div>
+            
+            <button class="btn float-btn" id="add-friend-btn">+</button>
         </div>
-
-        <!-- 主内容区域 -->
-        <div class="main-content" id="main-content">
-            <!-- 聊天页面 -->
-            <div class="chat-page" id="chat-page">
-                <div class="chat-header">
-                    <button class="back-btn" id="back-from-chat">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="chat-title" id="chat-title">聊天</div>
+        
+        <!-- 添加好友页面 -->
+        <div id="add-friend-page" class="page">
+            <div class="add-friend-box">
+                <a class="back-btn" id="back-to-home">← 返回</a>
+                <h1 class="auth-title">添加好友</h1>
+                
+                <div class="input-group">
+                    <label for="search-username">搜索用户名</label>
+                    <input type="text" id="search-username" placeholder="输入用户名">
                 </div>
-                <div class="chat-container" id="chat-messages">
-                    <!-- 聊天消息将通过JavaScript动态生成 -->
+                
+                <div class="auth-actions">
+                    <button class="btn" id="search-user-btn">搜索</button>
                 </div>
-                <div class="chat-input-container">
-                    <input type="text" id="chat-message-input" placeholder="输入消息...">
-                    <button id="send-message-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 添加好友页面 -->
-            <div class="add-friend-container" id="add-friend-page">
-                <h2 class="add-friend-title">添加好友</h2>
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="输入用户名或手机号">
-                    <button id="search-btn">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
+                
                 <div class="search-results" id="search-results">
-                    <!-- 搜索结果将通过JavaScript动态生成 -->
+                    <div class="status-message">输入用户名搜索其他用户</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 数据存储
-        let users = JSON.parse(localStorage.getItem('users')) || {};
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-        let friendRequests = JSON.parse(localStorage.getItem('friendRequests')) || {};
-        let messages = JSON.parse(localStorage.getItem('messages')) || {};
-        let currentChatFriend = null;
-
-        // DOM元素
-        const authContainer = document.getElementById('auth-container');
-        const loginBox = document.getElementById('login-box');
-        const registerBox = document.getElementById('register-box');
-        const showRegisterLink = document.getElementById('show-register');
-        const showLoginLink = document.getElementById('show-login');
-        const loginBtn = document.getElementById('login-btn');
-        const registerBtn = document.getElementById('register-btn');
-        const loginUsernameInput = document.getElementById('login-username');
-        const loginPasswordInput = document.getElementById('login-password');
-        const registerUsernameInput = document.getElementById('register-username');
-        const registerPhoneInput = document.getElementById('register-phone');
-        const registerPasswordInput = document.getElementById('register-password');
-
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const currentUserAvatar = document.getElementById('current-user-avatar');
-        const currentUserName = document.getElementById('current-user-name');
-        const friendsList = document.getElementById('friends-list');
-        const logoutBtn = document.getElementById('logout-btn');
-
-        const navChat = document.getElementById('nav-chat');
-        const navFriends = document.getElementById('nav-friends');
-        const navAddFriend = document.getElementById('nav-add-friend');
-
-        const chatPage = document.getElementById('chat-page');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatTitle = document.getElementById('chat-title');
-        const backFromChatBtn = document.getElementById('back-from-chat');
-        const messageInput = document.getElementById('chat-message-input');
-        const sendMessageBtn = document.getElementById('send-message-btn');
-
-        const addFriendPage = document.getElementById('add-friend-page');
-        const searchInput = document.getElementById('search-input');
-        const searchBtn = document.getElementById('search-btn');
-        const searchResults = document.getElementById('search-results');
-
-        // 显示通知
-        function showNotification(message, type = 'primary') {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.style.backgroundColor = `var(--${type})`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
+        // 初始化本地存储
+        function initStorage() {
+            if (!localStorage.getItem('quantumChatUsers')) {
+                localStorage.setItem('quantumChatUsers', JSON.stringify({}));
+            }
             
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // 初始化页面
-        function initPage() {
-            if (currentUser) {
-                showApp();
-            } else {
-                showAuth();
+            if (!localStorage.getItem('quantumChatLoggedIn')) {
+                localStorage.setItem('quantumChatLoggedIn', JSON.stringify({}));
             }
         }
-
-        // 显示认证页面
-        function showAuth() {
-            authContainer.style.display = 'flex';
-            sidebar.classList.remove('active');
-            mainContent.classList.remove('active');
+        
+        // 显示错误消息
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
         }
-
-        // 显示应用主界面
-        function showApp() {
-            authContainer.style.display = 'none';
-            sidebar.classList.add('active');
-            mainContent.classList.add('active');
-            
-            // 显示当前用户信息
-            currentUserAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
-            currentUserName.textContent = currentUser.username;
-            
-            // 默认显示好友列表
-            showFriendsList();
-            hideChatPage();
-            showAddFriendPage(false);
-            
-            // 设置导航菜单
-            navChat.classList.add('active');
-            navFriends.classList.remove('active');
-            navAddFriend.classList.remove('active');
+        
+        // 隐藏错误消息
+        function hideError(elementId) {
+            document.getElementById(elementId).style.display = 'none';
         }
-
-        // 渲染好友列表
-        function renderFriendsList() {
-            friendsList.innerHTML = '';
+        
+        // 初始化页面状态
+        function initPages() {
+            // 默认显示登录页面
+            document.getElementById('auth-page').classList.add('active');
+            document.getElementById('login-box').style.display = 'block';
+            document.getElementById('register-box').style.display = 'none';
             
-            if (!currentUser.friends || currentUser.friends.length === 0) {
-                friendsList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--gray);">暂无好友</div>';
+            // 隐藏其他页面
+            document.getElementById('main-page').classList.remove('active');
+            document.getElementById('add-friend-page').classList.remove('active');
+        }
+        
+        // 切换页面
+        function showPage(pageId) {
+            console.log('切换到页面:', pageId);
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add('active');
+            } else {
+                console.error('页面不存在:', pageId);
+            }
+            
+            // 特殊处理：返回登录页面时重置状态
+            if (pageId === 'auth-page') {
+                document.getElementById('login-box').style.display = 'block';
+                document.getElementById('register-box').style.display = 'none';
+            }
+        }
+        
+        // 注册用户
+        function registerUser() {
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            // 重置错误消息
+            hideError('register-username-error');
+            hideError('register-password-error');
+            hideError('register-confirm-error');
+            
+            // 验证
+            let isValid = true;
+            
+            if (username.length < 4) {
+                showError('register-username-error', '用户名至少4个字符');
+                isValid = false;
+            }
+            
+            if (password.length < 6) {
+                showError('register-password-error', '密码至少6个字符');
+                isValid = false;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('register-confirm-error', '密码不匹配');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // 检查用户名是否已存在
+            const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+            if (users[username]) {
+                showError('register-username-error', '用户名已存在');
                 return;
             }
             
-            currentUser.friends.forEach(friend => {
-                const friendData = users[friend];
-                if (!friendData) return;
-                
-                const friendItem = document.createElement('div');
-                friendItem.className = 'friend-item';
-                friendItem.innerHTML = `
-                    <div class="friend-avatar">${friendData.username.charAt(0).toUpperCase()}</div>
-                    <div class="friend-info">
-                        <div class="friend-name">${friendData.username}</div>
-                        <div class="friend-status ${Math.random() > 0.5 ? 'online' : ''}">
-                            ${Math.random() > 0.5 ? '在线' : '离线'}
-                        </div>
-                    </div>
-                `;
-                
-                friendItem.addEventListener('click', () => {
-                    openChatWithFriend(friendData.username);
-                });
-                
-                friendsList.appendChild(friendItem);
-            });
-        }
-
-        // 打开与好友的聊天
-        function openChatWithFriend(friendUsername) {
-            currentChatFriend = friendUsername;
-            chatTitle.textContent = `与 ${friendUsername} 聊天`;
-            renderChatMessages();
-            showChatPage();
-        }
-
-        // 渲染聊天消息
-        function renderChatMessages() {
-            if (!currentUser || !currentChatFriend) return;
-            
-            chatMessages.innerHTML = '';
-            
-            const chatKey = getChatKey(currentUser.username, currentChatFriend);
-            const chatHistory = messages[chatKey] || [];
-            
-            chatHistory.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${msg.sender === currentUser.username ? 'sent' : 'received'}`;
-                
-                const time = new Date(msg.timestamp);
-                const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                messageDiv.innerHTML = `
-                    <div class="message-content">${msg.text}</div>
-                    <div class="message-time">${timeString}</div>
-                `;
-                
-                chatMessages.appendChild(messageDiv);
-            });
-            
-            // 滚动到底部
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // 发送消息
-        function sendMessage() {
-            const messageText = messageInput.value.trim();
-            if (!messageText || !currentUser || !currentChatFriend) return;
-            
-            const chatKey = getChatKey(currentUser.username, currentChatFriend);
-            
-            // 初始化聊天记录
-            if (!messages[chatKey]) {
-                messages[chatKey] = [];
-            }
-            
-            // 添加新消息
-            const newMessage = {
-                sender: currentUser.username,
-                text: messageText,
-                timestamp: Date.now()
+            // 注册新用户
+            users[username] = {
+                password: password,
+                friends: [],
+                chatHistory: {}
             };
             
-            messages[chatKey].push(newMessage);
-            localStorage.setItem('messages', JSON.stringify(messages));
+            localStorage.setItem('quantumChatUsers', JSON.stringify(users));
             
-            // 清空输入框
-            messageInput.value = '';
+            alert('注册成功！请登录。');
+            document.getElementById('register-box').style.display = 'none';
+            document.getElementById('login-box').style.display = 'block';
             
-            // 渲染消息
-            renderChatMessages();
-            
-            // 模拟对方回复
-            setTimeout(() => {
-                const replies = [
-                    "好的，我知道了",
-                    "听起来不错！",
-                    "我同意你的看法",
-                    "能详细说说吗？",
-                    "哈哈，真有趣",
-                    "我也有同样的想法",
-                    "我们改天再聊这个话题吧"
-                ];
-                const randomReply = replies[Math.floor(Math.random() * replies.length)];
-                
-                const replyMessage = {
-                    sender: currentChatFriend,
-                    text: randomReply,
-                    timestamp: Date.now()
-                };
-                
-                messages[chatKey].push(replyMessage);
-                localStorage.setItem('messages', JSON.stringify(messages));
-                
-                renderChatMessages();
-            }, 1000 + Math.random() * 2000);
+            // 清空表单
+            document.getElementById('register-username').value = '';
+            document.getElementById('register-password').value = '';
+            document.getElementById('register-confirm-password').value = '';
         }
-
-        // 搜索好友
-        function searchFriends() {
-            const searchTerm = searchInput.value.trim();
-            if (!searchTerm) {
-                showNotification('请输入搜索内容', 'danger');
+        
+        // 用户登录
+        function loginUser() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            // 重置错误消息
+            hideError('login-username-error');
+            hideError('login-password-error');
+            
+            // 验证
+            let isValid = true;
+            
+            if (username === '') {
+                showError('login-username-error', '请输入用户名');
+                isValid = false;
+            }
+            
+            if (password === '') {
+                showError('login-password-error', '请输入密码');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // 检查用户是否存在
+            const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+            if (!users[username]) {
+                showError('login-username-error', '用户名不存在');
                 return;
             }
             
-            searchResults.innerHTML = '';
-            
-            // 搜索用户名或手机号匹配的用户
-            const results = Object.values(users).filter(user => {
-                return (user.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                       user.phone.includes(searchTerm)) && 
-                       user.username !== currentUser.username;
-            });
-            
-            if (results.length === 0) {
-                searchResults.innerHTML = '<div style="text-align: center; color: var(--gray);">未找到匹配的用户</div>';
+            // 检查密码
+            if (users[username].password !== password) {
+                showError('login-password-error', '密码错误');
                 return;
             }
             
-            results.forEach(user => {
-                const isFriend = currentUser.friends && currentUser.friends.includes(user.username);
-                const hasRequestSent = friendRequests[user.username] && 
-                                     friendRequests[user.username].some(req => req.from === currentUser.username);
-                
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.innerHTML = `
-                    <div class="search-result-avatar">${user.username.charAt(0).toUpperCase()}</div>
-                    <div class="search-result-info">
-                        <div class="search-result-name">${user.username}</div>
-                        <div class="search-result-phone">${user.phone}</div>
-                    </div>
-                    <button class="add-friend-btn" ${isFriend || hasRequestSent ? 'disabled' : ''}>
-                        ${isFriend ? '已是好友' : hasRequestSent ? '已发送' : '添加'}
-                    </button>
-                `;
-                
-                const addBtn = resultItem.querySelector('.add-friend-btn');
-                if (!isFriend && !hasRequestSent) {
-                    addBtn.addEventListener('click', () => {
-                        sendFriendRequest(user.username);
-                        addBtn.textContent = '已发送';
-                        addBtn.disabled = true;
-                    });
-                }
-                
-                searchResults.appendChild(resultItem);
-            });
-        }
-
-        // 发送好友请求
-        function sendFriendRequest(toUsername) {
-            if (!currentUser) return;
-            
-            // 检查是否是自己
-            if (toUsername === currentUser.username) {
-                showNotification('不能添加自己为好友', 'danger');
-                return;
-            }
-            
-            // 检查是否已经是好友
-            if (currentUser.friends && currentUser.friends.includes(toUsername)) {
-                showNotification('你们已经是好友了', 'danger');
-                return;
-            }
-            
-            // 初始化好友请求
-            if (!friendRequests[toUsername]) {
-                friendRequests[toUsername] = [];
-            }
-            
-            // 检查是否已经发送过请求
-            const existingRequest = friendRequests[toUsername].find(
-                req => req.from === currentUser.username
-            );
-            
-            if (existingRequest) {
-                showNotification('已发送过好友请求，请等待对方处理', 'danger');
-                return;
-            }
-            
-            // 添加好友请求
-            friendRequests[toUsername].push({
-                from: currentUser.username,
-                timestamp: Date.now()
-            });
-            
-            localStorage.setItem('friendRequests', JSON.stringify(friendRequests));
-            showNotification(`好友请求已发送给 ${toUsername}`, 'secondary');
-        }
-
-        // 辅助函数
-        function getChatKey(user1, user2) {
-            return [user1, user2].sort().join('_');
-        }
-
-        function showChatPage() {
-            chatPage.classList.add('active');
-            addFriendPage.style.display = 'none';
-        }
-
-        function hideChatPage() {
-            chatPage.classList.remove('active');
-        }
-
-        function showAddFriendPage(show) {
-            addFriendPage.style.display = show ? 'block' : 'none';
-            chatPage.style.display = show ? 'none' : 'flex';
-        }
-
-        // 登录功能
-        function login() {
-            const usernameOrPhone = loginUsernameInput.value.trim();
-            const password = loginPasswordInput.value.trim();
-            
-            if (!usernameOrPhone || !password) {
-                showNotification('请输入用户名/手机号和密码', 'danger');
-                return;
-            }
-            
-            // 查找用户
-            let user = null;
-            for (const key in users) {
-                if (users[key].username === usernameOrPhone || users[key].phone === usernameOrPhone) {
-                    user = users[key];
-                    break;
-                }
-            }
-            
-            if (!user || user.password !== password) {
-                showNotification('用户名/手机号或密码错误', 'danger');
+            // 检查是否已登录
+            const loggedIn = JSON.parse(localStorage.getItem('quantumChatLoggedIn'));
+            if (loggedIn[username]) {
+                showError('login-username-error', '该账号已在其他地方登录');
                 return;
             }
             
             // 登录成功
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showNotification('登录成功', 'secondary');
-            showApp();
+            loggedIn[username] = true;
+            localStorage.setItem('quantumChatLoggedIn', JSON.stringify(loggedIn));
+            localStorage.setItem('quantumChatCurrentUser', username);
+            
+            // 确保主界面完全初始化后再显示
+            setTimeout(() => {
+                initMainInterface(username);
+                showPage('main-page');
+                
+                // 清除登录表单
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+            }, 100);
         }
-
-        // 注册功能
-        function register() {
-            const username = registerUsernameInput.value.trim();
-            const phone = registerPhoneInput.value.trim();
-            const password = registerPasswordInput.value.trim();
+        
+        // 初始化主界面
+        function initMainInterface(username) {
+            try {
+                // 设置用户信息
+                document.getElementById('current-user-name').textContent = username;
+                document.getElementById('current-user-avatar').textContent = username.charAt(0).toUpperCase();
+                
+                // 加载好友列表
+                loadFriendsList(username);
+                
+                // 设置聊天功能
+                setupChatFunctionality(username);
+                
+                // 设置添加好友功能
+                setupAddFriendFunctionality(username);
+                
+                // 确保聊天区域初始状态正确
+                document.getElementById('chat-messages').innerHTML = '<div class="empty-state">选择好友开始聊天</div>';
+                document.getElementById('message-input').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+                
+                console.log('主界面初始化完成');
+            } catch (error) {
+                console.error('初始化主界面时出错:', error);
+                // 出错时返回登录页面
+                showPage('auth-page');
+            }
+        }
+        
+        // 加载好友列表
+        function loadFriendsList(username) {
+            const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+            const currentUserData = users[username];
+            const friendsList = document.getElementById('friends-list');
             
-            if (!username || !phone || !password) {
-                showNotification('请填写所有字段', 'danger');
-                return;
+            friendsList.innerHTML = '';
+            
+            if (currentUserData.friends && currentUserData.friends.length > 0) {
+                currentUserData.friends.forEach(friend => {
+                    const friendItem = document.createElement('div');
+                    friendItem.className = 'friend-item';
+                    friendItem.dataset.username = friend;
+                    
+                    friendItem.innerHTML = `
+                        <div class="friend-avatar">${friend.charAt(0).toUpperCase()}</div>
+                        <div class="friend-name">${friend}</div>
+                        <div class="friend-status"></div>
+                    `;
+                    
+                    friendItem.addEventListener('click', function() {
+                        // 设置选中状态
+                        document.querySelectorAll('.friend-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        
+                        // 加载聊天
+                        loadChat(username, friend);
+                    });
+                    
+                    friendsList.appendChild(friendItem);
+                });
+            } else {
+                friendsList.innerHTML = '<div class="empty-state">暂无好友，点击右下角按钮添加</div>';
             }
             
-            // 验证手机号格式
-            if (!/^1[3-9]\d{9}$/.test(phone)) {
-                showNotification('请输入有效的手机号', 'danger');
-                return;
+            // 搜索好友
+            document.getElementById('search-friend').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const friendItems = document.querySelectorAll('.friend-item');
+                
+                if (searchTerm === '') {
+                    friendItems.forEach(item => {
+                        item.style.display = 'flex';
+                    });
+                    return;
+                }
+                
+                friendItems.forEach(item => {
+                    const friendName = item.dataset.username.toLowerCase();
+                    item.style.display = friendName.includes(searchTerm) ? 'flex' : 'none';
+                });
+            });
+        }
+        
+        // 加载聊天
+        function loadChat(currentUser, friendUsername) {
+            // 更新聊天头部
+            document.getElementById('chat-user-name').textContent = friendUsername;
+            document.getElementById('chat-user-avatar').textContent = friendUsername.charAt(0).toUpperCase();
+            document.getElementById('chat-user-status').textContent = '在线';
+            
+            // 启用输入框和发送按钮
+            document.getElementById('message-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            
+            // 加载聊天记录
+            const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+            const currentUserData = users[currentUser];
+            const chatMessages = document.getElementById('chat-messages');
+            
+            chatMessages.innerHTML = '';
+            
+            if (currentUserData.chatHistory && currentUserData.chatHistory[friendUsername]) {
+                const messages = currentUserData.chatHistory[friendUsername];
+                
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.sender === currentUser ? 'sent' : 'received'}`;
+                    
+                    const time = new Date(msg.timestamp);
+                    const timeString = `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
+                    
+                    messageDiv.innerHTML = `
+                        <div class="message-content">${msg.content}</div>
+                        <div class="message-time">${timeString}</div>
+                    `;
+                    
+                    chatMessages.appendChild(messageDiv);
+                });
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else {
+                chatMessages.innerHTML = '<div class="empty-state">开始新的对话</div>';
+            }
+        }
+        
+        // 设置聊天功能
+        function setupChatFunctionality(username) {
+            // 发送消息
+            document.getElementById('send-btn').addEventListener('click', function() {
+                sendMessage(username);
+            });
+            
+            document.getElementById('message-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage(username);
+                }
+            });
+        }
+        
+        // 发送消息
+        function sendMessage(currentUser) {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            const friendUsername = document.getElementById('chat-user-name').textContent;
+            
+            if (message === '' || friendUsername === '选择好友开始聊天') return;
+            
+            // 获取用户数据
+            const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+            const currentUserData = users[currentUser];
+            
+            // 初始化聊天历史记录如果不存在
+            if (!currentUserData.chatHistory) {
+                currentUserData.chatHistory = {};
             }
             
-            // 检查用户名是否已存在
-            if (users[username]) {
-                showNotification('用户名已存在', 'danger');
-                return;
+            if (!currentUserData.chatHistory[friendUsername]) {
+                currentUserData.chatHistory[friendUsername] = [];
             }
             
-            // 检查手机号是否已注册
-            const phoneExists = Object.values(users).some(user => user.phone === phone);
-            if (phoneExists) {
-                showNotification('该手机号已注册', 'danger');
-                return;
-            }
-            
-            // 创建新用户
-            users[username] = {
-                username,
-                phone,
-                password,
-                friends: []
+            // 添加新消息
+            const newMessage = {
+                sender: currentUser,
+                content: message,
+                timestamp: new Date().getTime()
             };
             
-            localStorage.setItem('users', JSON.stringify(users));
+            currentUserData.chatHistory[friendUsername].push(newMessage);
             
-            // 自动登录
-            currentUser = users[username];
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showNotification('注册成功', 'secondary');
-            showApp();
+            // 更新本地存储
+            users[currentUser] = currentUserData;
+            localStorage.setItem('quantumChatUsers', JSON.stringify(users));
             
-            // 清空注册表单
-            registerUsernameInput.value = '';
-            registerPhoneInput.value = '';
-            registerPasswordInput.value = '';
+            // 清空输入框
+            input.value = '';
+            
+            // 重新加载聊天
+            loadChat(currentUser, friendUsername);
         }
-
-        // 退出登录
-        function logout() {
-            if (confirm('确定要退出登录吗？')) {
-                currentUser = null;
-                localStorage.removeItem('currentUser');
-                showNotification('已退出登录', 'secondary');
-                showAuth();
+        
+        // 设置添加好友功能
+        function setupAddFriendFunctionality(currentUser) {
+            document.getElementById('search-user-btn').addEventListener('click', function() {
+                const searchTerm = document.getElementById('search-username').value.trim();
+                const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+                const searchResults = document.getElementById('search-results');
                 
-                // 清空登录表单
-                loginUsernameInput.value = '';
-                loginPasswordInput.value = '';
-            }
+                searchResults.innerHTML = '';
+                
+                if (searchTerm === '') {
+                    searchResults.innerHTML = '<div class="status-message">请输入用户名</div>';
+                    return;
+                }
+                
+                if (searchTerm === currentUser) {
+                    searchResults.innerHTML = '<div class="status-message error">不能添加自己为好友</div>';
+                    return;
+                }
+                
+                if (users[searchTerm]) {
+                    const currentUserData = users[currentUser];
+                    const isAlreadyFriend = currentUserData.friends && currentUserData.friends.includes(searchTerm);
+                    
+                    const userResult = document.createElement('div');
+                    userResult.className = 'user-result';
+                    userResult.innerHTML = `
+                        <div class="user-result-avatar">${searchTerm.charAt(0).toUpperCase()}</div>
+                        <div class="user-result-name">${searchTerm}</div>
+                        <button class="btn add-btn" id="add-friend-${searchTerm}" ${isAlreadyFriend ? 'disabled' : ''}>
+                            ${isAlreadyFriend ? '已添加' : '添加'}
+                        </button>
+                    `;
+                    
+                    searchResults.appendChild(userResult);
+                    
+                    if (!isAlreadyFriend) {
+                        document.getElementById(`add-friend-${searchTerm}`).addEventListener('click', function() {
+                            addFriend(currentUser, searchTerm);
+                        });
+                    }
+                } else {
+                    searchResults.innerHTML = '<div class="status-message error">用户不存在</div>';
+                }
+            });
         }
-
-        // 事件监听
-        showRegisterLink.addEventListener('click', () => {
-            loginBox.style.display = 'none';
-            registerBox.style.display = 'block';
-        });
-
-        showLoginLink.addEventListener('click', () => {
-            registerBox.style.display = 'none';
-            loginBox.style.display = 'block';
-        });
-
-        loginBtn.addEventListener('click', login);
-        registerBtn.addEventListener('click', register);
-
-        // 登录表单回车事件
-        loginUsernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
-        });
-        loginPasswordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
-        });
-
-        // 注册表单回车事件
-        registerUsernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') register();
-        });
-        registerPhoneInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') register();
-        });
-        registerPasswordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') register();
-        });
-
-        sendMessageBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        backFromChatBtn.addEventListener('click', () => {
-            hideChatPage();
-        });
-
-        navChat.addEventListener('click', () => {
-            showAddFriendPage(false);
-            navChat.classList.add('active');
-            navFriends.classList.remove('active');
-            navAddFriend.classList.remove('active');
-        });
-
-        navAddFriend.addEventListener('click', () => {
-            showAddFriendPage(true);
-            navChat.classList.remove('active');
-            navFriends.classList.remove('active');
-            navAddFriend.classList.add('active');
-        });
-
-        searchBtn.addEventListener('click', searchFriends);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchFriends();
-        });
-
-        logoutBtn.addEventListener('click', logout);
-
+        
+        // 添加好友
+        function addFriend(currentUser, friendUsername) {
+            const users = JSON.parse(localStorage.getItem('quantumChatUsers'));
+            const currentUserData = users[currentUser];
+            
+            // 初始化好友列表如果不存在
+            if (!currentUserData.friends) {
+                currentUserData.friends = [];
+            }
+            
+            // 检查是否已经是好友
+            if (currentUserData.friends.includes(friendUsername)) {
+                document.getElementById('search-results').innerHTML = `
+                    <div class="status-message error">${friendUsername} 已经是您的好友</div>
+                `;
+                return;
+            }
+            
+            // 添加好友
+            currentUserData.friends.push(friendUsername);
+            
+            // 更新本地存储
+            users[currentUser] = currentUserData;
+            localStorage.setItem('quantumChatUsers', JSON.stringify(users));
+            
+            // 显示成功消息
+            document.getElementById('search-results').innerHTML = `
+                <div class="status-message success">成功添加 ${friendUsername} 为好友</div>
+            `;
+            
+            // 更新好友列表
+            loadFriendsList(currentUser);
+        }
+        
         // 初始化应用
-        initPage();
+        function initApp() {
+            initStorage();
+            initPages();
+            
+            // 检查是否已登录
+            const currentUser = localStorage.getItem('quantumChatCurrentUser');
+            if (currentUser) {
+                console.log('检测到已登录用户:', currentUser);
+                try {
+                    initMainInterface(currentUser);
+                    showPage('main-page');
+                } catch (error) {
+                    console.error('自动登录失败:', error);
+                    showPage('auth-page');
+                }
+            }
+            
+            // 登录/注册切换
+            document.getElementById('show-register').addEventListener('click', function() {
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('register-box').style.display = 'block';
+            });
+            
+            document.getElementById('show-login').addEventListener('click', function() {
+                document.getElementById('register-box').style.display = 'none';
+                document.getElementById('login-box').style.display = 'block';
+            });
+            
+            // 注册功能
+            document.getElementById('register-btn').addEventListener('click', registerUser);
+            
+            // 登录功能
+            document.getElementById('login-btn').addEventListener('click', loginUser);
+            
+            // 添加好友按钮
+            document.getElementById('add-friend-btn').addEventListener('click', function() {
+                const currentUser = localStorage.getItem('quantumChatCurrentUser');
+                if (currentUser) {
+                    document.getElementById('search-username').value = '';
+                    document.getElementById('search-results').innerHTML = '<div class="status-message">输入用户名搜索其他用户</div>';
+                    showPage('add-friend-page');
+                }
+            });
+            
+            // 返回按钮
+            document.getElementById('back-to-home').addEventListener('click', function() {
+                showPage('main-page');
+            });
+        }
+        
+        // 启动应用
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('应用启动...');
+            initApp();
+        });
     </script>
 </body>
 </html>
