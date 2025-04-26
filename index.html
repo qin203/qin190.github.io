@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高级实时聊天</title>
+    <title>纯前端聊天系统</title>
     <style>
         :root {
             --primary-color: #4361ee;
@@ -813,32 +813,46 @@
         /* 搜索好友结果 */
         .search-results {
             margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
         }
         
         .search-result-item {
-            padding: 0.8rem 0;
-            border-bottom: 1px solid var(--gray-light);
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            transition: var(--transition);
+            border-bottom: 1px solid var(--gray-light);
+            transition: all 0.2s ease;
         }
         
         .search-result-item:hover {
-            background-color: var(--light-color);
+            background-color: var(--primary-light);
         }
         
         .search-result-info {
             flex: 1;
-            margin-left: 0.8rem;
+            margin-left: 12px;
         }
         
         .search-result-name {
             font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .search-result-id {
+            font-size: 0.75rem;
+            color: var(--gray-dark);
+            margin-top: 4px;
         }
         
         .search-result-actions {
-            display: flex;
-            gap: 0.5rem;
+            margin-left: auto;
+        }
+        
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: var(--gray-dark);
         }
         
         /* 好友请求列表 */
@@ -993,6 +1007,38 @@
             margin-bottom: 1rem;
             color: var(--primary-light);
         }
+        
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--success-color);
+            color: white;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--box-shadow);
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        .notification.warning {
+            background-color: var(--warning-color);
+        }
     </style>
 </head>
 <body>
@@ -1020,7 +1066,7 @@
             <button id="menuBtn" class="header-btn">☰</button>
             <div class="logo">
                 <span class="logo-icon">💬</span>
-                <span>高级聊天</span>
+                <span>纯前端聊天</span>
             </div>
             <div class="header-actions">
                 <button id="requestsBtn" class="header-btn" title="好友请求">
@@ -1089,7 +1135,7 @@
                 <button class="modal-close" id="closeSearchModal">&times;</button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchInput" class="auth-input" placeholder="输入用户名">
+                <input type="text" id="searchInput" class="auth-input" placeholder="输入用户名或用户ID">
                 <div class="search-results" id="searchResults">
                     <!-- 搜索结果将通过JS动态生成 -->
                 </div>
@@ -1139,6 +1185,10 @@
                     <label for="settingsUsername">用户名</label>
                     <input type="text" id="settingsUsername" class="auth-input" readonly>
                 </div>
+                <div class="auth-input-group">
+                    <label for="settingsUserId">用户ID</label>
+                    <input type="text" id="settingsUserId" class="auth-input" readonly>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger" id="logoutBtn">退出登录</button>
@@ -1150,100 +1200,12 @@
     <script>
         // 数据存储键名
         const STORAGE_KEYS = {
-            USERS: 'premiumChatApp_users',
-            CURRENT_USER: 'premiumChatApp_currentUser',
-            FRIENDS: 'premiumChatApp_friends',
-            MESSAGES: 'premiumChatApp_messages',
-            FRIEND_REQUESTS: 'premiumChatApp_friendRequests'
+            USERS: 'pureFrontendChatApp_users',
+            CURRENT_USER: 'pureFrontendChatApp_currentUser',
+            FRIENDS: 'pureFrontendChatApp_friends',
+            MESSAGES: 'pureFrontendChatApp_messages',
+            FRIEND_REQUESTS: 'pureFrontendChatApp_friendRequests'
         };
-        
-        // 模拟WebSocket连接
-        class MockWebSocket {
-            constructor(url) {
-                this.url = url;
-                this.onopen = null;
-                this.onmessage = null;
-                this.onclose = null;
-                this.onerror = null;
-                this.readyState = 0; // 0: CONNECTING, 1: OPEN, 2: CLOSING, 3: CLOSED
-                
-                // 模拟连接过程
-                setTimeout(() => {
-                    this.readyState = 1;
-                    if (this.onopen) this.onopen({ type: 'open' });
-                }, 500);
-                
-                // 存储实例以便其他部分可以访问
-                MockWebSocket.instance = this;
-            }
-            
-            send(data) {
-                // 模拟消息接收
-                if (typeof data === 'string') {
-                    const message = JSON.parse(data);
-                    
-                    // 模拟消息广播
-                    setTimeout(() => {
-                        if (this.onmessage) {
-                            this.onmessage({
-                                data: JSON.stringify({
-                                    type: 'message',
-                                    from: message.from,
-                                    to: message.to,
-                                    content: message.content,
-                                    timestamp: new Date().toISOString()
-                                })
-                            });
-                        }
-                    }, 300);
-                }
-            }
-            
-            close() {
-                this.readyState = 3;
-                if (this.onclose) this.onclose({ type: 'close' });
-            }
-            
-            // 静态方法用于模拟服务器推送
-            static simulateIncomingMessage(from, to, content) {
-                if (this.instance && this.instance.onmessage) {
-                    this.instance.onmessage({
-                        data: JSON.stringify({
-                            type: 'message',
-                            from,
-                            to,
-                            content,
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                }
-            }
-            
-            static simulateFriendRequest(from, to) {
-                if (this.instance && this.instance.onmessage) {
-                    this.instance.onmessage({
-                        data: JSON.stringify({
-                            type: 'friend_request',
-                            from,
-                            to
-                        })
-                    });
-                }
-            }
-            
-            static simulateFriendRequestResponse(from, to, accepted) {
-                if (this.instance && this.instance.onmessage) {
-                    this.instance.onmessage({
-                        data: JSON.stringify({
-                            type: 'friend_request_response',
-                            from,
-                            to,
-                            accepted
-                        })
-                    });
-                }
-            }
-        }
         
         // 应用状态
         const state = {
@@ -1253,7 +1215,6 @@
             messages: {},
             allUsers: [],
             friendRequests: {},
-            socket: null,
             pendingRequests: 0
         };
         
@@ -1301,9 +1262,23 @@
         const avatarPreviewImg = document.getElementById('avatarPreviewImg');
         const avatarUploadInput = document.getElementById('avatarUploadInput');
         const settingsUsername = document.getElementById('settingsUsername');
+        const settingsUserId = document.getElementById('settingsUserId');
         const closeSettingsModal = document.getElementById('closeSettingsModal');
         const logoutBtn = document.getElementById('logoutBtn');
         const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
         
         // 初始化应用
         function init() {
@@ -1314,232 +1289,12 @@
             if (state.currentUser) {
                 showApp();
                 loadFriends();
-                initWebSocket();
             } else {
                 showAuth();
             }
             
             // 绑定事件
             bindEvents();
-        }
-        
-        // 初始化WebSocket连接
-        function initWebSocket() {
-            if (state.socket) {
-                state.socket.close();
-            }
-            
-            // 在实际应用中，这里应该是真实的WebSocket连接
-            // state.socket = new WebSocket('wss://your-websocket-server.com');
-            
-            // 使用模拟的WebSocket进行演示
-            state.socket = new MockWebSocket('ws://mock-websocket-server');
-            
-            state.socket.onopen = () => {
-                console.log('WebSocket连接已建立');
-                // 发送身份验证消息
-                if (state.currentUser) {
-                    state.socket.send(JSON.stringify({
-                        type: 'auth',
-                        userId: state.currentUser.id
-                    }));
-                }
-            };
-            
-            state.socket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                console.log('收到消息:', data);
-                
-                switch (data.type) {
-                    case 'message':
-                        handleIncomingMessage(data);
-                        break;
-                    case 'friend_request':
-                        handleFriendRequest(data);
-                        break;
-                    case 'friend_request_response':
-                        handleFriendRequestResponse(data);
-                        break;
-                }
-            };
-            
-            state.socket.onclose = () => {
-                console.log('WebSocket连接已关闭');
-                // 尝试重新连接
-                setTimeout(initWebSocket, 5000);
-            };
-            
-            state.socket.onerror = (error) => {
-                console.error('WebSocket错误:', error);
-            };
-        }
-        
-        // 处理收到的消息
-        function handleIncomingMessage(data) {
-            if (!state.messages[state.currentUser.id]) {
-                state.messages[state.currentUser.id] = {};
-            }
-            
-            if (!state.messages[state.currentUser.id][data.from]) {
-                state.messages[state.currentUser.id][data.from] = [];
-            }
-            
-            const sender = state.allUsers.find(u => u.id === data.from) || 
-                          state.friends.find(f => f.id === data.from);
-            
-            state.messages[state.currentUser.id][data.from].push({
-                text: data.content,
-                time: formatTime(new Date(data.timestamp)),
-                incoming: true,
-                sender: sender ? sender.username : '未知用户',
-                timestamp: data.timestamp
-            });
-            
-            // 保存消息
-            saveData(STORAGE_KEYS.MESSAGES, state.messages);
-            
-            // 如果当前正在与发送者聊天，更新消息显示
-            if (state.currentChat && state.currentChat.id === data.from) {
-                renderMessages(data.from);
-            } else {
-                // 更新好友列表中的最后消息
-                const friendIndex = state.friends.findIndex(f => f.id === data.from);
-                if (friendIndex !== -1) {
-                    state.friends[friendIndex].lastMessage = data.content;
-                    state.friends[friendIndex].lastMessageTime = data.timestamp;
-                    saveData(STORAGE_KEYS.FRIENDS, state.friends);
-                    renderFriendsList();
-                    
-                    // 显示通知
-                    if (!document.hasFocus()) {
-                        showNotification(`新消息来自 ${sender?.username || '好友'}`);
-                    }
-                }
-            }
-        }
-        
-        // 处理好友请求
-        function handleFriendRequest(data) {
-            if (!state.friendRequests[state.currentUser.id]) {
-                state.friendRequests[state.currentUser.id] = [];
-            }
-            
-            // 检查是否已经存在相同的请求
-            const existingRequest = state.friendRequests[state.currentUser.id].find(
-                req => req.from === data.from && req.status === 'pending'
-            );
-            
-            if (!existingRequest) {
-                state.friendRequests[state.currentUser.id].push({
-                    from: data.from,
-                    status: 'pending',
-                    timestamp: new Date().toISOString()
-                });
-                
-                saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
-                updateRequestsBadge();
-                showNotification('收到新的好友请求');
-            }
-        }
-        
-        // 处理好友请求响应
-        function handleFriendRequestResponse(data) {
-            // 更新请求状态
-            if (state.friendRequests[state.currentUser.id]) {
-                const requestIndex = state.friendRequests[state.currentUser.id].findIndex(
-                    req => req.to === data.to && req.status === 'pending'
-                );
-                
-                if (requestIndex !== -1) {
-                    state.friendRequests[state.currentUser.id][requestIndex].status = 
-                        data.accepted ? 'accepted' : 'rejected';
-                    state.friendRequests[state.currentUser.id][requestIndex].respondedAt = 
-                        new Date().toISOString();
-                    
-                    saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
-                }
-            }
-            
-            // 如果请求被接受，添加好友
-            if (data.accepted) {
-                const newFriend = state.allUsers.find(u => u.id === data.from);
-                if (newFriend && !state.friends.some(f => f.id === newFriend.id)) {
-                    state.friends.push({
-                        ...newFriend,
-                        status: 'offline',
-                        lastSeen: '未知'
-                    });
-                    
-                    saveData(STORAGE_KEYS.FRIENDS, state.friends);
-                    renderFriendsList();
-                    
-                    // 初始化消息记录
-                    if (!state.messages[state.currentUser.id]) {
-                        state.messages[state.currentUser.id] = {};
-                    }
-                    
-                    if (!state.messages[state.currentUser.id][newFriend.id]) {
-                        state.messages[state.currentUser.id][newFriend.id] = [
-                            { 
-                                text: `你好，我是${state.currentUser.username}`, 
-                                time: getCurrentTime(), 
-                                incoming: false,
-                                sender: state.currentUser.username,
-                                timestamp: new Date().toISOString()
-                            },
-                            { 
-                                text: `你好，我是${newFriend.username}`, 
-                                time: getCurrentTime(), 
-                                incoming: true,
-                                sender: newFriend.username,
-                                timestamp: new Date().toISOString()
-                            }
-                        ];
-                        saveData(STORAGE_KEYS.MESSAGES, state.messages);
-                    }
-                }
-            }
-            
-            updateRequestsBadge();
-        }
-        
-        // 显示通知
-        function showNotification(message) {
-            if (Notification.permission === 'granted') {
-                new Notification('高级聊天', {
-                    body: message,
-                    icon: 'https://via.placeholder.com/64'
-                });
-            } else if (Notification.permission !== 'denied') {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        new Notification('高级聊天', {
-                            body: message,
-                            icon: 'https://via.placeholder.com/64'
-                        });
-                    }
-                });
-            }
-        }
-        
-        // 更新请求徽章
-        function updateRequestsBadge() {
-            if (state.currentUser && state.friendRequests[state.currentUser.id]) {
-                const pendingCount = state.friendRequests[state.currentUser.id].filter(
-                    req => req.status === 'pending'
-                ).length;
-                
-                state.pendingRequests = pendingCount;
-                
-                if (pendingCount > 0) {
-                    requestsBadge.textContent = pendingCount;
-                    requestsBadge.style.display = 'flex';
-                } else {
-                    requestsBadge.style.display = 'none';
-                }
-            } else {
-                requestsBadge.style.display = 'none';
-            }
         }
         
         // 加载所有数据
@@ -1552,28 +1307,32 @@
             if (state.allUsers.length === 0) {
                 state.allUsers = [
                     { 
-                        id: generateId(), 
-                        username: 'test', 
-                        password: 'test123', 
-                        avatar: 'https://i.pravatar.cc/150?img=1' 
-                    },
-                    { 
-                        id: generateId(), 
+                        id: 'user_001_' + generateId(),
                         username: '张三', 
                         password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=3' 
+                        avatar: 'https://i.pravatar.cc/150?img=3',
+                        createdAt: new Date().toISOString()
                     },
                     { 
-                        id: generateId(), 
+                        id: 'user_002_' + generateId(),
                         username: '李四', 
                         password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=5' 
+                        avatar: 'https://i.pravatar.cc/150?img=5',
+                        createdAt: new Date().toISOString()
                     },
                     { 
-                        id: generateId(), 
+                        id: 'user_003_' + generateId(),
                         username: '王五', 
                         password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=7' 
+                        avatar: 'https://i.pravatar.cc/150?img=7',
+                        createdAt: new Date().toISOString()
+                    },
+                    { 
+                        id: 'user_004_' + generateId(),
+                        username: '赵六', 
+                        password: '123456', 
+                        avatar: 'https://i.pravatar.cc/150?img=9',
+                        createdAt: new Date().toISOString()
                     }
                 ];
                 saveData(STORAGE_KEYS.USERS, state.allUsers);
@@ -1644,11 +1403,6 @@
                 adjustInputHeight();
                 sendBtn.disabled = messageInput.value.trim() === '';
             });
-            
-            // 请求通知权限
-            if (window.Notification) {
-                Notification.requestPermission();
-            }
         }
         
         // 返回首页
@@ -1711,19 +1465,19 @@
             const isLogin = authTitle.textContent === '登录';
             
             if (!username || !password) {
-                alert('请输入用户名和密码');
+                showNotification('请输入用户名和密码', 'error');
                 return;
             }
             
             if (!isLogin) {
                 const confirmPassword = confirmPasswordInput.value;
                 if (password !== confirmPassword) {
-                    alert('两次输入的密码不一致');
+                    showNotification('两次输入的密码不一致', 'error');
                     return;
                 }
                 
                 if (password.length < 6) {
-                    alert('密码长度至少需要6位');
+                    showNotification('密码长度至少需要6位', 'error');
                     return;
                 }
             }
@@ -1736,22 +1490,23 @@
                     saveData(STORAGE_KEYS.CURRENT_USER, user);
                     showApp();
                     loadFriends();
-                    initWebSocket();
+                    showNotification('登录成功');
                 } else {
-                    alert('用户名或密码错误');
+                    showNotification('用户名或密码错误', 'error');
                 }
             } else {
                 // 注册逻辑
                 if (state.allUsers.some(u => u.username === username)) {
-                    alert('用户名已存在');
+                    showNotification('用户名已存在', 'error');
                     return;
                 }
                 
                 const newUser = {
-                    id: generateId(),
+                    id: 'user_' + generateId(),
                     username,
                     password,
-                    avatar: `https://i.pravatar.cc/150?u=${generateId()}`
+                    avatar: `https://i.pravatar.cc/150?u=${generateId()}`,
+                    createdAt: new Date().toISOString()
                 };
                 
                 state.allUsers.push(newUser);
@@ -1768,7 +1523,7 @@
                 
                 showApp();
                 loadFriends();
-                initWebSocket();
+                showNotification('注册成功');
             }
         }
         
@@ -1783,9 +1538,10 @@
             authContainer.style.display = 'none';
             appContainer.style.display = 'flex';
             
-            // 更新设置中的用户名
+            // 更新设置中的用户名和ID
             if (state.currentUser) {
                 settingsUsername.value = state.currentUser.username;
+                settingsUserId.value = state.currentUser.id;
                 if (state.currentUser.avatar) {
                     avatarPreviewImg.src = state.currentUser.avatar;
                 }
@@ -1910,6 +1666,8 @@
             }
             
             if (!state.messages[state.currentUser.id][friendId]) {
+                const friend = state.allUsers.find(u => u.id === friendId) || state.friends.find(f => f.id === friendId);
+                
                 state.messages[state.currentUser.id][friendId] = [
                     { 
                         text: `你好，我是${state.currentUser.username}`, 
@@ -1919,10 +1677,10 @@
                         timestamp: new Date().toISOString()
                     },
                     { 
-                        text: `你好，我是${state.allUsers.find(u => u.id === friendId)?.username || '好友'}`, 
+                        text: `你好，我是${friend?.username || '好友'}`, 
                         time: getCurrentTime(), 
                         incoming: true,
-                        sender: state.allUsers.find(u => u.id === friendId)?.username || '好友',
+                        sender: friend?.username || '好友',
                         timestamp: new Date().toISOString()
                     }
                 ];
@@ -1991,7 +1749,7 @@
         // 发送消息
         function sendMessage() {
             const text = messageInput.value.trim();
-            if (!text || !state.currentChat || !state.socket) return;
+            if (!text || !state.currentChat) return;
             
             const time = getCurrentTime();
             const timestamp = new Date().toISOString();
@@ -2016,15 +1774,6 @@
             
             // 保存消息
             saveData(STORAGE_KEYS.MESSAGES, state.messages);
-            
-            // 通过WebSocket发送消息
-            state.socket.send(JSON.stringify({
-                type: 'message',
-                from: state.currentUser.id,
-                to: state.currentChat.id,
-                content: text,
-                timestamp
-            }));
             
             // 更新好友列表中的最后消息
             const friendIndex = state.friends.findIndex(f => f.id === state.currentChat.id);
@@ -2097,17 +1846,42 @@
         // 处理搜索
         function handleSearch() {
             const query = searchInput.value.trim().toLowerCase();
+            
+            // 获取所有用户（排除自己）
+            const allUsers = state.allUsers.filter(user => 
+                user.id !== state.currentUser.id
+            );
+            
+            // 如果没有查询词，显示所有用户（已好友在前，非好友在后）
             if (!query) {
-                searchResults.innerHTML = '';
+                const sortedUsers = [...allUsers].sort((a, b) => {
+                    const isFriendA = state.friends.some(f => f.id === a.id);
+                    const isFriendB = state.friends.some(f => f.id === b.id);
+                    
+                    if (isFriendA && !isFriendB) return -1;
+                    if (!isFriendA && isFriendB) return 1;
+                    return a.username.localeCompare(b.username);
+                });
+                
+                renderSearchResults(sortedUsers);
                 return;
             }
             
-            // 过滤出匹配的用户（排除自己和已经是好友的用户）
-            const results = state.allUsers.filter(user => 
-                user.id !== state.currentUser.id &&
-                !state.friends.some(friend => friend.id === user.id) &&
-                user.username.toLowerCase().includes(query)
+            // 搜索匹配用户名或ID的用户（包括已好友和非好友）
+            const results = allUsers.filter(user => 
+                user.username.toLowerCase().includes(query) || 
+                user.id.toLowerCase().includes(query)
             );
+            
+            // 按好友状态和用户名排序
+            results.sort((a, b) => {
+                const isFriendA = state.friends.some(f => f.id === a.id);
+                const isFriendB = state.friends.some(f => f.id === b.id);
+                
+                if (isFriendA && !isFriendB) return -1;
+                if (!isFriendA && isFriendB) return 1;
+                return a.username.localeCompare(b.username);
+            });
             
             renderSearchResults(results);
         }
@@ -2118,15 +1892,21 @@
             
             if (results.length === 0) {
                 searchResults.innerHTML = `
-                    <div class="empty-state">
+                    <div class="no-results">
                         <div class="empty-state-icon">🔍</div>
                         <div>没有找到匹配的用户</div>
+                        <div style="margin-top: 10px; font-size: 0.9rem;">你可以尝试搜索其他用户名或ID</div>
                     </div>
                 `;
                 return;
             }
             
             results.forEach(user => {
+                const isFriend = state.friends.some(f => f.id === user.id);
+                const isPendingRequest = state.friendRequests[state.currentUser.id]?.some(
+                    req => req.from === user.id && req.status === 'pending'
+                );
+                
                 const resultItem = document.createElement('div');
                 resultItem.className = 'search-result-item';
                 
@@ -2136,9 +1916,17 @@
                     </div>
                     <div class="search-result-info">
                         <div class="search-result-name">${user.username}</div>
+                        <div class="search-result-id">ID: ${user.id}</div>
+                        ${isFriend ? '<div class="search-result-status" style="color: var(--success-color); font-size: 0.7rem; margin-top: 2px;">已是好友</div>' : ''}
+                        ${isPendingRequest ? '<div class="search-result-status" style="color: var(--warning-color); font-size: 0.7rem; margin-top: 2px;">请求已发送</div>' : ''}
                     </div>
                     <div class="search-result-actions">
-                        <button class="btn btn-primary add-friend-btn" data-user-id="${user.id}">添加</button>
+                        ${isFriend ? 
+                            `<button class="btn btn-secondary start-chat-btn" data-user-id="${user.id}">聊天</button>` : 
+                            isPendingRequest ? 
+                                `<button class="btn btn-secondary" disabled>已发送</button>` : 
+                                `<button class="btn btn-primary add-friend-btn" data-user-id="${user.id}">添加</button>`
+                        }
                     </div>
                 `;
                 
@@ -2152,24 +1940,78 @@
                     sendFriendRequest(userId);
                 });
             });
+            
+            // 绑定开始聊天按钮事件
+            document.querySelectorAll('.start-chat-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.target.dataset.userId;
+                    const friend = state.friends.find(f => f.id === userId);
+                    if (friend) {
+                        startChat(friend);
+                        hideSearchModal();
+                    }
+                });
+            });
         }
-        
+
         // 发送好友请求
         function sendFriendRequest(userId) {
-            if (!state.socket) return;
+            const targetUser = state.allUsers.find(u => u.id === userId);
+            if (!targetUser) {
+                showNotification('找不到该用户', 'error');
+                return;
+            }
             
-            // 在实际应用中，这里应该通过WebSocket发送请求
-            state.socket.send(JSON.stringify({
-                type: 'friend_request',
-                from: state.currentUser.id,
-                to: userId
-            }));
+            // 检查是否已经是好友
+            if (state.friends.some(f => f.id === userId)) {
+                showNotification(`您已经是${targetUser.username}的好友`, 'error');
+                return;
+            }
             
-            // 模拟服务器响应
-            MockWebSocket.simulateFriendRequest(state.currentUser.id, userId);
+            // 检查是否已经发送过请求
+            if (state.friendRequests[state.currentUser.id]?.some(
+                req => req.from === userId && req.status === 'pending'
+            )) {
+                showNotification(`您已经向${targetUser.username}发送过好友请求`, 'error');
+                return;
+            }
             
-            alert(`好友请求已发送`);
+            // 添加好友请求
+            if (!state.friendRequests[state.currentUser.id]) {
+                state.friendRequests[state.currentUser.id] = [];
+            }
+            
+            state.friendRequests[state.currentUser.id].push({
+                from: userId,
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            });
+            
+            saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
+            updateRequestsBadge();
+            
+            showNotification(`已向${targetUser.username}发送好友请求`);
             hideSearchModal();
+        }
+        
+        // 更新请求徽章
+        function updateRequestsBadge() {
+            if (state.currentUser && state.friendRequests[state.currentUser.id]) {
+                const pendingCount = state.friendRequests[state.currentUser.id].filter(
+                    req => req.status === 'pending'
+                ).length;
+                
+                state.pendingRequests = pendingCount;
+                
+                if (pendingCount > 0) {
+                    requestsBadge.textContent = pendingCount;
+                    requestsBadge.style.display = 'flex';
+                } else {
+                    requestsBadge.style.display = 'none';
+                }
+            } else {
+                requestsBadge.style.display = 'none';
+            }
         }
         
         // 显示好友请求弹窗
@@ -2226,111 +2068,114 @@
                     </div>
                     <div class="request-info">
                         <div class="request-name">${requestUser.username}</div>
-                        <div class="request-status">请求添加你为好友</div>
+                        <div class="request-status">请求时间: ${formatDate(new Date(request.timestamp))}</div>
                     </div>
                     <div class="request-actions">
-                        <button class="btn btn-danger reject-request-btn" data-request-id="${request.from}">拒绝</button>
-                        <button class="btn btn-primary accept-request-btn" data-request-id="${request.from}">接受</button>
+                        <button class="btn btn-primary accept-request-btn" data-user-id="${request.from}">接受</button>
+                        <button class="btn btn-danger reject-request-btn" data-user-id="${request.from}">拒绝</button>
                     </div>
                 `;
                 
                 requestsList.appendChild(requestItem);
             });
             
-            // 绑定接受/拒绝按钮事件
+            // 绑定接受请求按钮事件
             document.querySelectorAll('.accept-request-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const fromUserId = e.target.dataset.requestId;
-                    respondToFriendRequest(fromUserId, true);
+                    const userId = e.target.dataset.userId;
+                    respondToFriendRequest(userId, true);
                 });
             });
             
+            // 绑定拒绝请求按钮事件
             document.querySelectorAll('.reject-request-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const fromUserId = e.target.dataset.requestId;
-                    respondToFriendRequest(fromUserId, false);
+                    const userId = e.target.dataset.userId;
+                    respondToFriendRequest(userId, false);
                 });
             });
         }
         
         // 响应好友请求
-        function respondToFriendRequest(fromUserId, accepted) {
-            if (!state.socket) return;
-            
-            // 在实际应用中，这里应该通过WebSocket发送响应
-            state.socket.send(JSON.stringify({
-                type: 'friend_request_response',
-                from: state.currentUser.id,
-                to: fromUserId,
-                accepted
-            }));
-            
-            // 模拟服务器响应
-            MockWebSocket.simulateFriendRequestResponse(state.currentUser.id, fromUserId, accepted);
-            
-            // 更新本地请求状态
-            const requestIndex = state.friendRequests[state.currentUser.id].findIndex(
-                req => req.from === fromUserId && req.status === 'pending'
-            );
-            
-            if (requestIndex !== -1) {
-                state.friendRequests[state.currentUser.id][requestIndex].status = 
-                    accepted ? 'accepted' : 'rejected';
-                state.friendRequests[state.currentUser.id][requestIndex].respondedAt = 
-                    new Date().toISOString();
+        function respondToFriendRequest(userId, accepted) {
+            // 更新请求状态
+            if (state.friendRequests[state.currentUser.id]) {
+                const requestIndex = state.friendRequests[state.currentUser.id].findIndex(
+                    req => req.from === userId && req.status === 'pending'
+                );
                 
-                saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
-                updateRequestsBadge();
-                
-                if (accepted) {
-                    const newFriend = state.allUsers.find(u => u.id === fromUserId);
-                    if (newFriend && !state.friends.some(f => f.id === newFriend.id)) {
-                        state.friends.push({
-                            ...newFriend,
-                            status: 'offline',
-                            lastSeen: '未知'
-                        });
-                        
-                        saveData(STORAGE_KEYS.FRIENDS, state.friends);
-                        renderFriendsList();
-                        
-                        // 初始化消息记录
-                        if (!state.messages[state.currentUser.id]) {
-                            state.messages[state.currentUser.id] = {};
-                        }
-                        
-                        if (!state.messages[state.currentUser.id][newFriend.id]) {
-                            state.messages[state.currentUser.id][newFriend.id] = [
-                                { 
-                                    text: `你好，我是${state.currentUser.username}`, 
-                                    time: getCurrentTime(), 
-                                    incoming: false,
-                                    sender: state.currentUser.username,
-                                    timestamp: new Date().toISOString()
-                                },
-                                { 
-                                    text: `你好，我是${newFriend.username}`, 
-                                    time: getCurrentTime(), 
-                                    incoming: true,
-                                    sender: newFriend.username,
-                                    timestamp: new Date().toISOString()
-                                }
-                            ];
-                            saveData(STORAGE_KEYS.MESSAGES, state.messages);
-                        }
-                    }
+                if (requestIndex !== -1) {
+                    state.friendRequests[state.currentUser.id][requestIndex].status = 
+                        accepted ? 'accepted' : 'rejected';
+                    state.friendRequests[state.currentUser.id][requestIndex].respondedAt = 
+                        new Date().toISOString();
+                    
+                    saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
                 }
             }
             
-            // 重新渲染请求列表
+            const targetUser = state.allUsers.find(u => u.id === userId);
+            
+            if (accepted) {
+                // 添加好友
+                if (targetUser && !state.friends.some(f => f.id === targetUser.id)) {
+                    state.friends.push({
+                        ...targetUser,
+                        status: 'offline',
+                        lastSeen: '未知'
+                    });
+                    
+                    saveData(STORAGE_KEYS.FRIENDS, state.friends);
+                    renderFriendsList();
+                    
+                    // 初始化消息记录
+                    if (!state.messages[state.currentUser.id]) {
+                        state.messages[state.currentUser.id] = {};
+                    }
+                    
+                    if (!state.messages[state.currentUser.id][targetUser.id]) {
+                        state.messages[state.currentUser.id][targetUser.id] = [
+                            { 
+                                text: `你好，我是${state.currentUser.username}`, 
+                                time: getCurrentTime(), 
+                                incoming: false,
+                                sender: state.currentUser.username,
+                                timestamp: new Date().toISOString()
+                            },
+                            { 
+                                text: `你好，我是${targetUser.username}`, 
+                                time: getCurrentTime(), 
+                                incoming: true,
+                                sender: targetUser.username,
+                                timestamp: new Date().toISOString()
+                            }
+                        ];
+                        saveData(STORAGE_KEYS.MESSAGES, state.messages);
+                    }
+                }
+                
+                showNotification(`已接受${targetUser.username}的好友请求`);
+            } else {
+                showNotification(`已拒绝${targetUser?.username || '该用户'}的好友请求`, 'warning');
+            }
+            
+            updateRequestsBadge();
             renderRequestsList();
+            
+            // 如果接受了请求，关闭模态框
+            if (accepted) {
+                hideRequestsModal();
+            }
         }
         
         // 显示设置弹窗
         function showSettingsModal() {
             if (state.currentUser) {
                 settingsUsername.value = state.currentUser.username;
-                avatarPreviewImg.src = state.currentUser.avatar;
+                settingsUserId.value = state.currentUser.id;
+                if (state.currentUser.avatar) {
+                    avatarPreviewImg.src = state.currentUser.avatar;
+                }
             }
             settingsModal.classList.add('show');
         }
@@ -2346,72 +2191,65 @@
             if (!file) return;
             
             if (!file.type.match('image.*')) {
-                alert('请选择图片文件');
+                showNotification('请选择图片文件', 'error');
                 return;
             }
             
             const reader = new FileReader();
             reader.onload = (event) => {
                 avatarPreviewImg.src = event.target.result;
+                
+                // 更新当前用户头像
+                if (state.currentUser) {
+                    state.currentUser.avatar = event.target.result;
+                    saveData(STORAGE_KEYS.CURRENT_USER, state.currentUser);
+                    
+                    // 更新用户列表中的头像
+                    const userIndex = state.allUsers.findIndex(u => u.id === state.currentUser.id);
+                    if (userIndex !== -1) {
+                        state.allUsers[userIndex].avatar = event.target.result;
+                        saveData(STORAGE_KEYS.USERS, state.allUsers);
+                    }
+                    
+                    // 更新好友列表中的头像
+                    renderFriendsList();
+                    
+                    // 更新当前聊天头像
+                    if (state.currentChat && state.currentChat.id === state.currentUser.id) {
+                        currentChatAvatarImg.src = event.target.result;
+                    }
+                    
+                    showNotification('头像更新成功');
+                }
             };
             reader.readAsDataURL(file);
         }
         
         // 保存设置
         function saveSettings() {
-            if (!state.currentUser) return;
-            
-            // 更新头像
-            if (avatarPreviewImg.src && avatarPreviewImg.src !== state.currentUser.avatar) {
-                state.currentUser.avatar = avatarPreviewImg.src;
-                
-                // 更新当前用户数据
+            if (state.currentUser) {
                 saveData(STORAGE_KEYS.CURRENT_USER, state.currentUser);
-                
-                // 更新用户列表中的数据
-                const userIndex = state.allUsers.findIndex(u => u.id === state.currentUser.id);
-                if (userIndex !== -1) {
-                    state.allUsers[userIndex].avatar = avatarPreviewImg.src;
-                    saveData(STORAGE_KEYS.USERS, state.allUsers);
-                }
-                
-                // 更新好友列表中的头像
-                const friendIndex = state.friends.findIndex(f => f.id === state.currentUser.id);
-                if (friendIndex !== -1) {
-                    state.friends[friendIndex].avatar = avatarPreviewImg.src;
-                    saveData(STORAGE_KEYS.FRIENDS, state.friends);
-                    renderFriendsList();
-                }
-                
-                // 更新当前聊天中的头像
-                if (state.currentChat && state.currentChat.id === state.currentUser.id) {
-                    currentChatAvatarImg.src = avatarPreviewImg.src;
-                }
+                showNotification('设置已保存');
+                hideSettingsModal();
             }
-            
-            hideSettingsModal();
-            alert('设置已保存');
         }
         
         // 处理退出登录
         function handleLogout() {
-            if (state.socket) {
-                state.socket.close();
-            }
-            
-            localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
             state.currentUser = null;
-            hideSettingsModal();
+            saveData(STORAGE_KEYS.CURRENT_USER, null);
             showAuth();
+            hideSettingsModal();
+            showNotification('已退出登录');
         }
         
-        // 生成ID
+        // 生成随机ID
         function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+            return Math.random().toString(36).substr(2, 9);
         }
         
-        // 初始化应用
-        init();
+        // 页面加载完成后初始化应用
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
