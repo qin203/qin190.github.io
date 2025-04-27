@@ -1356,20 +1356,22 @@
         
         // 加载所有数据
         function loadAllData() {
+            // 从localStorage加载数据
             const savedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
             state.allUsers = savedUsers ? JSON.parse(savedUsers) : [];
             
+            // 如果没有用户数据，创建几个测试用户
             if (state.allUsers.length === 0) {
                 state.allUsers = [
                     { 
-                        id: '666',
+                        id: 'user_666',
                         username: '测试用户666', 
                         password: '123456', 
                         avatar: 'https://i.pravatar.cc/150?img=3',
                         createdAt: new Date().toISOString()
                     },
                     { 
-                        id: '111',
+                        id: 'user_111',
                         username: '测试用户111', 
                         password: '123456', 
                         avatar: 'https://i.pravatar.cc/150?img=5',
@@ -1583,6 +1585,7 @@
             const savedFriends = localStorage.getItem(STORAGE_KEYS.FRIENDS);
             state.friends = savedFriends ? JSON.parse(savedFriends) : [];
             
+            // 确保好友列表中的用户信息是最新的
             state.friends = state.friends.map(friend => {
                 const user = state.allUsers.find(u => u.id === friend.id);
                 return {
@@ -2131,7 +2134,7 @@
                     if (!state.messages[state.currentUser.id][targetUser.id]) {
                         state.messages[state.currentUser.id][targetUser.id] = [
                             createMessage(`你好，我是${state.currentUser.username}`, false),
-                            createMessage(`你好，我是${targetUser.username}`, true)
+                            createMessage(`你好，我是${targetUser?.username || '好友'}`, true)
                         ];
                     }
                     
@@ -2140,7 +2143,7 @@
                     }
                     if (!state.messages[targetUser.id][state.currentUser.id]) {
                         state.messages[targetUser.id][state.currentUser.id] = [
-                            createMessage(`你好，我是${targetUser.username}`, false),
+                            createMessage(`你好，我是${targetUser?.username || '好友'}`, false),
                             createMessage(`你好，我是${state.currentUser.username}`, true)
                         ];
                     }
