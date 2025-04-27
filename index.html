@@ -1335,7 +1335,6 @@
             notification.textContent = message;
             document.body.appendChild(notification);
             
-            // 3秒后自动移除
             setTimeout(() => {
                 notification.remove();
             }, 3000);
@@ -1343,10 +1342,8 @@
         
         // 初始化应用
         function init() {
-            // 加载所有数据
             loadAllData();
             
-            // 检查是否已登录
             if (state.currentUser) {
                 showApp();
                 loadFriends();
@@ -1354,17 +1351,14 @@
                 showAuth();
             }
             
-            // 绑定事件
             bindEvents();
         }
         
         // 加载所有数据
         function loadAllData() {
-            // 加载用户数据
             const savedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
             state.allUsers = savedUsers ? JSON.parse(savedUsers) : [];
             
-            // 如果没有用户，创建一些测试用户
             if (state.allUsers.length === 0) {
                 state.allUsers = [
                     { 
@@ -1380,42 +1374,23 @@
                         password: '123456', 
                         avatar: 'https://i.pravatar.cc/150?img=5',
                         createdAt: new Date().toISOString()
-                    },
-                    { 
-                        id: 'user_003_' + generateId(),
-                        username: '王五', 
-                        password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=7',
-                        createdAt: new Date().toISOString()
-                    },
-                    { 
-                        id: 'user_004_' + generateId(),
-                        username: '赵六', 
-                        password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=9',
-                        createdAt: new Date().toISOString()
                     }
                 ];
                 saveData(STORAGE_KEYS.USERS, state.allUsers);
             }
             
-            // 加载当前用户
             const savedCurrentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
             state.currentUser = savedCurrentUser ? JSON.parse(savedCurrentUser) : null;
             
-            // 加载好友数据
             const savedFriends = localStorage.getItem(STORAGE_KEYS.FRIENDS);
             state.friends = savedFriends ? JSON.parse(savedFriends) : [];
             
-            // 加载消息数据
             const savedMessages = localStorage.getItem(STORAGE_KEYS.MESSAGES);
             state.messages = savedMessages ? JSON.parse(savedMessages) : {};
             
-            // 加载好友请求数据
             const savedFriendRequests = localStorage.getItem(STORAGE_KEYS.FRIEND_REQUESTS);
             state.friendRequests = savedFriendRequests ? JSON.parse(savedFriendRequests) : {};
             
-            // 更新请求徽章
             updateRequestsBadge();
         }
         
@@ -1426,11 +1401,9 @@
         
         // 绑定事件
         function bindEvents() {
-            // 认证事件
             authSwitch.addEventListener('click', toggleAuthMode);
             authBtn.addEventListener('click', handleAuth);
             
-            // 主应用事件
             menuBtn.addEventListener('click', toggleSidebar);
             searchFriendBtn.addEventListener('click', showSearchModal);
             closeSearchModal.addEventListener('click', hideSearchModal);
@@ -1446,13 +1419,10 @@
             logoutBtn.addEventListener('click', handleLogout);
             saveSettingsBtn.addEventListener('click', saveSettings);
             
-            // 返回首页按钮
             backToHomeBtn.addEventListener('click', backToHome);
             
-            // 头像上传
             avatarUploadInput.addEventListener('change', handleAvatarUpload);
             
-            // 聊天事件
             sendBtn.addEventListener('click', sendMessage);
             messageInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -1468,19 +1438,16 @@
         
         // 返回首页
         function backToHome() {
-            // 在移动设备上隐藏侧边栏
             if (window.innerWidth <= 768) {
                 friendsSidebar.classList.remove('active');
             }
             
-            // 重置当前聊天状态
             state.currentChat = null;
             currentChatTitle.textContent = '请选择好友开始聊天';
             currentChatAvatarImg.src = '';
             currentChatAvatarImg.alt = '';
             currentChatStatus.textContent = '';
             
-            // 显示空状态
             chatMessages.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">💬</div>
@@ -1488,10 +1455,8 @@
                 </div>
             `;
             
-            // 禁用发送按钮
             sendBtn.disabled = true;
             
-            // 更新好友列表中的活动状态
             document.querySelectorAll('.friend-item').forEach(item => {
                 item.classList.remove('active');
             });
@@ -1513,7 +1478,6 @@
                 confirmPasswordGroup.style.display = 'none';
             }
             
-            // 清空输入
             usernameInput.value = '';
             passwordInput.value = '';
             confirmPasswordInput.value = '';
@@ -1544,7 +1508,6 @@
             }
             
             if (isLogin) {
-                // 登录逻辑
                 const user = state.allUsers.find(u => u.username === username && u.password === password);
                 if (user) {
                     state.currentUser = user;
@@ -1556,7 +1519,6 @@
                     showNotification('用户名或密码错误', 'error');
                 }
             } else {
-                // 注册逻辑
                 if (state.allUsers.some(u => u.username === username)) {
                     showNotification('用户名已存在', 'error');
                     return;
@@ -1576,7 +1538,6 @@
                 state.currentUser = newUser;
                 saveData(STORAGE_KEYS.CURRENT_USER, newUser);
                 
-                // 初始化用户的消息数据
                 if (!state.messages[newUser.id]) {
                     state.messages[newUser.id] = {};
                     saveData(STORAGE_KEYS.MESSAGES, state.messages);
@@ -1599,7 +1560,6 @@
             authContainer.style.display = 'none';
             appContainer.style.display = 'flex';
             
-            // 更新设置中的用户名和ID
             if (state.currentUser) {
                 settingsUsername.value = state.currentUser.username;
                 settingsUserId.value = state.currentUser.id;
@@ -1608,7 +1568,6 @@
                 }
             }
             
-            // 显示空状态
             if (!state.currentChat) {
                 chatMessages.innerHTML = `
                     <div class="empty-state">
@@ -1621,11 +1580,9 @@
         
         // 加载好友列表
         function loadFriends() {
-            // 从存储中加载好友数据
             const savedFriends = localStorage.getItem(STORAGE_KEYS.FRIENDS);
             state.friends = savedFriends ? JSON.parse(savedFriends) : [];
             
-            // 确保好友数据是最新的用户信息
             state.friends = state.friends.map(friend => {
                 const user = state.allUsers.find(u => u.id === friend.id);
                 return {
@@ -1652,7 +1609,6 @@
                 return;
             }
             
-            // 按最后消息时间排序
             const sortedFriends = [...state.friends].sort((a, b) => {
                 const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
                 const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
@@ -1692,13 +1648,11 @@
         function startChat(friend) {
             state.currentChat = friend;
             
-            // 更新UI
             currentChatTitle.textContent = friend.username;
             currentChatAvatarImg.src = friend.avatar;
             currentChatAvatarImg.alt = friend.username;
             currentChatStatus.textContent = friend.status === 'online' ? '在线' : '离线';
             
-            // 更新好友列表中的活动状态
             document.querySelectorAll('.friend-item').forEach(item => {
                 item.classList.remove('active');
                 if (item.dataset.friendId === friend.id) {
@@ -1706,13 +1660,9 @@
                 }
             });
             
-            // 启用发送按钮
             sendBtn.disabled = false;
-            
-            // 加载消息
             loadMessages(friend.id);
             
-            // 在移动设备上隐藏侧边栏
             if (window.innerWidth <= 768) {
                 friendsSidebar.classList.remove('active');
             }
@@ -1720,35 +1670,44 @@
         
         // 加载消息
         function loadMessages(friendId) {
-            // 确保消息数据结构存在
             if (!state.messages[state.currentUser.id]) {
                 state.messages[state.currentUser.id] = {};
-                saveData(STORAGE_KEYS.MESSAGES, state.messages);
             }
             
             if (!state.messages[state.currentUser.id][friendId]) {
                 const friend = state.allUsers.find(u => u.id === friendId) || state.friends.find(f => f.id === friendId);
                 
                 state.messages[state.currentUser.id][friendId] = [
-                    { 
-                        text: `你好，我是${state.currentUser.username}`, 
-                        time: getCurrentTime(), 
-                        incoming: false,
-                        sender: state.currentUser.username,
-                        timestamp: new Date().toISOString()
-                    },
-                    { 
-                        text: `你好，我是${friend?.username || '好友'}`, 
-                        time: getCurrentTime(), 
-                        incoming: true,
-                        sender: friend?.username || '好友',
-                        timestamp: new Date().toISOString()
-                    }
+                    createMessage(`你好，我是${state.currentUser.username}`, false),
+                    createMessage(`你好，我是${friend?.username || '好友'}`, true)
                 ];
+                
+                if (!state.messages[friendId]) {
+                    state.messages[friendId] = {};
+                }
+                if (!state.messages[friendId][state.currentUser.id]) {
+                    state.messages[friendId][state.currentUser.id] = [
+                        createMessage(`你好，我是${friend?.username || '好友'}`, false),
+                        createMessage(`你好，我是${state.currentUser.username}`, true)
+                    ];
+                }
+                
                 saveData(STORAGE_KEYS.MESSAGES, state.messages);
             }
             
             renderMessages(friendId);
+        }
+        
+        // 创建标准化消息对象
+        function createMessage(text, incoming) {
+            return {
+                text,
+                time: getCurrentTime(),
+                timestamp: new Date().toISOString(),
+                incoming,
+                sender: incoming ? state.currentChat.username : state.currentUser.username,
+                senderId: incoming ? state.currentChat.id : state.currentUser.id
+            };
         }
         
         // 渲染消息
@@ -1767,7 +1726,6 @@
                 return;
             }
             
-            // 按日期分组消息
             const messagesByDate = {};
             messages.forEach(msg => {
                 const date = new Date(msg.timestamp || new Date()).toDateString();
@@ -1777,15 +1735,12 @@
                 messagesByDate[date].push(msg);
             });
             
-            // 渲染每组消息
             Object.entries(messagesByDate).forEach(([date, msgs]) => {
-                // 添加日期分隔
                 const dateElement = document.createElement('div');
                 dateElement.className = 'message-date';
                 dateElement.textContent = formatDate(new Date(date));
                 chatMessages.appendChild(dateElement);
                 
-                // 添加消息
                 msgs.forEach(msg => {
                     const messageContainer = document.createElement('div');
                     messageContainer.className = `message-${msg.incoming ? 'in' : 'out'}-container`;
@@ -1803,7 +1758,6 @@
                 });
             });
             
-            // 滚动到底部
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
@@ -1811,32 +1765,43 @@
         function sendMessage() {
             const text = messageInput.value.trim();
             if (!text || !state.currentChat) return;
-            
-            const time = getCurrentTime();
-            const timestamp = new Date().toISOString();
+
+            const newMessage = createMessage(text, false);
             
             // 确保消息数据结构存在
             if (!state.messages[state.currentUser.id]) {
                 state.messages[state.currentUser.id] = {};
             }
-            
             if (!state.messages[state.currentUser.id][state.currentChat.id]) {
                 state.messages[state.currentUser.id][state.currentChat.id] = [];
             }
             
-            // 添加到消息列表
-            state.messages[state.currentUser.id][state.currentChat.id].push({
-                text,
-                time,
-                timestamp,
-                incoming: false,
-                sender: state.currentUser.username
+            // 在接收方也创建消息存储结构
+            if (!state.messages[state.currentChat.id]) {
+                state.messages[state.currentChat.id] = {};
+            }
+            if (!state.messages[state.currentChat.id][state.currentUser.id]) {
+                state.messages[state.currentChat.id][state.currentUser.id] = [];
+            }
+            
+            // 添加到双方的聊天记录中
+            state.messages[state.currentUser.id][state.currentChat.id].push(newMessage);
+            state.messages[state.currentChat.id][state.currentUser.id].push({
+                ...newMessage,
+                incoming: true
             });
             
-            // 保存消息
             saveData(STORAGE_KEYS.MESSAGES, state.messages);
             
-            // 更新好友列表中的最后消息
+            // 更新最后消息显示
+            updateLastMessage(text, newMessage.timestamp);
+            
+            renderMessages(state.currentChat.id);
+            resetMessageInput();
+        }
+        
+        // 更新最后消息显示
+        function updateLastMessage(text, timestamp) {
             const friendIndex = state.friends.findIndex(f => f.id === state.currentChat.id);
             if (friendIndex !== -1) {
                 state.friends[friendIndex].lastMessage = text;
@@ -1844,14 +1809,19 @@
                 saveData(STORAGE_KEYS.FRIENDS, state.friends);
                 renderFriendsList();
             }
-            
-            // 渲染消息
-            renderMessages(state.currentChat.id);
-            
-            // 清空输入框
+        }
+        
+        // 重置消息输入框
+        function resetMessageInput() {
             messageInput.value = '';
             adjustInputHeight();
             sendBtn.disabled = true;
+        }
+        
+        // 调整输入框高度
+        function adjustInputHeight() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = (messageInput.scrollHeight > 120 ? 120 : messageInput.scrollHeight) + 'px';
         }
         
         // 获取当前时间
@@ -1880,12 +1850,6 @@
             }
         }
         
-        // 调整输入框高度
-        function adjustInputHeight() {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = (messageInput.scrollHeight > 120 ? 120 : messageInput.scrollHeight) + 'px';
-        }
-        
         // 切换侧边栏显示
         function toggleSidebar() {
             friendsSidebar.classList.toggle('active');
@@ -1907,41 +1871,25 @@
         // 处理搜索
         function handleSearch() {
             const query = searchInput.value.trim().toLowerCase();
+            const allUsers = state.allUsers.filter(user => user.id !== state.currentUser.id);
             
-            // 获取所有用户（排除自己）
-            const allUsers = state.allUsers.filter(user => 
-                user.id !== state.currentUser.id
-            );
-            
-            // 如果没有查询词，显示所有用户（已好友在前，非好友在后）
             if (!query) {
                 const sortedUsers = [...allUsers].sort((a, b) => {
                     const isFriendA = state.friends.some(f => f.id === a.id);
                     const isFriendB = state.friends.some(f => f.id === b.id);
-                    
-                    if (isFriendA && !isFriendB) return -1;
-                    if (!isFriendA && isFriendB) return 1;
-                    return a.username.localeCompare(b.username);
+                    return isFriendA && !isFriendB ? -1 : !isFriendA && isFriendB ? 1 : a.username.localeCompare(b.username);
                 });
-                
                 renderSearchResults(sortedUsers);
                 return;
             }
             
-            // 搜索匹配用户名或ID的用户（包括已好友和非好友）
             const results = allUsers.filter(user => 
                 user.username.toLowerCase().includes(query) || 
                 user.id.toLowerCase().includes(query)
-            );
-            
-            // 按好友状态和用户名排序
-            results.sort((a, b) => {
+            ).sort((a, b) => {
                 const isFriendA = state.friends.some(f => f.id === a.id);
                 const isFriendB = state.friends.some(f => f.id === b.id);
-                
-                if (isFriendA && !isFriendB) return -1;
-                if (!isFriendA && isFriendB) return 1;
-                return a.username.localeCompare(b.username);
+                return isFriendA && !isFriendB ? -1 : !isFriendA && isFriendB ? 1 : a.username.localeCompare(b.username);
             });
             
             renderSearchResults(results);
@@ -1956,7 +1904,6 @@
                     <div class="no-results">
                         <div class="empty-state-icon">🔍</div>
                         <div>没有找到匹配的用户</div>
-                        <div style="margin-top: 10px; font-size: 0.9rem;">你可以尝试搜索其他用户名或ID</div>
                     </div>
                 `;
                 return;
@@ -1994,7 +1941,6 @@
                 searchResults.appendChild(resultItem);
             });
             
-            // 绑定添加好友按钮事件
             document.querySelectorAll('.add-friend-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const userId = e.target.dataset.userId;
@@ -2002,7 +1948,6 @@
                 });
             });
             
-            // 绑定开始聊天按钮事件
             document.querySelectorAll('.start-chat-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const userId = e.target.dataset.userId;
@@ -2023,13 +1968,11 @@
                 return;
             }
             
-            // 检查是否已经是好友
             if (state.friends.some(f => f.id === userId)) {
                 showNotification(`您已经是${targetUser.username}的好友`, 'error');
                 return;
             }
             
-            // 检查是否已经发送过请求
             if (state.friendRequests[userId]?.some(
                 req => req.from === state.currentUser.id && req.status === 'pending'
             )) {
@@ -2037,7 +1980,6 @@
                 return;
             }
             
-            // 添加好友请求到目标用户的请求列表中
             if (!state.friendRequests[userId]) {
                 state.friendRequests[userId] = [];
             }
@@ -2100,7 +2042,6 @@
                 return;
             }
             
-            // 只显示待处理的请求
             const pendingRequests = state.friendRequests[state.currentUser.id].filter(
                 req => req.status === 'pending'
             );
@@ -2139,7 +2080,6 @@
                 requestsList.appendChild(requestItem);
             });
             
-            // 绑定接受请求按钮事件
             document.querySelectorAll('.accept-request-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const userId = e.target.dataset.userId;
@@ -2147,7 +2087,6 @@
                 });
             });
             
-            // 绑定拒绝请求按钮事件
             document.querySelectorAll('.reject-request-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const userId = e.target.dataset.userId;
@@ -2158,7 +2097,6 @@
         
         // 响应好友请求
         function respondToFriendRequest(userId, accepted) {
-            // 更新请求状态
             if (state.friendRequests[state.currentUser.id]) {
                 const requestIndex = state.friendRequests[state.currentUser.id].findIndex(
                     req => req.from === userId && req.status === 'pending'
@@ -2177,7 +2115,6 @@
             const targetUser = state.allUsers.find(u => u.id === userId);
             
             if (accepted) {
-                // 添加好友
                 if (targetUser && !state.friends.some(f => f.id === targetUser.id)) {
                     state.friends.push({
                         ...targetUser,
@@ -2188,30 +2125,27 @@
                     saveData(STORAGE_KEYS.FRIENDS, state.friends);
                     renderFriendsList();
                     
-                    // 初始化消息记录
                     if (!state.messages[state.currentUser.id]) {
                         state.messages[state.currentUser.id] = {};
                     }
-                    
                     if (!state.messages[state.currentUser.id][targetUser.id]) {
                         state.messages[state.currentUser.id][targetUser.id] = [
-                            { 
-                                text: `你好，我是${state.currentUser.username}`, 
-                                time: getCurrentTime(), 
-                                incoming: false,
-                                sender: state.currentUser.username,
-                                timestamp: new Date().toISOString()
-                            },
-                            { 
-                                text: `你好，我是${targetUser.username}`, 
-                                time: getCurrentTime(), 
-                                incoming: true,
-                                sender: targetUser.username,
-                                timestamp: new Date().toISOString()
-                            }
+                            createMessage(`你好，我是${state.currentUser.username}`, false),
+                            createMessage(`你好，我是${targetUser.username}`, true)
                         ];
-                        saveData(STORAGE_KEYS.MESSAGES, state.messages);
                     }
+                    
+                    if (!state.messages[targetUser.id]) {
+                        state.messages[targetUser.id] = {};
+                    }
+                    if (!state.messages[targetUser.id][state.currentUser.id]) {
+                        state.messages[targetUser.id][state.currentUser.id] = [
+                            createMessage(`你好，我是${targetUser.username}`, false),
+                            createMessage(`你好，我是${state.currentUser.username}`, true)
+                        ];
+                    }
+                    
+                    saveData(STORAGE_KEYS.MESSAGES, state.messages);
                 }
                 
                 showNotification(`已接受${targetUser.username}的好友请求`);
@@ -2222,7 +2156,6 @@
             updateRequestsBadge();
             renderRequestsList();
             
-            // 如果接受了请求，关闭模态框
             if (accepted) {
                 hideRequestsModal();
             }
@@ -2259,22 +2192,18 @@
             reader.onload = (event) => {
                 avatarPreviewImg.src = event.target.result;
                 
-                // 更新当前用户头像
                 if (state.currentUser) {
                     state.currentUser.avatar = event.target.result;
                     saveData(STORAGE_KEYS.CURRENT_USER, state.currentUser);
                     
-                    // 更新用户列表中的头像
                     const userIndex = state.allUsers.findIndex(u => u.id === state.currentUser.id);
                     if (userIndex !== -1) {
                         state.allUsers[userIndex].avatar = event.target.result;
                         saveData(STORAGE_KEYS.USERS, state.allUsers);
                     }
                     
-                    // 更新好友列表中的头像
                     renderFriendsList();
                     
-                    // 更新当前聊天头像
                     if (state.currentChat && state.currentChat.id === state.currentUser.id) {
                         currentChatAvatarImg.src = event.target.result;
                     }
