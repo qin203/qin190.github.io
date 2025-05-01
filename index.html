@@ -3,2318 +3,2212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeonChat - 科技感聊天系统</title>
+    <title>高级人脉星球</title>
     <style>
-        :root {
-            --primary-color: #00f2ff;
-            --primary-light: rgba(0, 242, 255, 0.1);
-            --secondary-color: #7b2dff;
-            --accent-color: #ff2d7b;
-            --dark-bg: #0a0a12;
-            --darker-bg: #05050a;
-            --panel-bg: rgba(15, 15, 25, 0.8);
-            --text-color: #e0e0ff;
-            --text-muted: #a0a0c0;
-            --success-color: #00ff9d;
-            --danger-color: #ff2d7b;
-            --warning-color: #ffcc00;
-            --border-radius: 12px;
-            --border-radius-sm: 8px;
-            --box-shadow: 0 4px 20px rgba(0, 242, 255, 0.15);
-            --box-shadow-sm: 0 2px 10px rgba(0, 242, 255, 0.1);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --neon-glow: 0 0 10px rgba(0, 242, 255, 0.8);
-        }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-family: 'Microsoft YaHei', sans-serif;
         }
         
         body {
-            background-color: var(--dark-bg);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: var(--text-color);
-            line-height: 1.6;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(123, 45, 255, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 20%);
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+            min-height: 100vh;
         }
         
-        /* 认证页面样式 */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
-            position: relative;
-            overflow: hidden;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
-        .auth-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle, rgba(0, 242, 255, 0.05) 0%, transparent 70%),
-                radial-gradient(circle, rgba(123, 45, 255, 0.05) 0%, transparent 70%);
-            animation: rotate 60s linear infinite;
-            z-index: 0;
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
         }
         
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        h1 {
+            color: #4cc9f0;
+            margin-bottom: 10px;
+        }
+        
+        .countdown {
+            font-size: 18px;
+            color: #f72585;
+            margin-bottom: 20px;
         }
         
         .auth-form {
-            background-color: var(--panel-bg);
-            padding: 2.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            background-color: #16213e;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a8dadc;
+        }
+        
+        input {
             width: 100%;
-            max-width: 450px;
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 242, 255, 0.1);
-            transition: var(--transition);
+            padding: 12px;
+            border: 1px solid #457b9d;
+            border-radius: 5px;
+            background-color: #1d3557;
+            color: white;
+            font-size: 16px;
         }
         
-        .auth-form:hover {
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-        }
-        
-        .auth-title {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
-            font-size: 1.8rem;
-            font-weight: 600;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        .auth-input-group {
-            margin-bottom: 1.2rem;
-            position: relative;
-        }
-        
-        .auth-input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-            background-color: rgba(10, 10, 20, 0.5);
-            color: var(--text-color);
-        }
-        
-        .auth-input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.2);
-            background-color: rgba(15, 15, 25, 0.7);
-        }
-        
-        .auth-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .auth-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: var(--dark-bg);
+        button {
+            background-color: #f72585;
+            color: white;
             border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            margin-bottom: 1rem;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: var(--neon-glow);
-        }
-        
-        .auth-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4);
-        }
-        
-        .auth-btn::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
+            font-size: 16px;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.2),
-                transparent
-            );
-            transition: 0.5s;
+            margin-top: 10px;
+            transition: background-color 0.3s;
         }
         
-        .auth-btn:hover::before {
-            left: 100%;
+        button:hover {
+            background-color: #b5179e;
         }
         
-        .auth-switch {
-            text-align: center;
-            color: var(--primary-color);
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: var(--transition);
-            position: relative;
-            display: inline-block;
-            text-shadow: 0 0 5px rgba(0, 242, 255, 0.3);
-        }
-        
-        .auth-switch:hover {
-            color: var(--accent-color);
-        }
-        
-        /* 主应用样式 */
-        .app-container {
+        .tab-container {
             display: none;
-            flex-direction: column;
-            height: 100vh;
-            background-color: var(--dark-bg);
-            position: relative;
-            overflow: hidden;
+            background-color: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
         }
         
-        .app-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(123, 45, 255, 0.05) 0%, transparent 30%),
-                radial-gradient(circle at 80% 70%, rgba(0, 242, 255, 0.05) 0%, transparent 30%);
-            z-index: 0;
+        .active-tab {
+            display: block;
         }
         
-        .header {
-            background-color: var(--panel-bg);
-            color: var(--text-color);
-            padding: 0.8rem 1.5rem;
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #a8dadc;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-right: 5px;
+        }
+        
+        .tab-btn.active {
+            border-bottom: 3px solid #f72585;
+            color: white;
+        }
+        
+        .game-stats {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            z-index: 10;
-            position: relative;
-            backdrop-filter: blur(5px);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+            margin-bottom: 20px;
+            background-color: #1d3557;
+            padding: 15px;
+            border-radius: 8px;
         }
         
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        .logo-icon {
-            margin-right: 0.5rem;
-            font-size: 1.5rem;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 0.8rem;
-        }
-        
-        .header-btn {
-            background-color: rgba(0, 242, 255, 0.1);
-            color: var(--primary-color);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            border: 1px solid rgba(0, 242, 255, 0.2);
-        }
-        
-        .header-btn:hover {
-            background-color: rgba(0, 242, 255, 0.2);
-            color: var(--text-color);
-            transform: translateY(-2px);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        .main-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* 好友列表样式 */
-        .friends-sidebar {
-            width: 320px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid rgba(0, 242, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            position: relative;
-            z-index: 5;
-            backdrop-filter: blur(5px);
-        }
-        
-        .friends-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            position: relative;
-        }
-        
-        .back-to-home {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin-right: 0.8rem;
-            color: var(--primary-color);
-            transition: var(--transition);
-            padding: 0.3rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-        }
-        
-        .back-to-home:hover {
-            background-color: rgba(0, 242, 255, 0.1);
-            color: var(--text-color);
-        }
-        
-        .friends-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-        
-        .search-friend {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            position: relative;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 0.6rem 1rem 0.6rem 2.5rem;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 20px;
-            font-size: 0.9rem;
-            background-color: rgba(10, 10, 20, 0.5);
-            transition: var(--transition);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300f2ff' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: 1rem center;
-            background-size: 1rem;
-            color: var(--text-color);
-        }
-        
-        .search-input:focus {
-            outline: none;
-            background-color: rgba(15, 15, 25, 0.7);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.2);
-        }
-        
-        .search-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .friends-list {
-            flex: 1;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-light) transparent;
-        }
-        
-        .friends-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .friends-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .friends-list::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
-            border-radius: 3px;
-        }
-        
-        .friend-item {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-        }
-        
-        .friend-item:hover {
-            background-color: rgba(0, 242, 255, 0.05);
-        }
-        
-        .friend-item.active {
-            background-color: rgba(0, 242, 255, 0.1);
-        }
-        
-        .friend-item.active::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background-color: var(--primary-color);
-            border-radius: 0 3px 3px 0;
-        }
-        
-        .friend-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            color: var(--dark-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 0.8rem;
-            font-weight: 600;
-            overflow: hidden;
-            flex-shrink: 0;
-            border: 2px solid var(--panel-bg);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        .friend-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .friend-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .friend-name {
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text-color);
-        }
-        
-        .friend-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            margin-top: 0.2rem;
-        }
-        
-        .friend-status.online {
-            color: var(--success-color);
-            text-shadow: 0 0 5px rgba(0, 255, 157, 0.3);
-        }
-        
-        .friend-status.online::before {
-            content: "";
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background-color: var(--success-color);
-            border-radius: 50%;
-            margin-right: 0.3rem;
-            box-shadow: 0 0 5px var(--success-color);
-        }
-        
-        .friend-last-message {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* 聊天区域样式 */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--dark-bg);
-            position: relative;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(123, 45, 255, 0.03) 0%, transparent 30%),
-                radial-gradient(circle at 80% 70%, rgba(0, 242, 255, 0.03) 0%, transparent 30%);
-        }
-        
-        .chat-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            background-color: var(--panel-bg);
-            display: flex;
-            align-items: center;
-            z-index: 5;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(5px);
-        }
-        
-        .chat-user-info {
-            flex: 1;
-            margin-left: 0.8rem;
-        }
-        
-        .chat-user-name {
-            font-weight: 600;
-            color: var(--text-color);
-        }
-        
-        .chat-user-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.2rem;
-        }
-        
-        .chat-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .chat-action-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.3rem;
-            border-radius: 50%;
-            transition: var(--transition);
-            font-size: 1.1rem;
-        }
-        
-        .chat-action-btn:hover {
-            background-color: rgba(0, 242, 255, 0.1);
-            color: var(--primary-color);
-        }
-        
-        .chat-messages {
-            flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZJ7z5YQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANElEQVQ4y2NgGAWjYBSMglEwCkbBKBgFgw4wQjHjKJcPfcA4qgWjYBSMglEwCkbBKBgFgwAA7XgKASGv2XQAAAAASUVORK5CYII=');
-            background-color: rgba(10, 10, 20, 0.5);
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) transparent;
-        }
-        
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .chat-messages::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
-            border-radius: 3px;
-        }
-        
-        .message-date {
+        .stat-item {
             text-align: center;
-            margin: 1rem 0;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            position: relative;
         }
         
-        .message-date::before,
-        .message-date::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            width: 30%;
-            height: 1px;
-            background-color: rgba(0, 242, 255, 0.3);
+        .stat-value {
+            font-size: 24px;
+            color: #4cc9f0;
+            font-weight: bold;
         }
         
-        .message-date::before {
-            left: 0;
+        .stat-label {
+            font-size: 14px;
+            color: #a8dadc;
         }
         
-        .message-date::after {
-            right: 0;
-        }
-        
-        /* 用户消息样式 */
-        .message-out-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-left: 20%;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .message-out {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--dark-bg);
-            border-radius: 18px 18px 0 18px;
-            padding: 0.8rem 1rem;
-            max-width: 80%;
-            position: relative;
-            box-shadow: 0 2px 10px rgba(0, 242, 255, 0.3);
-            word-wrap: break-word;
-        }
-        
-        .message-out .message-time {
-            color: rgba(10, 10, 20, 0.7);
-            text-align: right;
-            font-size: 0.7rem;
-            margin-top: 0.3rem;
-        }
-        
-        /* 好友消息样式 */
-        .message-in-container {
-            display: flex;
-            justify-content: flex-start;
-            margin-right: 20%;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .message-in {
-            background-color: var(--panel-bg);
-            border-radius: 18px 18px 18px 0;
-            padding: 0.8rem 1rem;
-            max-width: 80%;
-            position: relative;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            word-wrap: break-word;
-            border: 1px solid rgba(0, 242, 255, 0.1);
-        }
-        
-        .message-in .message-time {
-            color: var(--text-muted);
-            text-align: right;
-            font-size: 0.7rem;
-            margin-top: 0.3rem;
-            opacity: 0.7;
-        }
-        
-        .chat-input-area {
-            padding: 1rem;
-            background-color: var(--panel-bg);
-            border-top: 1px solid rgba(0, 242, 255, 0.1);
-            display: flex;
-            align-items: flex-end;
-            gap: 0.8rem;
-            backdrop-filter: blur(5px);
-        }
-        
-        .message-input {
-            flex: 1;
-            padding: 0.8rem 1.2rem;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 24px;
-            resize: none;
-            outline: none;
-            max-height: 120px;
-            font-size: 0.95rem;
-            transition: var(--transition);
-            background-color: rgba(10, 10, 20, 0.5);
-            color: var(--text-color);
-        }
-        
-        .message-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.2);
-            background-color: rgba(15, 15, 25, 0.7);
-        }
-        
-        .message-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        .send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--dark-bg);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .game-card {
+            background-color: #1d3557;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
             cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+            transition: transform 0.3s;
         }
         
-        .send-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4);
+        .game-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
         
-        .send-btn:disabled {
-            background: var(--panel-bg);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            box-shadow: none;
-            border: 1px solid rgba(0, 242, 255, 0.1);
+        .game-title {
+            color: #4cc9f0;
+            margin-bottom: 10px;
         }
         
-        /* 模态框样式 */
+        .game-desc {
+            color: #a8dadc;
+            font-size: 14px;
+        }
+        
+        .upgrade-btn {
+            background-color: #4895ef;
+            margin-top: 10px;
+        }
+        
+        .upgrade-btn:hover {
+            background-color: #3a7bd5;
+        }
+        
+        .payment-methods {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .payment-method {
+            text-align: center;
+            padding: 15px;
+            background-color: #1d3557;
+            border-radius: 8px;
+            width: 45%;
+        }
+        
+        .payment-method img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        
+        .admin-panel {
+            background-color: #1d3557;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .admin-section {
+            margin-bottom: 20px;
+        }
+        
+        .admin-section h3 {
+            color: #f72585;
+            margin-bottom: 10px;
+        }
+        
+        .user-list {
+            list-style: none;
+        }
+        
+        .user-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        
         .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.show {
-            display: flex;
-            opacity: 1;
         }
         
         .modal-content {
-            background-color: var(--panel-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
+            background-color: #16213e;
+            padding: 30px;
+            border-radius: 10px;
             width: 90%;
-            max-width: 450px;
+            max-width: 500px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            backdrop-filter: blur(10px);
         }
         
-        .modal.show .modal-content {
-            transform: translateY(0);
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
         }
         
-        .modal-header {
+        .leaderboard {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .leaderboard th, .leaderboard td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        .leaderboard th {
+            background-color: #1d3557;
+            color: #4cc9f0;
+        }
+        
+        .leaderboard tr:nth-child(even) {
+            background-color: rgba(29, 53, 87, 0.5);
+        }
+        
+        .rank-1 { color: gold; font-weight: bold; }
+        .rank-2 { color: silver; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
+        
+        /* 大逃杀游戏样式 */
+        .escape-room {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .room-card {
+            background-color: #457b9d;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .room-card:hover {
+            background-color: #1d3557;
+            transform: translateY(-3px);
+        }
+        
+        .room-card.selected {
+            background-color: #f72585;
+            border: 2px solid white;
+        }
+        
+        .escape-stats {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            position: relative;
+            margin: 20px 0;
         }
         
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--text-color);
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: var(--transition);
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        
-        .modal-close:hover {
-            background-color: rgba(255, 45, 123, 0.1);
-            color: var(--danger-color);
-        }
-        
-        .modal-body {
-            margin-bottom: 1.5rem;
-        }
-        
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.8rem;
-        }
-        
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: var(--border-radius-sm);
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.2),
-                transparent
-            );
-            transition: 0.5s;
-        }
-        
-        .btn:hover::after {
-            left: 100%;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--dark-bg);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4);
-        }
-        
-        .btn-secondary {
-            background-color: rgba(0, 242, 255, 0.1);
-            color: var(--primary-color);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-        }
-        
-        .btn-secondary:hover {
-            background-color: rgba(0, 242, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger-color), #ff6b9c);
-            color: white;
-            box-shadow: 0 0 10px rgba(255, 45, 123, 0.3);
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 45, 123, 0.4);
-        }
-        
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* 搜索好友结果 */
-        .search-results {
-            margin-top: 1rem;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .search-result-item {
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            transition: all 0.2s ease;
-        }
-        
-        .search-result-item:hover {
-            background-color: rgba(0, 242, 255, 0.05);
-        }
-        
-        .search-result-info {
-            flex: 1;
-            margin-left: 12px;
-        }
-        
-        .search-result-name {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-        
-        .search-result-id {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-        
-        .search-result-joined {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-        
-        .search-result-status {
-            font-size: 0.7rem;
-            margin-top: 2px;
-        }
-        
-        .search-result-actions {
-            margin-left: auto;
-        }
-        
-        .no-results {
-            padding: 20px;
+        .escape-stat {
+            background-color: #1d3557;
+            padding: 10px;
+            border-radius: 8px;
             text-align: center;
-            color: var(--text-muted);
-        }
-        
-        /* 好友请求列表 */
-        .request-item {
-            padding: 0.8rem 0;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            display: flex;
-            align-items: center;
-            transition: var(--transition);
-        }
-        
-        .request-item:hover {
-            background-color: rgba(0, 242, 255, 0.05);
-        }
-        
-        .request-info {
             flex: 1;
-            margin-left: 0.8rem;
+            margin: 0 5px;
         }
         
-        .request-name {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-        
-        .request-status {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.2rem;
-        }
-        
-        .request-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        /* 头像上传 */
-        .avatar-upload {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .avatar-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: rgba(0, 242, 255, 0.1);
-            margin-bottom: 1rem;
-            overflow: hidden;
-            position: relative;
-            border: 3px solid var(--panel-bg);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
-        }
-        
-        .avatar-preview img {
+        .escape-button {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            margin: 10px 0;
         }
         
-        .avatar-upload-btn {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .avatar-upload-input {
-            position: absolute;
-            font-size: 100px;
-            opacity: 0;
-            right: 0;
-            top: 0;
-            cursor: pointer;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .friends-sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                width: 85%;
-                max-width: 320px;
-                z-index: 20;
-                transform: translateX(-100%);
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-            }
-            
-            .friends-sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .message-out-container {
-                margin-left: 10%;
-            }
-            
-            .message-in-container {
-                margin-right: 10%;
-            }
-            
-            .modal-content {
-                width: 95%;
-            }
-        }
-        
-        /* 加载动画 */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0, 242, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* 通知徽章 */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 4px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--dark-bg);
-            background: linear-gradient(135deg, var(--danger-color), #ff6b9c);
-            border-radius: 9px;
-            margin-left: 0.3rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* 空状态 */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-state-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-        }
-        
-        /* 通知样式 */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background-color: var(--success-color);
-            color: var(--dark-bg);
-            border-radius: var(--border-radius-sm);
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
-            z-index: 1001;
-            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
-            font-weight: 500;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        .notification.error {
-            background-color: var(--danger-color);
-            box-shadow: 0 0 15px rgba(255, 45, 123, 0.3);
-        }
-        
-        .notification.warning {
-            background-color: var(--warning-color);
-            color: var(--dark-bg);
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+        .escape-players {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #a8dadc;
         }
     </style>
 </head>
 <body>
-    <!-- 认证页面 -->
-    <div class="auth-container" id="authContainer">
-        <div class="auth-form">
-            <h2 class="auth-title" id="authTitle">登录</h2>
-            <div class="auth-input-group">
-                <input type="text" id="usernameInput" class="auth-input" placeholder="用户名">
+    <div class="container">
+        <!-- 登录/注册表单 -->
+        <div id="auth-container">
+            <header>
+                <h1>高级人脉星球</h1>
+                <div class="countdown" id="countdown">开服时间: 2025年5月1日</div>
+            </header>
+            
+            <div class="auth-form" id="login-form">
+                <h2>登录</h2>
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" placeholder="输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" placeholder="输入密码">
+                </div>
+                <button id="login-btn">登录</button>
+                <p style="text-align: center; margin-top: 15px; color: #a8dadc;">
+                    还没有账号? <a href="#" id="show-register" style="color: #4cc9f0;">立即注册</a>
+                </p>
             </div>
-            <div class="auth-input-group">
-                <input type="password" id="passwordInput" class="auth-input" placeholder="密码">
-            </div>
-            <div class="auth-input-group" id="confirmPasswordGroup" style="display: none;">
-                <input type="password" id="confirmPasswordInput" class="auth-input" placeholder="确认密码">
-            </div>
-            <button class="auth-btn" id="authBtn">登录</button>
-            <div class="auth-switch" id="authSwitch">没有账号？立即注册</div>
-        </div>
-    </div>
-    
-    <!-- 主应用 -->
-    <div class="app-container" id="appContainer">
-        <div class="header">
-            <button id="menuBtn" class="header-btn">☰</button>
-            <div class="logo">
-                <span class="logo-icon">💬</span>
-                <span>NeonChat</span>
-            </div>
-            <div class="header-actions">
-                <button id="requestsBtn" class="header-btn" title="好友请求">
-                    <span id="requestsBadge" class="badge" style="display: none;">0</span>
-                    <span>👋</span>
-                </button>
-                <button id="searchFriendBtn" class="header-btn" title="添加好友">+</button>
-                <button id="settingsBtn" class="header-btn" title="设置">⚙️</button>
+            
+            <div class="auth-form" id="register-form" style="display: none;">
+                <h2>注册</h2>
+                <div class="form-group">
+                    <label for="reg-username">用户名</label>
+                    <input type="text" id="reg-username" placeholder="输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">密码</label>
+                    <input type="password" id="reg-password" placeholder="输入密码(至少6位)">
+                </div>
+                <div class="form-group">
+                    <label for="reg-invite">邀请码(可选)</label>
+                    <input type="text" id="reg-invite" placeholder="输入邀请码(可选)">
+                </div>
+                <button id="register-btn">注册</button>
+                <p style="text-align: center; margin-top: 15px; color: #a8dadc;">
+                    已有账号? <a href="#" id="show-login" style="color: #4cc9f0;">立即登录</a>
+                </p>
             </div>
         </div>
         
-        <div class="main-content">
-            <!-- 好友列表侧边栏 -->
-            <div class="friends-sidebar" id="friendsSidebar">
-                <div class="friends-header">
-                    <button class="back-to-home" id="backToHomeBtn" title="返回首页">
-                        ←
-                    </button>
-                    <h3 class="friends-title">好友列表</h3>
+        <!-- 主游戏界面 (默认隐藏) -->
+        <div id="game-container" style="display: none;">
+            <header>
+                <h1>高级人脉星球</h1>
+                <div class="countdown" id="game-countdown"></div>
+                <p id="user-info">欢迎, <span id="username-display"></span> | 会员: <span id="vip-status">否</span></p>
+            </header>
+            
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="home">首页</button>
+                <button class="tab-btn" data-tab="upgrade">升级</button>
+                <button class="tab-btn" data-tab="games">小游戏</button>
+                <button class="tab-btn" data-tab="market">交易市场</button>
+                <button class="tab-btn" data-tab="vip">会员</button>
+                <button class="tab-btn" data-tab="withdraw">提现</button>
+                <button class="tab-btn" data-tab="invite">邀请</button>
+                <button class="tab-btn" id="logout-btn">退出</button>
+            </div>
+            
+            <!-- 首页 -->
+            <div class="tab-container active-tab" id="home-tab">
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="coin-display">0</div>
+                        <div class="stat-label">星脉币</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="point-display">0</div>
+                        <div class="stat-label">升级积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="level-display">1</div>
+                        <div class="stat-label">等级</div>
+                    </div>
                 </div>
                 
-                <div class="search-friend">
-                    <input type="text" class="search-input" placeholder="搜索好友...">
+                <div class="game-card" id="mine-coins">
+                    <h3 class="game-title">星脉矿场</h3>
+                    <p class="game-desc">每小时自动生产5个星脉币，最多积累24小时</p>
+                    <button id="collect-btn">收集星脉币</button>
+                    <div id="mine-progress" style="margin-top: 10px;">
+                        <div style="background-color: #333; height: 20px; border-radius: 10px;">
+                            <div id="progress-bar" style="background-color: #4cc9f0; height: 100%; width: 0%; border-radius: 10px;"></div>
+                        </div>
+                        <p id="progress-text" style="text-align: center; margin-top: 5px;">0/5 星脉币</p>
+                    </div>
                 </div>
                 
-                <div class="friends-list" id="friendsList">
-                    <!-- 好友列表将通过JS动态生成 -->
+                <div class="game-card">
+                    <h3 class="game-title">排行榜</h3>
+                    <p class="game-desc">查看本周排名前10的玩家</p>
+                    <button id="show-leaderboard">查看排行榜</button>
+                </div>
+                
+                <div class="game-card">
+                    <h3 class="game-title">公告</h3>
+                    <div id="announcement">
+                        <p>1. 邀请好友升级到5级，邀请50人可联系管理员领取888红包</p>
+                        <p>2. 排行榜每周刷新，前三名有现金奖励</p>
+                        <p>3. 管理员微信: 19042507597</p>
+                    </div>
                 </div>
             </div>
             
-            <!-- 聊天区域 -->
-            <div class="chat-area">
-                <div class="chat-header">
-                    <div class="friend-avatar" id="currentChatAvatar">
-                        <img id="currentChatAvatarImg" src="" alt="">
+            <!-- 升级 -->
+            <div class="tab-container" id="upgrade-tab">
+                <h2>升级系统</h2>
+                <p>当前等级: <span id="current-level">1</span>/60</p>
+                <p>升级所需积分: <span id="next-level-cost">0.3</span></p>
+                <p>当前积分: <span id="current-points">0</span></p>
+                <button id="upgrade-btn" class="upgrade-btn">升级</button>
+                
+                <h3 style="margin-top: 20px;">等级奖励</h3>
+                <ul>
+                    <li>1-5级: 每次升级免费</li>
+                    <li>6-20级: 每次升级需要1积分</li>
+                    <li>21-40级: 每次升级需要3积分</li>
+                    <li>41-60级: 每次升级需要5积分</li>
+                </ul>
+            </div>
+            
+            <!-- 小游戏 -->
+            <div class="tab-container" id="games-tab">
+                <h2>小游戏</h2>
+                <p>通过小游戏赚取升级积分</p>
+                
+                <div class="game-card" data-game="clicker">
+                    <h3 class="game-title">点击赚积分</h3>
+                    <p class="game-desc">每次点击获得0.01积分，消耗1星脉币/次</p>
+                    <button class="play-game-btn">开始游戏</button>
+                </div>
+                
+                <div class="game-card" data-game="memory">
+                    <h3 class="game-title">记忆匹配</h3>
+                    <p class="game-desc">匹配卡片获得积分，消耗2星脉币/次</p>
+                    <button class="play-game-btn">开始游戏</button>
+                </div>
+                
+                <div class="game-card" data-game="quiz">
+                    <h3 class="game-title">知识问答</h3>
+                    <p class="game-desc">回答正确获得积分，消耗3星脉币/次</p>
+                    <button class="play-game-btn">开始游戏</button>
+                </div>
+                
+                <!-- 新增大逃杀游戏 -->
+                <div class="game-card" data-game="escape">
+                    <h3 class="game-title">能量石-大谜杀</h3>
+                    <p class="game-desc">选择房间躲避外星人，幸存者瓜分被杀房间的能量石</p>
+                    <button class="play-game-btn">开始游戏</button>
+                </div>
+            </div>
+            
+            <!-- 交易市场 -->
+            <div class="tab-container" id="market-tab">
+                <h2>交易市场</h2>
+                <p>交易功能暂未开放</p>
+            </div>
+            
+            <!-- 会员 -->
+            <div class="tab-container" id="vip-tab">
+                <h2>会员特权</h2>
+                <div class="payment-methods">
+                    <div class="payment-method">
+                        <h3>支付宝</h3>
+                        <img src="alipay_qr.jpg" alt="支付宝收款码">
+                        <p>支持信用卡/花呗付款</p>
                     </div>
-                    <div class="chat-user-info">
-                        <div class="chat-user-name" id="currentChatTitle">请选择好友开始聊天</div>
-                        <div class="chat-user-status" id="currentChatStatus"></div>
-                    </div>
-                    <div class="chat-actions">
-                        <button class="chat-action-btn" title="更多选项">⋯</button>
+                    <div class="payment-method">
+                        <h3>微信支付</h3>
+                        <img src="wechat_qr.jpg" alt="微信收款码">
+                        <p>扫码支付32元开通会员</p>
                     </div>
                 </div>
                 
-                <div class="chat-messages" id="chatMessages">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <div>选择好友开始聊天</div>
-                    </div>
+                <h3 style="margin-top: 20px;">会员特权</h3>
+                <ul>
+                    <li>每日额外获得10星脉币</li>
+                    <li>小游戏消耗减少50%</li>
+                    <li>提现手续费降低</li>
+                    <li>专属会员标识</li>
+                </ul>
+                
+                <button id="apply-vip" style="margin-top: 20px;">申请开通会员</button>
+            </div>
+            
+            <!-- 提现 -->
+            <div class="tab-container" id="withdraw-tab">
+                <h2>提现申请</h2>
+                <p>当前可提现星脉币: <span id="withdraw-coin">0</span></p>
+                <div class="form-group">
+                    <label for="withdraw-amount">提现金额</label>
+                    <input type="number" id="withdraw-amount" placeholder="输入提现金额">
+                </div>
+                <div class="form-group">
+                    <label for="withdraw-method">提现方式</label>
+                    <select id="withdraw-method" style="width: 100%; padding: 12px; background-color: #1d3557; color: white; border: 1px solid #457b9d; border-radius: 5px;">
+                        <option value="alipay">支付宝</option>
+                        <option value="wechat">微信支付</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="withdraw-account">收款账号</label>
+                    <input type="text" id="withdraw-account" placeholder="输入支付宝/微信账号">
+                </div>
+                <button id="submit-withdraw">提交提现申请</button>
+                
+                <h3 style="margin-top: 20px;">提现规则</h3>
+                <ul>
+                    <li>最低提现金额: 100星脉币</li>
+                    <li>提现手续费: 10%(会员5%)</li>
+                    <li>处理时间: 24小时内</li>
+                </ul>
+            </div>
+            
+            <!-- 邀请 -->
+            <div class="tab-container" id="invite-tab">
+                <h2>邀请好友</h2>
+                <p>您的专属邀请码: <strong id="invite-code">LOADING...</strong></p>
+                <p>已邀请好友: <span id="invited-count">0</span>人</p>
+                <p>其中达到5级的: <span id="invited-level5">0</span>人</p>
+                
+                <h3 style="margin-top: 20px;">邀请奖励</h3>
+                <ul>
+                    <li>每邀请1人获得1星脉币</li>
+                    <li>好友达到5级，额外获得5星脉币</li>
+                    <li>邀请50人达到5级，联系管理员领取888红包</li>
+                </ul>
+                
+                <button id="copy-invite" style="margin-top: 20px;">复制邀请链接</button>
+            </div>
+        </div>
+        
+        <!-- 管理员面板 (默认隐藏) -->
+        <div id="admin-container" style="display: none;">
+            <header>
+                <h1>高级人脉星球 - 管理面板</h1>
+                <button id="admin-logout" style="background-color: #f72585; padding: 8px 15px; margin-top: 10px;">退出管理</button>
+            </header>
+            
+            <div class="admin-panel">
+                <div class="admin-section">
+                    <h3>会员申请</h3>
+                    <ul class="user-list" id="vip-requests">
+                        <li>加载中...</li>
+                    </ul>
                 </div>
                 
-                <div class="chat-input-area">
-                    <textarea class="message-input" id="messageInput" placeholder="输入消息..." rows="1"></textarea>
-                    <button class="send-btn" id="sendBtn" disabled>↵</button>
+                <div class="admin-section">
+                    <h3>提现申请</h3>
+                    <ul class="user-list" id="withdraw-requests">
+                        <li>加载中...</li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 搜索好友弹窗 -->
-    <div class="modal" id="searchModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">搜索好友</h3>
-                <button class="modal-close" id="closeSearchModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="searchInput" class="auth-input" placeholder="输入用户名或用户ID">
-                <div class="search-results" id="searchResults">
-                    <!-- 搜索结果将通过JS动态生成 -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelSearchBtn">取消</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 好友请求弹窗 -->
-    <div class="modal" id="requestsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">好友请求</h3>
-                <button class="modal-close" id="closeRequestsModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="requests-list" id="requestsList">
-                    <!-- 好友请求列表将通过JS动态生成 -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelRequestsBtn">关闭</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 设置弹窗 -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">设置</h3>
-                <button class="modal-close" id="closeSettingsModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="avatar-upload">
-                    <div class="avatar-preview" id="avatarPreview">
-                        <img id="avatarPreviewImg" src="" alt="头像预览">
+                
+                <div class="admin-section">
+                    <h3>用户管理</h3>
+                    <div class="form-group">
+                        <input type="text" id="search-user" placeholder="搜索用户名">
                     </div>
-                    <button class="btn btn-primary avatar-upload-btn">
-                        上传头像
-                        <input type="file" id="avatarUploadInput" class="avatar-upload-input" accept="image/*">
-                    </button>
+                    <ul class="user-list" id="user-list">
+                        <li>加载中...</li>
+                    </ul>
                 </div>
-                <div class="auth-input-group">
-                    <label for="settingsUsername">用户名</label>
-                    <input type="text" id="settingsUsername" class="auth-input" readonly>
+                
+                <div class="admin-section">
+                    <h3>系统设置</h3>
+                    <div class="form-group">
+                        <label for="announcement-edit">公告编辑</label>
+                        <textarea id="announcement-edit" rows="4" style="width: 100%; padding: 10px; background-color: #1d3557; color: white; border: 1px solid #457b9d; border-radius: 5px;"></textarea>
+                    </div>
+                    <button id="save-settings">保存设置</button>
                 </div>
-                <div class="auth-input-group">
-                    <label for="settingsUserId">用户ID</label>
-                    <input type="text" id="settingsUserId" class="auth-input" readonly>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="logoutBtn">退出登录</button>
-                <button class="btn btn-primary" id="saveSettingsBtn">保存</button>
             </div>
         </div>
     </div>
-
+    
+    <!-- 排行榜模态框 -->
+    <div class="modal" id="leaderboard-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>本周排行榜</h2>
+            <table class="leaderboard">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>用户名</th>
+                        <th>等级</th>
+                        <th>星脉币</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr>
+                        <td class="rank-1">1</td>
+                        <td>玩家1</td>
+                        <td>45</td>
+                        <td>1200</td>
+                    </tr>
+                    <tr>
+                        <td class="rank-2">2</td>
+                        <td>玩家2</td>
+                        <td>38</td>
+                        <td>980</td>
+                    </tr>
+                    <tr>
+                        <td class="rank-3">3</td>
+                        <td>玩家3</td>
+                        <td>35</td>
+                        <td>850</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- 小游戏模态框 -->
+    <div class="modal" id="game-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="game-modal-title">游戏名称</h2>
+            <div id="game-modal-content">
+                <!-- 游戏内容动态加载 -->
+            </div>
+        </div>
+    </div>
+    
     <script>
-        // 数据存储键名 - 使用新版本避免冲突
-        const STORAGE_KEYS = {
-            USERS: 'neonChatApp_users_v3',
-            CURRENT_USER: 'neonChatApp_currentUser_v3',
-            FRIENDS: 'neonChatApp_friends_v3',
-            MESSAGES: 'neonChatApp_messages_v3',
-            FRIEND_REQUESTS: 'neonChatApp_friendRequests_v3'
-        };
-        
-        // 应用状态
-        const state = {
+        // 游戏数据
+        const gameData = {
+            users: {},
             currentUser: null,
-            friends: [],
-            currentChat: null,
-            messages: {},
-            allUsers: [],
-            friendRequests: {},
-            pendingRequests: 0
+            adminUser: { username: "admin", password: "admin123" },
+            announcements: [
+                "邀请好友升级到5级，邀请50人可联系管理员领取888红包",
+                "排行榜每周刷新，前三名有现金奖励",
+                "管理员微信: 19042507597"
+            ],
+            leaderboard: [],
+            vipRequests: [],
+            withdrawRequests: [],
+            escapeRooms: {
+                rooms: ["量茶间", "太憩舱", "航指室", "星沙龙", "星洁室", "星悠室", "里空间", "音乐舱", "里悠室"],
+                players: {},
+                gameInProgress: false
+            }
         };
-        
+
         // DOM元素
-        const authContainer = document.getElementById('authContainer');
-        const appContainer = document.getElementById('appContainer');
-        const authTitle = document.getElementById('authTitle');
-        const usernameInput = document.getElementById('usernameInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
-        const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
-        const authBtn = document.getElementById('authBtn');
-        const authSwitch = document.getElementById('authSwitch');
-        
-        const friendsSidebar = document.getElementById('friendsSidebar');
-        const friendsList = document.getElementById('friendsList');
-        const menuBtn = document.getElementById('menuBtn');
-        const searchFriendBtn = document.getElementById('searchFriendBtn');
-        const settingsBtn = document.getElementById('settingsBtn');
-        const requestsBtn = document.getElementById('requestsBtn');
-        const requestsBadge = document.getElementById('requestsBadge');
-        const backToHomeBtn = document.getElementById('backToHomeBtn');
-        
-        const currentChatAvatar = document.getElementById('currentChatAvatar');
-        const currentChatAvatarImg = document.getElementById('currentChatAvatarImg');
-        const currentChatTitle = document.getElementById('currentChatTitle');
-        const currentChatStatus = document.getElementById('currentChatStatus');
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        
-        const searchModal = document.getElementById('searchModal');
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        const closeSearchModal = document.getElementById('closeSearchModal');
-        const cancelSearchBtn = document.getElementById('cancelSearchBtn');
-        
-        const requestsModal = document.getElementById('requestsModal');
-        const requestsList = document.getElementById('requestsList');
-        const closeRequestsModal = document.getElementById('closeRequestsModal');
-        const cancelRequestsBtn = document.getElementById('cancelRequestsBtn');
-        
-        const settingsModal = document.getElementById('settingsModal');
-        const avatarPreview = document.getElementById('avatarPreview');
-        const avatarPreviewImg = document.getElementById('avatarPreviewImg');
-        const avatarUploadInput = document.getElementById('avatarUploadInput');
-        const settingsUsername = document.getElementById('settingsUsername');
-        const settingsUserId = document.getElementById('settingsUserId');
-        const closeSettingsModal = document.getElementById('closeSettingsModal');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-        
-        // 显示通知
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        // 初始化应用
-        function init() {
-            loadAllData();
-            
-            if (state.currentUser) {
-                showApp();
-                loadFriends();
-            } else {
-                showAuth();
+        const elements = {
+            authContainer: document.getElementById('auth-container'),
+            gameContainer: document.getElementById('game-container'),
+            adminContainer: document.getElementById('admin-container'),
+            loginForm: document.getElementById('login-form'),
+            registerForm: document.getElementById('register-form'),
+            showLogin: document.getElementById('show-login'),
+            showRegister: document.getElementById('show-register'),
+            loginBtn: document.getElementById('login-btn'),
+            registerBtn: document.getElementById('register-btn'),
+            loginUsername: document.getElementById('login-username'),
+            loginPassword: document.getElementById('login-password'),
+            regUsername: document.getElementById('reg-username'),
+            regPassword: document.getElementById('reg-password'),
+            regInvite: document.getElementById('reg-invite'),
+            logoutBtn: document.getElementById('logout-btn'),
+            adminLogout: document.getElementById('admin-logout'),
+            usernameDisplay: document.getElementById('username-display'),
+            vipStatus: document.getElementById('vip-status'),
+            coinDisplay: document.getElementById('coin-display'),
+            pointDisplay: document.getElementById('point-display'),
+            levelDisplay: document.getElementById('level-display'),
+            currentLevel: document.getElementById('current-level'),
+            nextLevelCost: document.getElementById('next-level-cost'),
+            currentPoints: document.getElementById('current-points'),
+            upgradeBtn: document.getElementById('upgrade-btn'),
+            collectBtn: document.getElementById('collect-btn'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            mineCoins: document.getElementById('mine-coins'),
+            showLeaderboard: document.getElementById('show-leaderboard'),
+            leaderboardModal: document.getElementById('leaderboard-modal'),
+            leaderboardBody: document.getElementById('leaderboard-body'),
+            closeBtns: document.querySelectorAll('.close-btn'),
+            gameModal: document.getElementById('game-modal'),
+            gameModalTitle: document.getElementById('game-modal-title'),
+            gameModalContent: document.getElementById('game-modal-content'),
+            playGameBtns: document.querySelectorAll('.play-game-btn'),
+            inviteCode: document.getElementById('invite-code'),
+            invitedCount: document.getElementById('invited-count'),
+            invitedLevel5: document.getElementById('invited-level5'),
+            copyInvite: document.getElementById('copy-invite'),
+            applyVip: document.getElementById('apply-vip'),
+            withdrawCoin: document.getElementById('withdraw-coin'),
+            withdrawAmount: document.getElementById('withdraw-amount'),
+            withdrawMethod: document.getElementById('withdraw-method'),
+            withdrawAccount: document.getElementById('withdraw-account'),
+            submitWithdraw: document.getElementById('submit-withdraw'),
+            vipRequests: document.getElementById('vip-requests'),
+            withdrawRequests: document.getElementById('withdraw-requests'),
+            userList: document.getElementById('user-list'),
+            searchUser: document.getElementById('search-user'),
+            announcementEdit: document.getElementById('announcement-edit'),
+            saveSettings: document.getElementById('save-settings'),
+            tabBtns: document.querySelectorAll('.tab-btn'),
+            tabs: document.querySelectorAll('.tab-container'),
+            countdown: document.getElementById('countdown'),
+            gameCountdown: document.getElementById('game-countdown')
+        };
+
+        // 初始化游戏
+        function initGame() {
+            // 检查本地存储
+            if (localStorage.getItem('pmGameData')) {
+                const savedData = JSON.parse(localStorage.getItem('pmGameData'));
+                Object.assign(gameData, savedData);
             }
             
-            bindEvents();
-        }
-        
-        // 加载所有数据 - 关键改进部分
-        function loadAllData() {
-            // 从localStorage加载数据
-            const savedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
-            state.allUsers = savedUsers ? JSON.parse(savedUsers) : [];
+            // 设置开服倒计时
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
             
-            // 如果没有用户数据，创建几个测试用户
-            if (state.allUsers.length === 0) {
-                state.allUsers = [
-                    { 
-                        id: 'user_666',
-                        username: '测试用户666', 
-                        password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=3',
-                        createdAt: new Date().toISOString()
-                    },
-                    { 
-                        id: 'user_111',
-                        username: '测试用户111', 
-                        password: '123456', 
-                        avatar: 'https://i.pravatar.cc/150?img=5',
-                        createdAt: new Date().toISOString()
-                    }
-                ];
-                saveData(STORAGE_KEYS.USERS, state.allUsers);
-            }
+            // 事件监听器
+            setupEventListeners();
             
-            // 确保所有用户都是唯一的
-            state.allUsers = state.allUsers.filter((user, index, self) =>
-                index === self.findIndex((u) => (
-                    u.id === user.id && u.username === user.username
-                ))
-            );
-            
-            const savedCurrentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-            state.currentUser = savedCurrentUser ? JSON.parse(savedCurrentUser) : null;
-            
-            const savedFriends = localStorage.getItem(STORAGE_KEYS.FRIENDS);
-            state.friends = savedFriends ? JSON.parse(savedFriends) : [];
-            
-            const savedMessages = localStorage.getItem(STORAGE_KEYS.MESSAGES);
-            state.messages = savedMessages ? JSON.parse(savedMessages) : {};
-            
-            const savedFriendRequests = localStorage.getItem(STORAGE_KEYS.FRIEND_REQUESTS);
-            state.friendRequests = savedFriendRequests ? JSON.parse(savedFriendRequests) : {};
-            
-            updateRequestsBadge();
-        }
-        
-        // 保存数据到localStorage
-        function saveData(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-        
-        // 绑定事件
-        function bindEvents() {
-            authSwitch.addEventListener('click', toggleAuthMode);
-            authBtn.addEventListener('click', handleAuth);
-            
-            menuBtn.addEventListener('click', toggleSidebar);
-            searchFriendBtn.addEventListener('click', showSearchModal);
-            closeSearchModal.addEventListener('click', hideSearchModal);
-            cancelSearchBtn.addEventListener('click', hideSearchModal);
-            searchInput.addEventListener('input', handleSearch);
-            
-            requestsBtn.addEventListener('click', showRequestsModal);
-            closeRequestsModal.addEventListener('click', hideRequestsModal);
-            cancelRequestsBtn.addEventListener('click', hideRequestsModal);
-            
-            settingsBtn.addEventListener('click', showSettingsModal);
-            closeSettingsModal.addEventListener('click', hideSettingsModal);
-            logoutBtn.addEventListener('click', handleLogout);
-            saveSettingsBtn.addEventListener('click', saveSettings);
-            
-            backToHomeBtn.addEventListener('click', backToHome);
-            
-            avatarUploadInput.addEventListener('change', handleAvatarUpload);
-            
-            sendBtn.addEventListener('click', sendMessage);
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
+            // 检查是否有已登录用户
+            if (localStorage.getItem('pmCurrentUser')) {
+                const username = localStorage.getItem('pmCurrentUser');
+                if (gameData.users[username]) {
+                    loginUser(username);
                 }
-            });
-            messageInput.addEventListener('input', () => {
-                adjustInputHeight();
-                sendBtn.disabled = messageInput.value.trim() === '';
-            });
-        }
-        
-        // 返回首页
-        function backToHome() {
-            if (window.innerWidth <= 768) {
-                friendsSidebar.classList.remove('active');
             }
-            
-            state.currentChat = null;
-            currentChatTitle.textContent = '请选择好友开始聊天';
-            currentChatAvatarImg.src = '';
-            currentChatAvatarImg.alt = '';
-            currentChatStatus.textContent = '';
-            
-            chatMessages.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">💬</div>
-                    <div>选择好友开始聊天</div>
-                </div>
-            `;
-            
-            sendBtn.disabled = true;
-            
-            document.querySelectorAll('.friend-item').forEach(item => {
-                item.classList.remove('active');
-            });
         }
-        
-        // 切换登录/注册模式
-        function toggleAuthMode() {
-            const isLogin = authTitle.textContent === '登录';
+
+        // 更新开服倒计时
+        function updateCountdown() {
+            const launchDate = new Date('2025-05-01T00:00:00');
+            const now = new Date();
             
-            if (isLogin) {
-                authTitle.textContent = '注册';
-                authBtn.textContent = '注册';
-                authSwitch.textContent = '已有账号？立即登录';
-                confirmPasswordGroup.style.display = 'block';
-            } else {
-                authTitle.textContent = '登录';
-                authBtn.textContent = '登录';
-                authSwitch.textContent = '没有账号？立即注册';
-                confirmPasswordGroup.style.display = 'none';
-            }
-            
-            usernameInput.value = '';
-            passwordInput.value = '';
-            confirmPasswordInput.value = '';
-        }
-        
-        // 处理认证
-        function handleAuth() {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
-            const isLogin = authTitle.textContent === '登录';
-            
-            if (!username || !password) {
-                showNotification('请输入用户名和密码', 'error');
+            if (now >= launchDate) {
+                elements.countdown.textContent = "游戏已开服";
+                elements.gameCountdown.textContent = "开服时间: 2025年5月1日";
                 return;
             }
             
-            if (!isLogin) {
-                const confirmPassword = confirmPasswordInput.value;
-                if (password !== confirmPassword) {
-                    showNotification('两次输入的密码不一致', 'error');
+            const diff = launchDate - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            elements.countdown.textContent = `开服倒计时: ${days}天 ${hours}小时 ${minutes}分 ${seconds}秒`;
+            elements.gameCountdown.textContent = `开服倒计时: ${days}天 ${hours}小时 ${minutes}分 ${seconds}秒`;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 登录/注册切换
+            elements.showLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                elements.loginForm.style.display = 'block';
+                elements.registerForm.style.display = 'none';
+            });
+            
+            elements.showRegister.addEventListener('click', (e) => {
+                e.preventDefault();
+                elements.loginForm.style.display = 'none';
+                elements.registerForm.style.display = 'block';
+            });
+            
+            // 登录按钮
+            elements.loginBtn.addEventListener('click', () => {
+                const username = elements.loginUsername.value.trim();
+                const password = elements.loginPassword.value.trim();
+                
+                if (!username || !password) {
+                    alert('请输入用户名和密码');
+                    return;
+                }
+                
+                // 检查管理员登录
+                if (username === gameData.adminUser.username && password === gameData.adminUser.password) {
+                    loginAdmin();
+                    return;
+                }
+                
+                // 检查普通用户
+                if (!gameData.users[username]) {
+                    alert('用户名不存在');
+                    return;
+                }
+                
+                if (gameData.users[username].password !== password) {
+                    alert('密码错误');
+                    return;
+                }
+                
+                loginUser(username);
+            });
+            
+            // 注册按钮
+            elements.registerBtn.addEventListener('click', () => {
+                const username = elements.regUsername.value.trim();
+                const password = elements.regPassword.value.trim();
+                const inviteCode = elements.regInvite.value.trim();
+                
+                if (!username || !password) {
+                    alert('请输入用户名和密码');
                     return;
                 }
                 
                 if (password.length < 6) {
-                    showNotification('密码长度至少需要6位', 'error');
-                    return;
-                }
-            }
-            
-            if (isLogin) {
-                const user = state.allUsers.find(u => u.username === username && u.password === password);
-                if (user) {
-                    state.currentUser = user;
-                    saveData(STORAGE_KEYS.CURRENT_USER, user);
-                    showApp();
-                    loadFriends();
-                    showNotification('登录成功');
-                } else {
-                    showNotification('用户名或密码错误', 'error');
-                }
-            } else {
-                if (state.allUsers.some(u => u.username === username)) {
-                    showNotification('用户名已存在', 'error');
+                    alert('密码至少需要6位');
                     return;
                 }
                 
+                if (gameData.users[username]) {
+                    alert('用户名已存在');
+                    return;
+                }
+                
+                // 创建新用户
                 const newUser = {
-                    id: 'user_' + generateId(),
                     username,
                     password,
-                    avatar: `https://i.pravatar.cc/150?u=${generateId()}`,
-                    createdAt: new Date().toISOString()
+                    coins: 0,
+                    points: 0,
+                    level: 1,
+                    isVIP: false,
+                    lastMineTime: Date.now(),
+                    minedCoins: 0,
+                    inviteCode: generateInviteCode(),
+                    invitedUsers: [],
+                    invitedLevel5Users: [],
+                    vipRequested: false,
+                    withdrawHistory: []
                 };
                 
-                state.allUsers.push(newUser);
-                saveData(STORAGE_KEYS.USERS, state.allUsers);
+                gameData.users[username] = newUser;
                 
-                state.currentUser = newUser;
-                saveData(STORAGE_KEYS.CURRENT_USER, newUser);
-                
-                if (!state.messages[newUser.id]) {
-                    state.messages[newUser.id] = {};
-                    saveData(STORAGE_KEYS.MESSAGES, state.messages);
+                // 处理邀请码
+                if (inviteCode) {
+                    const inviter = findUserByInviteCode(inviteCode);
+                    if (inviter) {
+                        inviter.invitedUsers.push(username);
+                        inviter.coins += 1; // 邀请奖励
+                        
+                        // 更新邀请者数据
+                        gameData.users[inviter.username] = inviter;
+                    }
                 }
                 
-                showApp();
-                loadFriends();
-                showNotification('注册成功');
-            }
-        }
-        
-        // 显示认证页面
-        function showAuth() {
-            authContainer.style.display = 'flex';
-            appContainer.style.display = 'none';
-        }
-        
-        // 显示主应用
-        function showApp() {
-            authContainer.style.display = 'none';
-            appContainer.style.display = 'flex';
-            
-            if (state.currentUser) {
-                settingsUsername.value = state.currentUser.username;
-                settingsUserId.value = state.currentUser.id;
-                if (state.currentUser.avatar) {
-                    avatarPreviewImg.src = state.currentUser.avatar;
-                }
-            }
-            
-            if (!state.currentChat) {
-                chatMessages.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <div>选择好友开始聊天</div>
-                    </div>
-                `;
-            }
-        }
-        
-        // 加载好友列表
-        function loadFriends() {
-            const savedFriends = localStorage.getItem(STORAGE_KEYS.FRIENDS);
-            state.friends = savedFriends ? JSON.parse(savedFriends) : [];
-            
-            // 确保好友列表中的用户信息是最新的
-            state.friends = state.friends.map(friend => {
-                const user = state.allUsers.find(u => u.id === friend.id);
-                return {
-                    ...friend,
-                    username: user?.username || friend.username,
-                    avatar: user?.avatar || friend.avatar || `https://i.pravatar.cc/150?u=${friend.id}`
-                };
+                // 保存数据
+                saveGameData();
+                
+                alert('注册成功！');
+                elements.loginForm.style.display = 'block';
+                elements.registerForm.style.display = 'none';
+                elements.loginUsername.value = username;
+                elements.loginPassword.value = '';
             });
             
-            renderFriendsList();
-        }
-        
-        // 渲染好友列表
-        function renderFriendsList() {
-            friendsList.innerHTML = '';
+            // 退出登录
+            elements.logoutBtn.addEventListener('click', logoutUser);
+            elements.adminLogout.addEventListener('click', logoutAdmin);
             
-            if (state.friends.length === 0) {
-                friendsList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">👥</div>
-                        <div>暂无好友，点击右上角添加好友</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const sortedFriends = [...state.friends].sort((a, b) => {
-                const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
-                const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
-                return timeB - timeA;
-            });
-            
-            sortedFriends.forEach(friend => {
-                const friendItem = document.createElement('div');
-                friendItem.className = 'friend-item';
-                if (state.currentChat && state.currentChat.id === friend.id) {
-                    friendItem.classList.add('active');
-                }
-                friendItem.dataset.friendId = friend.id;
-                
-                friendItem.innerHTML = `
-                    <div class="friend-avatar">
-                        <img src="${friend.avatar}" alt="${friend.username}" onerror="this.src='https://i.pravatar.cc/150?u=${friend.id}'">
-                    </div>
-                    <div class="friend-info">
-                        <div class="friend-name">${friend.username}</div>
-                        <div class="friend-status ${friend.status === 'online' ? 'online' : ''}">
-                            ${friend.status === 'online' ? '在线' : friend.lastSeen || '离线'}
-                        </div>
-                        ${friend.lastMessage ? `<div class="friend-last-message">${friend.lastMessage}</div>` : ''}
-                    </div>
-                `;
-                
-                friendItem.addEventListener('click', () => {
-                    startChat(friend);
-                });
-                
-                friendsList.appendChild(friendItem);
-            });
-        }
-        
-        // 开始聊天
-        function startChat(friend) {
-            state.currentChat = friend;
-            
-            currentChatTitle.textContent = friend.username;
-            currentChatAvatarImg.src = friend.avatar;
-            currentChatAvatarImg.alt = friend.username;
-            currentChatStatus.textContent = friend.status === 'online' ? '在线' : '离线';
-            
-            document.querySelectorAll('.friend-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.friendId === friend.id) {
-                    item.classList.add('active');
+            // 标签页切换
+            elements.tabBtns.forEach(btn => {
+                if (btn.id !== 'logout-btn') {
+                    btn.addEventListener('click', () => {
+                        const tabId = btn.getAttribute('data-tab');
+                        switchTab(tabId);
+                    });
                 }
             });
             
-            sendBtn.disabled = false;
-            loadMessages(friend.id);
-            
-            if (window.innerWidth <= 768) {
-                friendsSidebar.classList.remove('active');
-            }
-        }
-        
-        // 加载消息
-        function loadMessages(friendId) {
-            if (!state.messages[state.currentUser.id]) {
-                state.messages[state.currentUser.id] = {};
-            }
-            
-            if (!state.messages[state.currentUser.id][friendId]) {
-                const friend = state.allUsers.find(u => u.id === friendId) || state.friends.find(f => f.id === friendId);
-                
-                state.messages[state.currentUser.id][friendId] = [
-                    createMessage(`你好，我是${state.currentUser.username}`, false),
-                    createMessage(`你好，我是${friend?.username || '好友'}`, true)
-                ];
-                
-                if (!state.messages[friendId]) {
-                    state.messages[friendId] = {};
-                }
-                if (!state.messages[friendId][state.currentUser.id]) {
-                    state.messages[friendId][state.currentUser.id] = [
-                        createMessage(`你好，我是${friend?.username || '好友'}`, false),
-                        createMessage(`你好，我是${state.currentUser.username}`, true)
-                    ];
-                }
-                
-                saveData(STORAGE_KEYS.MESSAGES, state.messages);
-            }
-            
-            renderMessages(friendId);
-        }
-        
-        // 创建标准化消息对象
-        function createMessage(text, incoming) {
-            return {
-                text,
-                time: getCurrentTime(),
-                timestamp: new Date().toISOString(),
-                incoming,
-                sender: incoming ? state.currentChat.username : state.currentUser.username,
-                senderId: incoming ? state.currentChat.id : state.currentUser.id
-            };
-        }
-        
-        // 渲染消息
-        function renderMessages(friendId) {
-            chatMessages.innerHTML = '';
-            
-            const messages = state.messages[state.currentUser.id][friendId] || [];
-            
-            if (messages.length === 0) {
-                chatMessages.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <div>开始与 ${state.currentChat.username} 的对话</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const messagesByDate = {};
-            messages.forEach(msg => {
-                const date = new Date(msg.timestamp || new Date()).toDateString();
-                if (!messagesByDate[date]) {
-                    messagesByDate[date] = [];
-                }
-                messagesByDate[date].push(msg);
-            });
-            
-            Object.entries(messagesByDate).forEach(([date, msgs]) => {
-                const dateElement = document.createElement('div');
-                dateElement.className = 'message-date';
-                dateElement.textContent = formatDate(new Date(date));
-                chatMessages.appendChild(dateElement);
-                
-                msgs.forEach(msg => {
-                    const messageContainer = document.createElement('div');
-                    messageContainer.className = `message-${msg.incoming ? 'in' : 'out'}-container`;
-                    
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message-${msg.incoming ? 'in' : 'out'}`;
-                    
-                    messageDiv.innerHTML = `
-                        <div class="message-content">${msg.text}</div>
-                        <div class="message-time">${msg.time}</div>
-                    `;
-                    
-                    messageContainer.appendChild(messageDiv);
-                    chatMessages.appendChild(messageContainer);
+            // 关闭模态框
+            elements.closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.leaderboardModal.style.display = 'none';
+                    elements.gameModal.style.display = 'none';
                 });
             });
             
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target === elements.leaderboardModal) {
+                    elements.leaderboardModal.style.display = 'none';
+                }
+                if (e.target === elements.gameModal) {
+                    elements.gameModal.style.display = 'none';
+                }
+            });
+            
+            // 收集星脉币
+            elements.collectBtn.addEventListener('click', collectCoins);
+            
+            // 查看排行榜
+            elements.showLeaderboard.addEventListener('click', showLeaderboard);
+            
+            // 升级
+            elements.upgradeBtn.addEventListener('click', upgradeLevel);
+            
+            // 小游戏按钮
+            elements.playGameBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const gameCard = e.target.closest('.game-card');
+                    const gameName = gameCard.getAttribute('data-game');
+                    startGame(gameName);
+                });
+            });
+            
+            // 复制邀请链接
+            elements.copyInvite.addEventListener('click', copyInviteLink);
+            
+            // 申请会员
+            elements.applyVip.addEventListener('click', applyForVIP);
+            
+            // 提交提现申请
+            elements.submitWithdraw.addEventListener('click', submitWithdrawRequest);
+            
+            // 管理员保存设置
+            elements.saveSettings.addEventListener('click', saveAdminSettings);
+            
+            // 搜索用户
+            elements.searchUser.addEventListener('input', searchUsers);
         }
-        
-        // 发送消息
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || !state.currentChat) return;
 
-            const newMessage = createMessage(text, false);
-            
-            // 确保消息数据结构存在
-            if (!state.messages[state.currentUser.id]) {
-                state.messages[state.currentUser.id] = {};
+        // 生成邀请码
+        function generateInviteCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // 通过邀请码查找用户
+        function findUserByInviteCode(code) {
+            for (const username in gameData.users) {
+                if (gameData.users[username].inviteCode === code) {
+                    return gameData.users[username];
+                }
             }
-            if (!state.messages[state.currentUser.id][state.currentChat.id]) {
-                state.messages[state.currentUser.id][state.currentChat.id] = [];
+            return null;
+        }
+
+        // 登录用户
+        function loginUser(username) {
+            gameData.currentUser = gameData.users[username];
+            localStorage.setItem('pmCurrentUser', username);
+            
+            // 更新UI
+            elements.authContainer.style.display = 'none';
+            elements.gameContainer.style.display = 'block';
+            elements.adminContainer.style.display = 'none';
+            
+            updateUserUI();
+            startMiningTimer();
+        }
+
+        // 登录管理员
+        function loginAdmin() {
+            localStorage.setItem('pmCurrentUser', 'admin');
+            
+            // 更新UI
+            elements.authContainer.style.display = 'none';
+            elements.gameContainer.style.display = 'none';
+            elements.adminContainer.style.display = 'block';
+            
+            loadAdminData();
+        }
+
+        // 退出用户
+        function logoutUser() {
+            gameData.currentUser = null;
+            localStorage.removeItem('pmCurrentUser');
+            
+            // 重置表单
+            elements.loginUsername.value = '';
+            elements.loginPassword.value = '';
+            
+            // 更新UI
+            elements.authContainer.style.display = 'block';
+            elements.gameContainer.style.display = 'none';
+            elements.adminContainer.style.display = 'none';
+            elements.loginForm.style.display = 'block';
+            elements.registerForm.style.display = 'none';
+        }
+
+        // 退出管理员
+        function logoutAdmin() {
+            localStorage.removeItem('pmCurrentUser');
+            
+            // 更新UI
+            elements.authContainer.style.display = 'block';
+            elements.gameContainer.style.display = 'none';
+            elements.adminContainer.style.display = 'none';
+            elements.loginForm.style.display = 'block';
+            elements.registerForm.style.display = 'none';
+        }
+
+        // 更新用户界面
+        function updateUserUI() {
+            const user = gameData.currentUser;
+            
+            elements.usernameDisplay.textContent = user.username;
+            elements.vipStatus.textContent = user.isVIP ? '是' : '否';
+            elements.vipStatus.style.color = user.isVIP ? '#4cc9f0' : '#f72585';
+            
+            elements.coinDisplay.textContent = user.coins;
+            elements.pointDisplay.textContent = user.points.toFixed(2);
+            elements.levelDisplay.textContent = user.level;
+            elements.currentLevel.textContent = user.level;
+            
+            // 计算下一级所需积分
+            let nextLevelCost = 0;
+            if (user.level < 5) {
+                nextLevelCost = user.level === 1 ? 0.3 : 0.1;
+            } else if (user.level < 20) {
+                nextLevelCost = 1;
+            } else if (user.level < 40) {
+                nextLevelCost = 3;
+            } else if (user.level < 60) {
+                nextLevelCost = 5;
             }
             
-            // 在接收方也创建消息存储结构
-            if (!state.messages[state.currentChat.id]) {
-                state.messages[state.currentChat.id] = {};
-            }
-            if (!state.messages[state.currentChat.id][state.currentUser.id]) {
-                state.messages[state.currentChat.id][state.currentUser.id] = [];
-            }
+            elements.nextLevelCost.textContent = nextLevelCost;
+            elements.currentPoints.textContent = user.points.toFixed(2);
             
-            // 添加到双方的聊天记录中
-            state.messages[state.currentUser.id][state.currentChat.id].push(newMessage);
-            state.messages[state.currentChat.id][state.currentUser.id].push({
-                ...newMessage,
-                incoming: true
-            });
+            // 更新邀请信息
+            elements.inviteCode.textContent = user.inviteCode;
+            elements.invitedCount.textContent = user.invitedUsers.length;
+            elements.invitedLevel5.textContent = user.invitedLevel5Users.length;
             
-            saveData(STORAGE_KEYS.MESSAGES, state.messages);
+            // 更新可提现星脉币
+            elements.withdrawCoin.textContent = user.coins;
+        }
+
+        // 开始挖矿计时器
+        function startMiningTimer() {
+            updateMiningProgress();
+            setInterval(updateMiningProgress, 1000);
+        }
+
+        // 更新挖矿进度
+        function updateMiningProgress() {
+            const user = gameData.currentUser;
+            if (!user) return;
             
-            // 更新最后消息显示
-            updateLastMessage(text, newMessage.timestamp);
+            const now = Date.now();
+            const elapsed = (now - user.lastMineTime) / 1000; // 秒
+            const hoursElapsed = elapsed / 3600;
             
-            renderMessages(state.currentChat.id);
-            resetMessageInput();
-        }
-        
-        // 更新最后消息显示
-        function updateLastMessage(text, timestamp) {
-            const friendIndex = state.friends.findIndex(f => f.id === state.currentChat.id);
-            if (friendIndex !== -1) {
-                state.friends[friendIndex].lastMessage = text;
-                state.friends[friendIndex].lastMessageTime = timestamp;
-                saveData(STORAGE_KEYS.FRIENDS, state.friends);
-                renderFriendsList();
-            }
-        }
-        
-        // 重置消息输入框
-        function resetMessageInput() {
-            messageInput.value = '';
-            adjustInputHeight();
-            sendBtn.disabled = true;
-        }
-        
-        // 调整输入框高度
-        function adjustInputHeight() {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = (messageInput.scrollHeight > 120 ? 120 : messageInput.scrollHeight) + 'px';
-        }
-        
-        // 获取当前时间
-        function getCurrentTime() {
-            const now = new Date();
-            return formatTime(now);
-        }
-        
-        // 格式化时间
-        function formatTime(date) {
-            return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-        }
-        
-        // 格式化日期
-        function formatDate(date) {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
+            // 每小时5个币，最多24小时(120个币)
+            const maxCoins = 120;
+            const coinsEarned = Math.min(hoursElapsed * 5, maxCoins);
             
-            if (date.toDateString() === today.toDateString()) {
-                return '今天';
-            } else if (date.toDateString() === yesterday.toDateString()) {
-                return '昨天';
-            } else {
-                return date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
-            }
-        }
-        
-        // 短日期格式
-        function formatDateShort(date) {
-            return date.toLocaleDateString('zh-CN', { 
-                year: 'numeric', 
-                month: '2-digit', 
-                day: '2-digit' 
-            });
-        }
-        
-        // 切换侧边栏显示
-        function toggleSidebar() {
-            friendsSidebar.classList.toggle('active');
-        }
-        
-        // 显示搜索好友弹窗
-        function showSearchModal() {
-            searchModal.classList.add('show');
-            searchInput.focus();
-        }
-        
-        // 隐藏搜索好友弹窗
-        function hideSearchModal() {
-            searchModal.classList.remove('show');
-            searchInput.value = '';
-            searchResults.innerHTML = '';
-        }
-        
-        // 处理搜索 - 这是关键改进部分
-        function handleSearch() {
-            const query = searchInput.value.trim().toLowerCase();
+            // 更新UI
+            const progressPercent = (coinsEarned % 5 / 5) * 100;
+            elements.progressBar.style.width = `${progressPercent}%`;
+            elements.progressText.textContent = `${(coinsEarned % 5).toFixed(2)}/5 星脉币`;
             
-            // 搜索所有用户，除了当前用户自己
-            const allUsers = state.allUsers.filter(user => user.id !== state.currentUser.id);
+            // 保存已挖矿但未收集的币
+            user.minedCoins = coinsEarned;
+            saveGameData();
+        }
+
+        // 收集星脉币
+        function collectCoins() {
+            const user = gameData.currentUser;
+            if (!user) return;
             
-            if (!query) {
-                // 如果没有搜索词，显示所有用户（除了自己）
-                const sortedUsers = [...allUsers].sort((a, b) => {
-                    const isFriendA = state.friends.some(f => f.id === a.id);
-                    const isFriendB = state.friends.some(f => f.id === b.id);
-                    return isFriendA && !isFriendB ? -1 : !isFriendA && isFriendB ? 1 : a.username.localeCompare(b.username);
-                });
-                renderSearchResults(sortedUsers);
+            if (user.minedCoins <= 0) {
+                alert('没有可收集的星脉币');
                 return;
             }
             
-            // 如果有搜索词，使用更智能的搜索算法
-            const results = allUsers.filter(user => {
-                // 搜索用户名和ID
-                const usernameMatch = user.username.toLowerCase().includes(query);
-                const idMatch = user.id.toLowerCase().includes(query);
-                
-                // 添加拼音搜索支持
-                const pinyinMatch = pinyinMatchUser(user, query);
-                
-                return usernameMatch || idMatch || pinyinMatch;
-            }).sort((a, b) => {
-                // 好友优先排序
-                const isFriendA = state.friends.some(f => f.id === a.id);
-                const isFriendB = state.friends.some(f => f.id === b.id);
-                
-                // 精确匹配优先
-                const aExactMatch = a.username.toLowerCase() === query || a.id.toLowerCase() === query;
-                const bExactMatch = b.username.toLowerCase() === query || b.id.toLowerCase() === query;
-                
-                if (aExactMatch && !bExactMatch) return -1;
-                if (!aExactMatch && bExactMatch) return 1;
-                
-                return isFriendA && !isFriendB ? -1 : !isFriendA && isFriendB ? 1 : a.username.localeCompare(b.username);
+            const coinsToAdd = Math.floor(user.minedCoins);
+            user.coins += coinsToAdd;
+            user.minedCoins -= coinsToAdd;
+            user.lastMineTime = Date.now();
+            
+            updateUserUI();
+            saveGameData();
+            
+            alert(`成功收集 ${coinsToAdd} 星脉币!`);
+        }
+
+        // 切换标签页
+        function switchTab(tabId) {
+            // 更新按钮状态
+            elements.tabBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
             });
             
-            renderSearchResults(results);
+            // 更新标签内容
+            elements.tabs.forEach(tab => {
+                if (tab.id === `${tabId}-tab`) {
+                    tab.classList.add('active-tab');
+                } else {
+                    tab.classList.remove('active-tab');
+                }
+            });
         }
-        
-        // 简单的拼音匹配功能
-        function pinyinMatchUser(user, query) {
-            // 这里可以添加更复杂的拼音匹配逻辑
-            // 目前只是简单的实现
-            const pinyinMap = {
-                '测试': 'ceshi',
-                '用户': 'yonghu',
-                '666': 'liuliuliu',
-                '111': 'yiyiyi'
-            };
-            
-            let pinyinUsername = user.username;
-            for (const [chinese, pinyin] of Object.entries(pinyinMap)) {
-                pinyinUsername = pinyinUsername.replace(new RegExp(chinese, 'g'), pinyin);
+
+        // 显示排行榜
+        function showLeaderboard() {
+            // 生成测试数据
+            if (gameData.leaderboard.length === 0) {
+                gameData.leaderboard = generateLeaderboard();
             }
             
-            return pinyinUsername.toLowerCase().includes(query);
-        }
-        
-        // 渲染搜索结果 - 改进显示效果
-        function renderSearchResults(results) {
-            searchResults.innerHTML = '';
+            // 更新排行榜UI
+            elements.leaderboardBody.innerHTML = '';
+            gameData.leaderboard.forEach((user, index) => {
+                const row = document.createElement('tr');
+                
+                const rankCell = document.createElement('td');
+                if (index === 0) rankCell.className = 'rank-1';
+                else if (index === 1) rankCell.className = 'rank-2';
+                else if (index === 2) rankCell.className = 'rank-3';
+                rankCell.textContent = index + 1;
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = user.username;
+                
+                const levelCell = document.createElement('td');
+                levelCell.textContent = user.level;
+                
+                const coinCell = document.createElement('td');
+                coinCell.textContent = user.coins;
+                
+                row.appendChild(rankCell);
+                row.appendChild(nameCell);
+                row.appendChild(levelCell);
+                row.appendChild(coinCell);
+                
+                elements.leaderboardBody.appendChild(row);
+            });
             
-            if (results.length === 0) {
-                searchResults.innerHTML = `
-                    <div class="no-results">
-                        <div class="empty-state-icon">🔍</div>
-                        <div>没有找到匹配的用户</div>
-                        <div style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
-                            尝试使用不同的关键词或拼音搜索
-                        </div>
-                    </div>
-                `;
+            elements.leaderboardModal.style.display = 'flex';
+        }
+
+        // 生成排行榜数据
+        function generateLeaderboard() {
+            const users = [];
+            
+            // 添加当前用户
+            if (gameData.currentUser) {
+                users.push({
+                    username: gameData.currentUser.username,
+                    level: gameData.currentUser.level,
+                    coins: gameData.currentUser.coins
+                });
+            }
+            
+            // 添加其他用户
+            for (const username in gameData.users) {
+                if (!gameData.currentUser || username !== gameData.currentUser.username) {
+                    users.push({
+                        username,
+                        level: gameData.users[username].level,
+                        coins: gameData.users[username].coins
+                    });
+                }
+            }
+            
+            // 按等级和星脉币排序
+            return users.sort((a, b) => {
+                if (b.level !== a.level) return b.level - a.level;
+                return b.coins - a.coins;
+            }).slice(0, 10);
+        }
+
+        // 升级等级
+        function upgradeLevel() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            // 检查是否已达到最高等级
+            if (user.level >= 60) {
+                alert('您已达到最高等级!');
                 return;
             }
             
-            results.forEach(user => {
-                const isFriend = state.friends.some(f => f.id === user.id);
-                const isPendingRequest = state.friendRequests[user.id]?.some(
-                    req => req.from === state.currentUser.id && req.status === 'pending'
-                );
-                
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                
-                resultItem.innerHTML = `
-                    <div class="friend-avatar">
-                        <img src="${user.avatar}" alt="${user.username}" onerror="this.src='https://i.pravatar.cc/150?u=${user.id}'">
-                    </div>
-                    <div class="search-result-info">
-                        <div class="search-result-name">${user.username}</div>
-                        <div class="search-result-id">ID: ${user.id}</div>
-                        <div class="search-result-joined">
-                            加入时间: ${formatDateShort(new Date(user.createdAt))}
+            // 计算升级所需积分
+            let requiredPoints = 0;
+            if (user.level < 5) {
+                requiredPoints = user.level === 1 ? 0.3 : 0.1;
+            } else if (user.level < 20) {
+                requiredPoints = 1;
+            } else if (user.level < 40) {
+                requiredPoints = 3;
+            } else if (user.level < 60) {
+                requiredPoints = 5;
+            }
+            
+            // 检查积分是否足够
+            if (user.points < requiredPoints) {
+                alert(`升级需要 ${requiredPoints} 积分，您当前只有 ${user.points.toFixed(2)} 积分`);
+                return;
+            }
+            
+            // 升级
+            user.level++;
+            user.points -= requiredPoints;
+            
+            // 更新UI
+            updateUserUI();
+            saveGameData();
+            
+            alert(`升级成功! 当前等级: ${user.level}`);
+        }
+
+        // 开始小游戏
+        function startGame(gameName) {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            // 检查星脉币是否足够
+            let cost = 1;
+            if (gameName === 'memory') cost = 2;
+            else if (gameName === 'quiz') cost = 3;
+            else if (gameName === 'escape') cost = 5; // 大逃杀游戏入场费
+            
+            // VIP折扣
+            if (user.isVIP) cost = Math.floor(cost * 0.5);
+            
+            if (user.coins < cost) {
+                alert(`需要 ${cost} 星脉币才能玩这个游戏`);
+                return;
+            }
+            
+            // 扣除星脉币
+            user.coins -= cost;
+            updateUserUI();
+            
+            // 设置游戏模态框
+            elements.gameModalTitle.textContent = getGameTitle(gameName);
+            elements.gameModalContent.innerHTML = getGameHTML(gameName);
+            
+            // 显示模态框
+            elements.gameModal.style.display = 'flex';
+            
+            // 设置游戏逻辑
+            setupGameLogic(gameName);
+        }
+
+        // 获取游戏标题
+        function getGameTitle(gameName) {
+            switch (gameName) {
+                case 'clicker': return '点击赚积分';
+                case 'memory': return '记忆匹配';
+                case 'quiz': return '知识问答';
+                case 'escape': return '能量石-大谜杀';
+                default: return '小游戏';
+            }
+        }
+
+        // 获取游戏HTML
+        function getGameHTML(gameName) {
+            switch (gameName) {
+                case 'clicker':
+                    return `
+                        <div style="text-align: center;">
+                            <p>点击按钮赚取积分</p>
+                            <button id="clicker-btn" style="font-size: 24px; padding: 20px 40px; margin: 20px 0;">点击我!</button>
+                            <p>已获得积分: <span id="clicker-points">0</span></p>
+                            <p>每次点击获得 0.01 积分</p>
                         </div>
-                        ${isFriend ? '<div class="search-result-status" style="color: var(--success-color);">已是好友</div>' : ''}
-                        ${isPendingRequest ? '<div class="search-result-status" style="color: var(--warning-color);">请求已发送</div>' : ''}
-                    </div>
-                    <div class="search-result-actions">
-                        ${isFriend ? 
-                            `<button class="btn btn-secondary start-chat-btn" data-user-id="${user.id}">聊天</button>` : 
-                            isPendingRequest ? 
-                                `<button class="btn btn-secondary" disabled>已发送</button>` : 
-                                `<button class="btn btn-primary add-friend-btn" data-user-id="${user.id}">添加</button>`
-                        }
-                    </div>
-                `;
+                    `;
+                case 'memory':
+                    return `
+                        <div style="text-align: center;">
+                            <h3>记忆匹配游戏</h3>
+                            <p>找出所有匹配的卡片</p>
+                            <div id="memory-board" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0;"></div>
+                            <p>剩余尝试次数: <span id="memory-attempts">10</span></p>
+                            <p>已匹配: <span id="memory-matched">0</span>/8</p>
+                        </div>
+                    `;
+                case 'quiz':
+                    return `
+                        <div style="text-align: center;">
+                            <h3>知识问答</h3>
+                            <div id="quiz-question" style="font-size: 18px; margin: 20px 0;"></div>
+                            <div id="quiz-options" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                            <p>当前得分: <span id="quiz-score">0</span></p>
+                        </div>
+                    `;
+                case 'escape':
+                    return `
+                        <div style="text-align: center;">
+                            <h3>能量石-大谜杀</h3>
+                            <p>选择一间房间躲避外星人，满足人数后，外星人随机挑选一个房间杀掉里面所有人，其他房间的幸存者平均瓜分被杀掉房间的能量石。</p>
+                            
+                            <div class="escape-stats">
+                                <div class="escape-stat">
+                                    <div>当前玩家</div>
+                                    <div id="escape-current-players">0</div>
+                                </div>
+                                <div class="escape-stat">
+                                    <div>目标玩家</div>
+                                    <div id="escape-target-players">10</div>
+                                </div>
+                                <div class="escape-stat">
+                                    <div>奖池</div>
+                                    <div id="escape-prize-pool">0</div>
+                                </div>
+                            </div>
+                            
+                            <h4>选择房间躲避外星人</h4>
+                            <div class="escape-room" id="escape-rooms">
+                                ${gameData.escapeRooms.rooms.map(room => `
+                                    <div class="room-card" data-room="${room}">
+                                        ${room}
+                                        <div class="escape-players" id="room-players-${room}">0人</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="escape-bet">投入能量石数量 (1-100)</label>
+                                <input type="number" id="escape-bet" min="1" max="100" value="10">
+                            </div>
+                            
+                            <button id="escape-join-btn" class="escape-button">加入游戏</button>
+                            <button id="escape-leave-btn" class="escape-button" style="display: none;">离开房间</button>
+                            
+                            <div id="escape-game-status" style="margin-top: 20px;"></div>
+                        </div>
+                    `;
+                default:
+                    return '<p>游戏加载中...</p>';
+            }
+        }
+
+        // 设置游戏逻辑
+        function setupGameLogic(gameName) {
+            switch (gameName) {
+                case 'clicker':
+                    setupClickerGame();
+                    break;
+                case 'memory':
+                    setupMemoryGame();
+                    break;
+                case 'quiz':
+                    setupQuizGame();
+                    break;
+                case 'escape':
+                    setupEscapeGame();
+                    break;
+            }
+        }
+
+        // 设置点击游戏
+        function setupClickerGame() {
+            let pointsEarned = 0;
+            const clickerBtn = document.getElementById('clicker-btn');
+            const pointsDisplay = document.getElementById('clicker-points');
+            
+            clickerBtn.addEventListener('click', () => {
+                pointsEarned += 0.01;
+                pointsDisplay.textContent = pointsEarned.toFixed(2);
                 
-                searchResults.appendChild(resultItem);
+                // 随机按钮移动
+                if (Math.random() < 0.2) {
+                    const x = Math.random() * 100 - 50;
+                    const y = Math.random() * 100 - 50;
+                    clickerBtn.style.transform = `translate(${x}px, ${y}px)`;
+                }
             });
             
-            // 绑定事件
-            document.querySelectorAll('.add-friend-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.dataset.userId;
-                    sendFriendRequest(userId);
-                });
+            // 游戏结束处理
+            elements.gameModal.querySelector('.close-btn').addEventListener('click', () => {
+                if (pointsEarned > 0) {
+                    gameData.currentUser.points += pointsEarned;
+                    updateUserUI();
+                    saveGameData();
+                    alert(`游戏结束! 获得 ${pointsEarned.toFixed(2)} 积分`);
+                }
             });
+        }
+
+        // 设置记忆游戏
+        function setupMemoryGame() {
+            const cards = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'];
+            let shuffledCards = shuffleArray([...cards]).slice(0, 8 * 2);
+            let flippedCards = [];
+            let matchedPairs = 0;
+            let attempts = 10;
             
-            document.querySelectorAll('.start-chat-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.dataset.userId;
-                    const friend = state.friends.find(f => f.id === userId) || 
-                                 state.allUsers.find(u => u.id === userId);
-                    if (friend) {
-                        startChat(friend);
-                        hideSearchModal();
+            const board = document.getElementById('memory-board');
+            const attemptsDisplay = document.getElementById('memory-attempts');
+            const matchedDisplay = document.getElementById('memory-matched');
+            
+            // 创建卡片
+            shuffledCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'memory-card';
+                cardElement.dataset.index = index;
+                cardElement.dataset.value = card;
+                cardElement.style.height = '80px';
+                cardElement.style.backgroundColor = '#457b9d';
+                cardElement.style.display = 'flex';
+                cardElement.style.justifyContent = 'center';
+                cardElement.style.alignItems = 'center';
+                cardElement.style.cursor = 'pointer';
+                cardElement.style.color = 'transparent';
+                cardElement.style.fontSize = '24px';
+                cardElement.style.borderRadius = '5px';
+                
+                cardElement.textContent = card;
+                
+                cardElement.addEventListener('click', () => {
+                    if (flippedCards.length < 2 && !flippedCards.includes(index) && cardElement.style.color === 'transparent') {
+                        flipCard(cardElement);
                     }
                 });
+                
+                board.appendChild(cardElement);
             });
+            
+            // 翻牌函数
+            function flipCard(cardElement) {
+                cardElement.style.color = 'white';
+                flippedCards.push(parseInt(cardElement.dataset.index));
+                
+                if (flippedCards.length === 2) {
+                    const firstCard = board.children[flippedCards[0]];
+                    const secondCard = board.children[flippedCards[1]];
+                    
+                    if (firstCard.dataset.value === secondCard.dataset.value) {
+                        // 匹配成功
+                        matchedPairs++;
+                        matchedDisplay.textContent = matchedPairs;
+                        
+                        // 标记为已匹配
+                        firstCard.style.backgroundColor = '#2a9d8f';
+                        secondCard.style.backgroundColor = '#2a9d8f';
+                        
+                        flippedCards = [];
+                        
+                        // 检查是否所有卡片都匹配
+                        if (matchedPairs === 8) {
+                            setTimeout(() => {
+                                gameData.currentUser.points += 1;
+                                updateUserUI();
+                                saveGameData();
+                                alert('恭喜! 你完成了记忆游戏，获得1积分!');
+                                elements.gameModal.style.display = 'none';
+                            }, 500);
+                        }
+                    } else {
+                        // 匹配失败
+                        attempts--;
+                        attemptsDisplay.textContent = attempts;
+                        
+                        setTimeout(() => {
+                            firstCard.style.color = 'transparent';
+                            secondCard.style.color = 'transparent';
+                            flippedCards = [];
+                        }, 1000);
+                        
+                        // 检查是否还有尝试次数
+                        if (attempts <= 0) {
+                            setTimeout(() => {
+                                if (matchedPairs > 0) {
+                                    gameData.currentUser.points += matchedPairs * 0.1;
+                                    updateUserUI();
+                                    saveGameData();
+                                    alert(`游戏结束! 你匹配了 ${matchedPairs} 对卡片，获得 ${(matchedPairs * 0.1).toFixed(1)} 积分`);
+                                } else {
+                                    alert('游戏结束! 没有匹配到任何卡片');
+                                }
+                                elements.gameModal.style.display = 'none';
+                            }, 1000);
+                        }
+                    }
+                }
+            }
         }
 
-        // 发送好友请求
-        function sendFriendRequest(userId) {
-            const targetUser = state.allUsers.find(u => u.id === userId);
-            if (!targetUser) {
-                showNotification('找不到该用户', 'error');
-                return;
-            }
+        // 设置问答游戏
+        function setupQuizGame() {
+            const questions = [
+                {
+                    question: "中国的首都是哪里?",
+                    options: ["上海", "北京", "广州", "深圳"],
+                    answer: 1
+                },
+                {
+                    question: "以下哪个不是编程语言?",
+                    options: ["Python", "Java", "HTML", "C++"],
+                    answer: 2
+                },
+                {
+                    question: "1 + 1等于多少?",
+                    options: ["1", "2", "3", "4"],
+                    answer: 1
+                }
+            ];
             
-            if (state.friends.some(f => f.id === userId)) {
-                showNotification(`您已经是${targetUser.username}的好友`, 'error');
-                return;
-            }
+            let currentQuestion = 0;
+            let score = 0;
             
-            if (state.friendRequests[userId]?.some(
-                req => req.from === state.currentUser.id && req.status === 'pending'
-            )) {
-                showNotification(`您已经向${targetUser.username}发送过好友请求`, 'error');
-                return;
-            }
+            const questionElement = document.getElementById('quiz-question');
+            const optionsElement = document.getElementById('quiz-options');
+            const scoreDisplay = document.getElementById('quiz-score');
             
-            if (!state.friendRequests[userId]) {
-                state.friendRequests[userId] = [];
-            }
-            
-            state.friendRequests[userId].push({
-                from: state.currentUser.id,
-                status: 'pending',
-                timestamp: new Date().toISOString()
-            });
-            
-            saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
-            
-            showNotification(`已向${targetUser.username}发送好友请求`);
-            hideSearchModal();
-        }
-        
-        // 更新请求徽章
-        function updateRequestsBadge() {
-            if (state.currentUser && state.friendRequests[state.currentUser.id]) {
-                const pendingCount = state.friendRequests[state.currentUser.id].filter(
-                    req => req.status === 'pending'
-                ).length;
+            function showQuestion() {
+                if (currentQuestion >= questions.length) {
+                    // 游戏结束
+                    gameData.currentUser.points += score * 0.2;
+                    updateUserUI();
+                    saveGameData();
+                    alert(`游戏结束! 你的得分是 ${score}，获得 ${(score * 0.2).toFixed(1)} 积分`);
+                    elements.gameModal.style.display = 'none';
+                    return;
+                }
                 
-                state.pendingRequests = pendingCount;
+                const q = questions[currentQuestion];
+                questionElement.textContent = q.question;
+                optionsElement.innerHTML = '';
                 
-                if (pendingCount > 0) {
-                    requestsBadge.textContent = pendingCount;
-                    requestsBadge.style.display = 'flex';
+                q.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.style.padding = '10px';
+                    button.addEventListener('click', () => {
+                        checkAnswer(index);
+                    });
+                    optionsElement.appendChild(button);
+                });
+            }
+            
+            function checkAnswer(selectedIndex) {
+                const q = questions[currentQuestion];
+                if (selectedIndex === q.answer) {
+                    score++;
+                    scoreDisplay.textContent = score;
+                    alert('回答正确!');
                 } else {
-                    requestsBadge.style.display = 'none';
+                    alert(`回答错误! 正确答案是: ${q.options[q.answer]}`);
                 }
-            } else {
-                requestsBadge.style.display = 'none';
-            }
-        }
-        
-        // 显示好友请求弹窗
-        function showRequestsModal() {
-            renderRequestsList();
-            requestsModal.classList.add('show');
-        }
-        
-        // 隐藏好友请求弹窗
-        function hideRequestsModal() {
-            requestsModal.classList.remove('show');
-        }
-        
-        // 渲染好友请求列表
-        function renderRequestsList() {
-            requestsList.innerHTML = '';
-            
-            if (!state.currentUser || !state.friendRequests[state.currentUser.id] || 
-                state.friendRequests[state.currentUser.id].length === 0) {
-                requestsList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">👋</div>
-                        <div>暂无好友请求</div>
-                    </div>
-                `;
-                return;
+                
+                currentQuestion++;
+                showQuestion();
             }
             
-            const pendingRequests = state.friendRequests[state.currentUser.id].filter(
-                req => req.status === 'pending'
-            );
-            
-            if (pendingRequests.length === 0) {
-                requestsList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">✅</div>
-                        <div>暂无待处理的好友请求</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            pendingRequests.forEach(request => {
-                const requestUser = state.allUsers.find(u => u.id === request.from);
-                if (!requestUser) return;
-                
-                const requestItem = document.createElement('div');
-                requestItem.className = 'request-item';
-                
-                requestItem.innerHTML = `
-                    <div class="friend-avatar">
-                        <img src="${requestUser.avatar}" alt="${requestUser.username}" onerror="this.src='https://i.pravatar.cc/150?u=${requestUser.id}'">
-                    </div>
-                    <div class="request-info">
-                        <div class="request-name">${requestUser.username}</div>
-                        <div class="request-status">请求时间: ${formatDate(new Date(request.timestamp))}</div>
-                    </div>
-                    <div class="request-actions">
-                        <button class="btn btn-primary accept-request-btn" data-user-id="${request.from}">接受</button>
-                        <button class="btn btn-danger reject-request-btn" data-user-id="${request.from}">拒绝</button>
-                    </div>
-                `;
-                
-                requestsList.appendChild(requestItem);
-            });
-            
-            document.querySelectorAll('.accept-request-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.dataset.userId;
-                    respondToFriendRequest(userId, true);
-                });
-            });
-            
-            document.querySelectorAll('.reject-request-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.dataset.userId;
-                    respondToFriendRequest(userId, false);
-                });
-            });
+            showQuestion();
         }
-        
-        // 响应好友请求
-        function respondToFriendRequest(userId, accepted) {
-            if (state.friendRequests[state.currentUser.id]) {
-                const requestIndex = state.friendRequests[state.currentUser.id].findIndex(
-                    req => req.from === userId && req.status === 'pending'
-                );
-                
-                if (requestIndex !== -1) {
-                    state.friendRequests[state.currentUser.id][requestIndex].status = 
-                        accepted ? 'accepted' : 'rejected';
-                    state.friendRequests[state.currentUser.id][requestIndex].respondedAt = 
-                        new Date().toISOString();
+
+        // 设置大逃杀游戏
+        function setupEscapeGame() {
+            const user = gameData.currentUser;
+            const roomsContainer = document.getElementById('escape-rooms');
+            const joinBtn = document.getElementById('escape-join-btn');
+            const leaveBtn = document.getElementById('escape-leave-btn');
+            const betInput = document.getElementById('escape-bet');
+            const gameStatus = document.getElementById('escape-game-status');
+            const currentPlayersDisplay = document.getElementById('escape-current-players');
+            const targetPlayersDisplay = document.getElementById('escape-target-players');
+            const prizePoolDisplay = document.getElementById('escape-prize-pool');
+            
+            let selectedRoom = null;
+            let currentBet = 10;
+            let gameInterval = null;
+            
+            // 初始化游戏状态
+            updateEscapeGameDisplay();
+            
+            // 房间选择
+            roomsContainer.querySelectorAll('.room-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    if (gameData.escapeRooms.gameInProgress) return;
                     
-                    saveData(STORAGE_KEYS.FRIEND_REQUESTS, state.friendRequests);
-                }
-            }
-            
-            const targetUser = state.allUsers.find(u => u.id === userId);
-            
-            if (accepted) {
-                if (targetUser && !state.friends.some(f => f.id === targetUser.id)) {
-                    state.friends.push({
-                        ...targetUser,
-                        status: 'offline',
-                        lastSeen: '未知'
+                    roomsContainer.querySelectorAll('.room-card').forEach(c => {
+                        c.classList.remove('selected');
                     });
                     
-                    saveData(STORAGE_KEYS.FRIENDS, state.friends);
-                    renderFriendsList();
-                    
-                    if (!state.messages[state.currentUser.id]) {
-                        state.messages[state.currentUser.id] = {};
-                    }
-                    if (!state.messages[state.currentUser.id][targetUser.id]) {
-                        state.messages[state.currentUser.id][targetUser.id] = [
-                            createMessage(`你好，我是${state.currentUser.username}`, false),
-                            createMessage(`你好，我是${targetUser?.username || '好友'}`, true)
-                        ];
-                    }
-                    
-                    if (!state.messages[targetUser.id]) {
-                        state.messages[targetUser.id] = {};
-                    }
-                    if (!state.messages[targetUser.id][state.currentUser.id]) {
-                        state.messages[targetUser.id][state.currentUser.id] = [
-                            createMessage(`你好，我是${targetUser?.username || '好友'}`, false),
-                            createMessage(`你好，我是${state.currentUser.username}`, true)
-                        ];
-                    }
-                    
-                    saveData(STORAGE_KEYS.MESSAGES, state.messages);
+                    card.classList.add('selected');
+                    selectedRoom = card.getAttribute('data-room');
+                });
+            });
+            
+            // 加入游戏
+            joinBtn.addEventListener('click', () => {
+                if (!selectedRoom) {
+                    alert('请先选择一个房间');
+                    return;
                 }
                 
-                showNotification(`已接受${targetUser.username}的好友请求`);
-            } else {
-                showNotification(`已拒绝${targetUser?.username || '该用户'}的好友请求`, 'warning');
+                currentBet = parseInt(betInput.value);
+                if (isNaN(currentBet) || currentBet < 1 || currentBet > 100) {
+                    alert('请输入1-100之间的有效数字');
+                    return;
+                }
+                
+                if (user.coins < currentBet) {
+                    alert('星脉币不足');
+                    return;
+                }
+                
+                // 扣除星脉币
+                user.coins -= currentBet;
+                updateUserUI();
+                
+                // 加入房间
+                if (!gameData.escapeRooms.players[selectedRoom]) {
+                    gameData.escapeRooms.players[selectedRoom] = [];
+                }
+                
+                gameData.escapeRooms.players[selectedRoom].push({
+                    username: user.username,
+                    bet: currentBet
+                });
+                
+                // 更新UI
+                joinBtn.style.display = 'none';
+                leaveBtn.style.display = 'block';
+                betInput.disabled = true;
+                gameStatus.textContent = `你已加入 ${selectedRoom}，投入 ${currentBet} 能量石`;
+                
+                // 开始游戏检查
+                checkEscapeGameStart();
+                
+                saveGameData();
+            });
+            
+            // 离开游戏
+            leaveBtn.addEventListener('click', () => {
+                if (gameData.escapeRooms.gameInProgress) {
+                    alert('游戏已开始，无法离开');
+                    return;
+                }
+                
+                // 返还星脉币
+                user.coins += currentBet;
+                updateUserUI();
+                
+                // 从房间移除
+                if (gameData.escapeRooms.players[selectedRoom]) {
+                    gameData.escapeRooms.players[selectedRoom] = gameData.escapeRooms.players[selectedRoom].filter(
+                        p => p.username !== user.username
+                    );
+                    
+                    if (gameData.escapeRooms.players[selectedRoom].length === 0) {
+                        delete gameData.escapeRooms.players[selectedRoom];
+                    }
+                }
+                
+                // 更新UI
+                joinBtn.style.display = 'block';
+                leaveBtn.style.display = 'none';
+                betInput.disabled = false;
+                gameStatus.textContent = '你已离开房间';
+                selectedRoom = null;
+                
+                roomsContainer.querySelectorAll('.room-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                saveGameData();
+                updateEscapeGameDisplay();
+            });
+            
+            // 关闭模态框时离开游戏
+            elements.gameModal.querySelector('.close-btn').addEventListener('click', () => {
+                if (selectedRoom && !gameData.escapeRooms.gameInProgress) {
+                    // 模拟点击离开按钮
+                    leaveBtn.click();
+                }
+            });
+            
+            // 更新游戏显示
+            function updateEscapeGameDisplay() {
+                // 更新玩家数量
+                let totalPlayers = 0;
+                let totalPrize = 0;
+                
+                gameData.escapeRooms.rooms.forEach(room => {
+                    const players = gameData.escapeRooms.players[room] || [];
+                    const roomPlayersElement = document.getElementById(`room-players-${room}`);
+                    if (roomPlayersElement) {
+                        roomPlayersElement.textContent = `${players.length}人`;
+                    }
+                    
+                    totalPlayers += players.length;
+                    players.forEach(player => {
+                        totalPrize += player.bet;
+                    });
+                });
+                
+                currentPlayersDisplay.textContent = totalPlayers;
+                prizePoolDisplay.textContent = totalPrize;
+                
+                // 设置目标玩家数量
+                const targetPlayers = Math.max(5, Math.ceil(totalPlayers * 1.2));
+                targetPlayersDisplay.textContent = targetPlayers;
             }
             
-            updateRequestsBadge();
-            renderRequestsList();
-            
-            if (accepted) {
-                hideRequestsModal();
-            }
-        }
-        
-        // 显示设置弹窗
-        function showSettingsModal() {
-            if (state.currentUser) {
-                settingsUsername.value = state.currentUser.username;
-                settingsUserId.value = state.currentUser.id;
-                if (state.currentUser.avatar) {
-                    avatarPreviewImg.src = state.currentUser.avatar;
+            // 检查游戏是否可以开始
+            function checkEscapeGameStart() {
+                updateEscapeGameDisplay();
+                
+                const totalPlayers = parseInt(currentPlayersDisplay.textContent);
+                const targetPlayers = parseInt(targetPlayersDisplay.textContent);
+                
+                if (totalPlayers >= targetPlayers && !gameData.escapeRooms.gameInProgress) {
+                    startEscapeGame();
+                } else if (!gameData.escapeRooms.gameInProgress) {
+                    // 每隔5秒检查一次
+                    clearInterval(gameInterval);
+                    gameInterval = setInterval(checkEscapeGameStart, 5000);
                 }
             }
-            settingsModal.classList.add('show');
-        }
-        
-        // 隐藏设置弹窗
-        function hideSettingsModal() {
-            settingsModal.classList.remove('show');
-        }
-        
-        // 处理头像上传
-        function handleAvatarUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
             
-            if (!file.type.match('image.*')) {
-                showNotification('请选择图片文件', 'error');
+            // 开始游戏
+            function startEscapeGame() {
+                gameData.escapeRooms.gameInProgress = true;
+                clearInterval(gameInterval);
+                
+                gameStatus.innerHTML = '<p>游戏开始! 外星人正在选择目标房间...</p>';
+                
+                // 模拟3秒等待
+                setTimeout(() => {
+                    // 随机选择一个房间作为目标
+                    const occupiedRooms = Object.keys(gameData.escapeRooms.players).filter(
+                        room => gameData.escapeRooms.players[room].length > 0
+                    );
+                    
+                    if (occupiedRooms.length === 0) {
+                        gameStatus.innerHTML = '<p>错误: 没有玩家在房间中</p>';
+                        gameData.escapeRooms.gameInProgress = false;
+                        return;
+                    }
+                    
+                    const targetRoom = occupiedRooms[Math.floor(Math.random() * occupiedRooms.length)];
+                    const killedPlayers = gameData.escapeRooms.players[targetRoom];
+                    const totalKilledBet = killedPlayers.reduce((sum, player) => sum + player.bet, 0);
+                    
+                    // 计算幸存者和奖励
+                    const survivors = {};
+                    let totalSurvivors = 0;
+                    
+                    occupiedRooms.forEach(room => {
+                        if (room !== targetRoom) {
+                            survivors[room] = gameData.escapeRooms.players[room];
+                            totalSurvivors += survivors[room].length;
+                        }
+                    });
+                    
+                    // 计算每个幸存者获得的奖励 (扣除5%手续费)
+                    const rewardPerSurvivor = totalSurvivors > 0 ? 
+                        Math.floor(totalKilledBet * 0.95 / totalSurvivors) : 0;
+                    
+                    // 更新玩家状态
+                    let userReward = 0;
+                    let userKilled = false;
+                    
+                    if (selectedRoom === targetRoom) {
+                        // 玩家被杀
+                        userKilled = true;
+                        gameStatus.innerHTML += `<p>外星人选择了 ${targetRoom}! 你被杀死了!</p>`;
+                    } else if (survivors[selectedRoom]) {
+                        // 玩家幸存
+                        userReward = rewardPerSurvivor;
+                        gameData.currentUser.coins += userReward;
+                        gameStatus.innerHTML += `<p>外星人选择了 ${targetRoom}! 你幸存下来并获得 ${userReward} 能量石!</p>`;
+                    }
+                    
+                    // 更新UI
+                    updateUserUI();
+                    
+                    // 重置游戏状态
+                    setTimeout(() => {
+                        gameData.escapeRooms.players = {};
+                        gameData.escapeRooms.gameInProgress = false;
+                        
+                        if (selectedRoom) {
+                            // 重置玩家状态
+                            joinBtn.style.display = 'block';
+                            leaveBtn.style.display = 'none';
+                            betInput.disabled = false;
+                            selectedRoom = null;
+                            
+                            roomsContainer.querySelectorAll('.room-card').forEach(c => {
+                                c.classList.remove('selected');
+                            });
+                        }
+                        
+                        updateEscapeGameDisplay();
+                        gameStatus.innerHTML += '<p>游戏结束! 可以开始新一局游戏</p>';
+                    }, 5000);
+                    
+                    saveGameData();
+                }, 3000);
+            }
+        }
+
+        // 复制邀请链接
+        function copyInviteLink() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            const inviteLink = `${window.location.origin}${window.location.pathname}?invite=${user.inviteCode}`;
+            
+            navigator.clipboard.writeText(inviteLink).then(() => {
+                alert('邀请链接已复制到剪贴板!');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制邀请码');
+            });
+        }
+
+        // 申请VIP
+        function applyForVIP() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            if (user.isVIP) {
+                alert('您已经是VIP会员!');
                 return;
             }
             
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                avatarPreviewImg.src = event.target.result;
+            if (user.vipRequested) {
+                alert('您已经提交过VIP申请，请等待管理员处理');
+                return;
+            }
+            
+            if (confirm('确定要申请VIP会员吗? 费用为32元')) {
+                user.vipRequested = true;
+                gameData.vipRequests.push({
+                    username: user.username,
+                    date: new Date().toISOString(),
+                    status: 'pending'
+                });
                 
-                if (state.currentUser) {
-                    state.currentUser.avatar = event.target.result;
-                    saveData(STORAGE_KEYS.CURRENT_USER, state.currentUser);
-                    
-                    const userIndex = state.allUsers.findIndex(u => u.id === state.currentUser.id);
-                    if (userIndex !== -1) {
-                        state.allUsers[userIndex].avatar = event.target.result;
-                        saveData(STORAGE_KEYS.USERS, state.allUsers);
-                    }
-                    
-                    renderFriendsList();
-                    
-                    if (state.currentChat && state.currentChat.id === state.currentUser.id) {
-                        currentChatAvatarImg.src = event.target.result;
-                    }
-                    
-                    showNotification('头像更新成功');
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        // 保存设置
-        function saveSettings() {
-            if (state.currentUser) {
-                saveData(STORAGE_KEYS.CURRENT_USER, state.currentUser);
-                showNotification('设置已保存');
-                hideSettingsModal();
+                saveGameData();
+                alert('VIP申请已提交，请支付并等待管理员审核');
             }
         }
-        
-        // 处理退出登录
-        function handleLogout() {
-            state.currentUser = null;
-            saveData(STORAGE_KEYS.CURRENT_USER, null);
-            showAuth();
-            hideSettingsModal();
-            showNotification('已退出登录');
+
+        // 提交提现申请
+        function submitWithdrawRequest() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            const amount = parseFloat(elements.withdrawAmount.value);
+            const method = elements.withdrawMethod.value;
+            const account = elements.withdrawAccount.value.trim();
+            
+            if (isNaN(amount)) {
+                alert('请输入有效的提现金额');
+                return;
+            }
+            
+            // 检查最低提现金额
+            if (amount < 100) {
+                alert('最低提现金额为100星脉币');
+                return;
+            }
+            
+            // 检查是否有足够的星脉币
+            if (amount > user.coins) {
+                alert('星脉币不足');
+                return;
+            }
+            
+            if (!account) {
+                alert('请输入收款账号');
+                return;
+            }
+            
+            // 计算手续费
+            const feeRate = user.isVIP ? 0.05 : 0.1;
+            const fee = amount * feeRate;
+            const received = amount - fee;
+            
+            if (confirm(`确定要提现 ${amount} 星脉币吗?\n手续费: ${fee.toFixed(2)} (${feeRate * 100}%)\n实际到账: ${received.toFixed(2)}`)) {
+                // 扣除星脉币
+                user.coins -= amount;
+                
+                // 添加提现记录
+                user.withdrawHistory.push({
+                    amount,
+                    fee,
+                    received,
+                    method,
+                    account,
+                    date: new Date().toISOString(),
+                    status: 'pending'
+                });
+                
+                // 添加到管理员队列
+                gameData.withdrawRequests.push({
+                    username: user.username,
+                    amount,
+                    method,
+                    account,
+                    date: new Date().toISOString(),
+                    status: 'pending'
+                });
+                
+                // 更新UI
+                updateUserUI();
+                saveGameData();
+                
+                alert('提现申请已提交，将在24小时内处理');
+                elements.withdrawAmount.value = '';
+                elements.withdrawAccount.value = '';
+            }
         }
-        
-        // 生成随机ID
-        function generateId() {
-            return Math.random().toString(36).substr(2, 9);
+
+        // 加载管理员数据
+        function loadAdminData() {
+            // 加载VIP申请
+            elements.vipRequests.innerHTML = '';
+            gameData.vipRequests.forEach(request => {
+                if (request.status === 'pending') {
+                    const li = document.createElement('li');
+                    li.className = 'user-item';
+                    li.innerHTML = `
+                        <span>${request.username} - ${new Date(request.date).toLocaleString()}</span>
+                        <div>
+                            <button class="approve-vip" data-user="${request.username}">批准</button>
+                            <button class="reject-vip" data-user="${request.username}">拒绝</button>
+                        </div>
+                    `;
+                    elements.vipRequests.appendChild(li);
+                }
+            });
+            
+            // 加载提现申请
+            elements.withdrawRequests.innerHTML = '';
+            gameData.withdrawRequests.forEach(request => {
+                if (request.status === 'pending') {
+                    const li = document.createElement('li');
+                    li.className = 'user-item';
+                    li.innerHTML = `
+                        <span>${request.username} - ${request.amount}星脉币 (${request.method})</span>
+                        <div>
+                            <button class="approve-withdraw" data-user="${request.username}" data-amount="${request.amount}">批准</button>
+                            <button class="reject-withdraw" data-user="${request.username}" data-amount="${request.amount}">拒绝</button>
+                        </div>
+                    `;
+                    elements.withdrawRequests.appendChild(li);
+                }
+            });
+            
+            // 加载用户列表
+            searchUsers();
+            
+            // 加载公告
+            elements.announcementEdit.value = gameData.announcements.join('\n');
+            
+            // 添加按钮事件
+            document.querySelectorAll('.approve-vip').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    approveVIP(username);
+                });
+            });
+            
+            document.querySelectorAll('.reject-vip').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    rejectVIP(username);
+                });
+            });
+            
+            document.querySelectorAll('.approve-withdraw').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    const amount = parseFloat(e.target.getAttribute('data-amount'));
+                    approveWithdraw(username, amount);
+                });
+            });
+            
+            document.querySelectorAll('.reject-withdraw').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    const amount = parseFloat(e.target.getAttribute('data-amount'));
+                    rejectWithdraw(username, amount);
+                });
+            });
         }
-        
-        // 页面加载完成后初始化应用
-        window.addEventListener('DOMContentLoaded', init);
+
+        // 搜索用户
+        function searchUsers() {
+            const searchTerm = elements.searchUser.value.toLowerCase();
+            elements.userList.innerHTML = '';
+            
+            for (const username in gameData.users) {
+                if (username.toLowerCase().includes(searchTerm)) {
+                    const user = gameData.users[username];
+                    const li = document.createElement('li');
+                    li.className = 'user-item';
+                    li.innerHTML = `
+                        <span>${username} - 等级${user.level} - ${user.isVIP ? 'VIP' : '普通用户'}</span>
+                        <div>
+                            <button class="add-vip" data-user="${username}">${user.isVIP ? '取消VIP' : '设为VIP'}</button>
+                            <button class="add-coins" data-user="${username}">加星脉币</button>
+                        </div>
+                    `;
+                    elements.userList.appendChild(li);
+                }
+            }
+            
+            // 添加按钮事件
+            document.querySelectorAll('.add-vip').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    toggleVIP(username);
+                });
+            });
+            
+            document.querySelectorAll('.add-coins').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    const amount = prompt(`为 ${username} 添加多少星脉币?`, "10");
+                    if (amount && !isNaN(parseInt(amount))) {
+                        addCoins(username, parseInt(amount));
+                    }
+                });
+            });
+        }
+
+        // 批准VIP
+        function approveVIP(username) {
+            if (gameData.users[username]) {
+                gameData.users[username].isVIP = true;
+                gameData.users[username].vipRequested = false;
+                
+                // 更新申请状态
+                gameData.vipRequests = gameData.vipRequests.map(req => {
+                    if (req.username === username && req.status === 'pending') {
+                        return { ...req, status: 'approved' };
+                    }
+                    return req;
+                });
+                
+                saveGameData();
+                loadAdminData();
+                alert(`已批准 ${username} 的VIP申请`);
+            }
+        }
+
+        // 拒绝VIP
+        function rejectVIP(username) {
+            if (gameData.users[username]) {
+                gameData.users[username].vipRequested = false;
+                
+                // 更新申请状态
+                gameData.vipRequests = gameData.vipRequests.map(req => {
+                    if (req.username === username && req.status === 'pending') {
+                        return { ...req, status: 'rejected' };
+                    }
+                    return req;
+                });
+                
+                saveGameData();
+                loadAdminData();
+                alert(`已拒绝 ${username} 的VIP申请`);
+            }
+        }
+
+        // 批准提现
+        function approveWithdraw(username, amount) {
+            if (gameData.users[username]) {
+                // 更新用户提现记录
+                gameData.users[username].withdrawHistory = gameData.users[username].withdrawHistory.map(wd => {
+                    if (wd.status === 'pending' && wd.amount === amount) {
+                        return { ...wd, status: 'approved' };
+                    }
+                    return wd;
+                });
+                
+                // 更新提现申请状态
+                gameData.withdrawRequests = gameData.withdrawRequests.map(req => {
+                    if (req.username === username && req.amount === amount && req.status === 'pending') {
+                        return { ...req, status: 'approved' };
+                    }
+                    return req;
+                });
+                
+                saveGameData();
+                loadAdminData();
+                alert(`已批准 ${username} 的 ${amount} 星脉币提现申请`);
+            }
+        }
+
+        // 拒绝提现
+        function rejectWithdraw(username, amount) {
+            if (gameData.users[username]) {
+                // 返还星脉币
+                gameData.users[username].coins += amount;
+                
+                // 更新用户提现记录
+                gameData.users[username].withdrawHistory = gameData.users[username].withdrawHistory.map(wd => {
+                    if (wd.status === 'pending' && wd.amount === amount) {
+                        return { ...wd, status: 'rejected' };
+                    }
+                    return wd;
+                });
+                
+                // 更新提现申请状态
+                gameData.withdrawRequests = gameData.withdrawRequests.map(req => {
+                    if (req.username === username && req.amount === amount && req.status === 'pending') {
+                        return { ...req, status: 'rejected' };
+                    }
+                    return req;
+                });
+                
+                saveGameData();
+                loadAdminData();
+                alert(`已拒绝 ${username} 的 ${amount} 星脉币提现申请，星脉币已返还`);
+            }
+        }
+
+        // 切换VIP状态
+        function toggleVIP(username) {
+            if (gameData.users[username]) {
+                gameData.users[username].isVIP = !gameData.users[username].isVIP;
+                gameData.users[username].vipRequested = false;
+                
+                // 如果是批准VIP，从申请列表中移除
+                gameData.vipRequests = gameData.vipRequests.filter(req => 
+                    !(req.username === username && req.status === 'pending')
+                );
+                
+                saveGameData();
+                searchUsers();
+                alert(`${username} 的VIP状态已更新`);
+            }
+        }
+
+        // 添加星脉币
+        function addCoins(username, amount) {
+            if (gameData.users[username] && amount > 0) {
+                gameData.users[username].coins += amount;
+                saveGameData();
+                searchUsers();
+                alert(`已为 ${username} 添加 ${amount} 星脉币`);
+            }
+        }
+
+        // 保存管理员设置
+        function saveAdminSettings() {
+            const newAnnouncements = elements.announcementEdit.value.split('\n').filter(line => line.trim());
+            gameData.announcements = newAnnouncements;
+            
+            saveGameData();
+            alert('设置已保存');
+        }
+
+        // 保存游戏数据
+        function saveGameData() {
+            localStorage.setItem('pmGameData', JSON.stringify(gameData));
+        }
+
+        // 辅助函数: 打乱数组
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 初始化游戏
+        window.onload = initGame;
     </script>
 </body>
 </html>
