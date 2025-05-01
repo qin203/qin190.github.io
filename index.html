@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高级人脉星球</title>
+    <title>搬砖人生</title>
     <style>
         * {
             margin: 0;
@@ -103,6 +103,7 @@
             display: flex;
             margin-bottom: 15px;
             border-bottom: 1px solid #333;
+            flex-wrap: wrap;
         }
         
         .tab-btn {
@@ -195,6 +196,7 @@
             max-width: 100%;
             height: auto;
             margin-bottom: 10px;
+            max-height: 200px;
         }
         
         .admin-panel {
@@ -330,6 +332,88 @@
             font-size: 12px;
             color: #a8dadc;
         }
+        
+        /* 交易市场样式 */
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .market-action {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 排行榜标签样式 */
+        .rank-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .rank-tab {
+            padding: 8px 15px;
+            background: none;
+            border: none;
+            color: #a8dadc;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-right: 5px;
+        }
+        
+        .rank-tab.active {
+            border-bottom: 3px solid #f72585;
+            color: white;
+        }
+        
+        /* 邀请好友列表样式 */
+        .invited-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .invited-user {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .invited-user:last-child {
+            border-bottom: none;
+        }
+        
+        /* 上传按钮样式 */
+        .upload-btn {
+            background-color: #4895ef;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .upload-btn:hover {
+            background-color: #3a7bd5;
+        }
+        
+        /* 机器人样式 */
+        .bot-tag {
+            background-color: #6c757d;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -337,7 +421,7 @@
         <!-- 登录/注册表单 -->
         <div id="auth-container">
             <header>
-                <h1>高级人脉星球</h1>
+                <h1>搬砖人生</h1>
                 <div class="countdown" id="countdown">开服时间: 2025年5月1日</div>
             </header>
             
@@ -381,9 +465,9 @@
         <!-- 主游戏界面 (默认隐藏) -->
         <div id="game-container" style="display: none;">
             <header>
-                <h1>高级人脉星球</h1>
+                <h1>搬砖人生</h1>
                 <div class="countdown" id="game-countdown"></div>
-                <p id="user-info">欢迎, <span id="username-display"></span> | 会员: <span id="vip-status">否</span></p>
+                <p id="user-info">�迎, <span id="username-display"></span> | 会员: <span id="vip-status">否</span></p>
             </header>
             
             <div class="tab-buttons">
@@ -394,6 +478,7 @@
                 <button class="tab-btn" data-tab="vip">会员</button>
                 <button class="tab-btn" data-tab="withdraw">提现</button>
                 <button class="tab-btn" data-tab="invite">邀请</button>
+                <button class="tab-btn" data-tab="rankings">排行榜</button>
                 <button class="tab-btn" id="logout-btn">退出</button>
             </div>
             
@@ -402,7 +487,7 @@
                 <div class="game-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="coin-display">0</div>
-                        <div class="stat-label">星脉币</div>
+                        <div class="stat-label">砖块币</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="point-display">0</div>
@@ -415,21 +500,15 @@
                 </div>
                 
                 <div class="game-card" id="mine-coins">
-                    <h3 class="game-title">星脉矿场</h3>
-                    <p class="game-desc">每小时自动生产5个星脉币，最多积累24小时</p>
-                    <button id="collect-btn">收集星脉币</button>
+                    <h3 class="game-title">砖块矿场</h3>
+                    <p class="game-desc">每小时自动生产5个砖块币，最多积累24小时</p>
+                    <button id="collect-btn">收集砖块币</button>
                     <div id="mine-progress" style="margin-top: 10px;">
                         <div style="background-color: #333; height: 20px; border-radius: 10px;">
                             <div id="progress-bar" style="background-color: #4cc9f0; height: 100%; width: 0%; border-radius: 10px;"></div>
                         </div>
-                        <p id="progress-text" style="text-align: center; margin-top: 5px;">0/5 星脉币</p>
+                        <p id="progress-text" style="text-align: center; margin-top: 5px;">0/5 砖块币</p>
                     </div>
-                </div>
-                
-                <div class="game-card">
-                    <h3 class="game-title">排行榜</h3>
-                    <p class="game-desc">查看本周排名前10的玩家</p>
-                    <button id="show-leaderboard">查看排行榜</button>
                 </div>
                 
                 <div class="game-card">
@@ -466,19 +545,19 @@
                 
                 <div class="game-card" data-game="clicker">
                     <h3 class="game-title">点击赚积分</h3>
-                    <p class="game-desc">每次点击获得0.01积分，消耗1星脉币/次</p>
+                    <p class="game-desc">每次点击获得0.01积分，消耗1砖块币/次</p>
                     <button class="play-game-btn">开始游戏</button>
                 </div>
                 
                 <div class="game-card" data-game="memory">
                     <h3 class="game-title">记忆匹配</h3>
-                    <p class="game-desc">匹配卡片获得积分，消耗2星脉币/次</p>
+                    <p class="game-desc">匹配卡片获得积分，消耗2砖块币/次</p>
                     <button class="play-game-btn">开始游戏</button>
                 </div>
                 
                 <div class="game-card" data-game="quiz">
                     <h3 class="game-title">知识问答</h3>
-                    <p class="game-desc">回答正确获得积分，消耗3星脉币/次</p>
+                    <p class="game-desc">回答正确获得积分，消耗3砖块币/次</p>
                     <button class="play-game-btn">开始游戏</button>
                 </div>
                 
@@ -493,7 +572,33 @@
             <!-- 交易市场 -->
             <div class="tab-container" id="market-tab">
                 <h2>交易市场</h2>
-                <p>交易功能暂未开放</p>
+                
+                <div class="market-item">
+                    <div>
+                        <h3>砖块币兑换积分</h3>
+                        <p>1砖块币 = 0.5积分</p>
+                    </div>
+                    <div class="market-action">
+                        <input type="number" id="coin-to-point" min="1" max="100" value="1" style="width: 60px;">
+                        <button id="exchange-coin-point">兑换</button>
+                    </div>
+                </div>
+                
+                <div class="market-item">
+                    <div>
+                        <h3>能量石兑换砖块币</h3>
+                        <p>1能量石 = 1砖块币</p>
+                    </div>
+                    <div class="market-action">
+                        <input type="number" id="stone-to-coin" min="1" max="100" value="1" style="width: 60px;">
+                        <button id="exchange-stone-coin">兑换</button>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 20px;">交易记录</h3>
+                <div id="market-history" style="margin-top: 10px;">
+                    <p>暂无交易记录</p>
+                </div>
             </div>
             
             <!-- 会员 -->
@@ -502,19 +607,19 @@
                 <div class="payment-methods">
                     <div class="payment-method">
                         <h3>支付宝</h3>
-                        <img src="alipay_qr.jpg" alt="支付宝收款码">
+                        <img src="alipay_qr.jpg" alt="支付宝收款码" id="alipay-qr">
                         <p>支持信用卡/花呗付款</p>
                     </div>
                     <div class="payment-method">
                         <h3>微信支付</h3>
-                        <img src="wechat_qr.jpg" alt="微信收款码">
-                        <p>扫码支付32元开通会员</p>
+                        <img src="wechat_qr.jpg" alt="微信收款码" id="wechat-qr">
+                        <p>扫码支付<span id="vip-price">32</span>元开通会员</p>
                     </div>
                 </div>
                 
                 <h3 style="margin-top: 20px;">会员特权</h3>
                 <ul>
-                    <li>每日额外获得10星脉币</li>
+                    <li>每日额外获得10砖块币</li>
                     <li>小游戏消耗减少50%</li>
                     <li>提现手续费降低</li>
                     <li>专属会员标识</li>
@@ -526,7 +631,7 @@
             <!-- 提现 -->
             <div class="tab-container" id="withdraw-tab">
                 <h2>提现申请</h2>
-                <p>当前可提现星脉币: <span id="withdraw-coin">0</span></p>
+                <p>当前可提现砖块币: <span id="withdraw-coin">0</span></p>
                 <div class="form-group">
                     <label for="withdraw-amount">提现金额</label>
                     <input type="number" id="withdraw-amount" placeholder="输入提现金额">
@@ -546,10 +651,15 @@
                 
                 <h3 style="margin-top: 20px;">提现规则</h3>
                 <ul>
-                    <li>最低提现金额: 100星脉币</li>
-                    <li>提现手续费: 10%(会员5%)</li>
+                    <li>最低提现金额: 100砖块币</li>
+                    <li>提现手续费: <span id="withdraw-fee">10</span>%</li>
                     <li>处理时间: 24小时内</li>
                 </ul>
+                
+                <h3 style="margin-top: 20px;">提现记录</h3>
+                <div id="withdraw-history" style="margin-top: 10px;">
+                    <p>暂无提现记录</p>
+                </div>
             </div>
             
             <!-- 邀请 -->
@@ -561,23 +671,133 @@
                 
                 <h3 style="margin-top: 20px;">邀请奖励</h3>
                 <ul>
-                    <li>每邀请1人获得1星脉币</li>
-                    <li>好友达到5级，额外获得5星脉币</li>
+                    <li>每邀请1人获得1砖块币</li>
+                    <li>好友达到5级，额外获得5砖块币</li>
                     <li>邀请50人达到5级，联系管理员领取888红包</li>
                 </ul>
                 
                 <button id="copy-invite" style="margin-top: 20px;">复制邀请链接</button>
+                
+                <h3 style="margin-top: 20px;">邀请好友列表</h3>
+                <div class="invited-list" id="invited-list">
+                    <p>暂无邀请好友</p>
+                </div>
+            </div>
+            
+            <!-- 排行榜 -->
+            <div class="tab-container" id="rankings-tab">
+                <h2>排行榜</h2>
+                
+                <div class="rank-tabs">
+                    <button class="rank-tab active" data-rank="level">等级排行</button>
+                    <button class="rank-tab" data-rank="invite">邀请排行</button>
+                    <button class="rank-tab" data-rank="points">积分排行</button>
+                </div>
+                
+                <div id="level-rank" class="rank-content">
+                    <table class="leaderboard">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>用户名</th>
+                                <th>等级</th>
+                                <th>砖块币</th>
+                            </tr>
+                        </thead>
+                        <tbody id="level-rank-body">
+                            <tr>
+                                <td colspan="4">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="invite-rank" class="rank-content" style="display: none;">
+                    <table class="leaderboard">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>用户名</th>
+                                <th>邀请人数</th>
+                                <th>5级好友</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invite-rank-body">
+                            <tr>
+                                <td colspan="4">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="points-rank" class="rank-content" style="display: none;">
+                    <table class="leaderboard">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>用户名</th>
+                                <th>积分</th>
+                                <th>等级</th>
+                            </tr>
+                        </thead>
+                        <tbody id="points-rank-body">
+                            <tr>
+                                <td colspan="4">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
         <!-- 管理员面板 (默认隐藏) -->
         <div id="admin-container" style="display: none;">
             <header>
-                <h1>高级人脉星球 - 管理面板</h1>
+                <h1>搬砖人生 - 管理面板</h1>
                 <button id="admin-logout" style="background-color: #f72585; padding: 8px 15px; margin-top: 10px;">退出管理</button>
             </header>
             
             <div class="admin-panel">
+                <div class="admin-section">
+                    <h3>系统设置</h3>
+                    <div class="form-group">
+                        <label for="vip-price-input">会员价格(元)</label>
+                        <input type="number" id="vip-price-input" value="32" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="withdraw-fee-input">提现手续费(%)</label>
+                        <input type="number" id="withdraw-fee-input" value="10" min="0" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="vip-fee-input">VIP提现手续费(%)</label>
+                        <input type="number" id="vip-fee-input" value="5" min="0" max="50">
+                    </div>
+                    <button id="save-settings">保存设置</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>支付二维码</h3>
+                    <div class="form-group">
+                        <label for="alipay-qr-input">支付宝二维码URL</label>
+                        <input type="text" id="alipay-qr-input" placeholder="输入支付宝二维码URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="alipay-qr-upload">或上传支付宝二维码</label>
+                        <input type="file" id="alipay-qr-upload" accept="image/*">
+                        <button class="upload-btn" id="upload-alipay">上传</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="wechat-qr-input">微信二维码URL</label>
+                        <input type="text" id="wechat-qr-input" placeholder="输入微信二维码URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="wechat-qr-upload">或上传微信二维码</label>
+                        <input type="file" id="wechat-qr-upload" accept="image/*">
+                        <button class="upload-btn" id="upload-wechat">上传</button>
+                    </div>
+                    <button id="update-qr">更新二维码</button>
+                </div>
+                
                 <div class="admin-section">
                     <h3>会员申请</h3>
                     <ul class="user-list" id="vip-requests">
@@ -603,56 +823,17 @@
                 </div>
                 
                 <div class="admin-section">
-                    <h3>系统设置</h3>
+                    <h3>公告编辑</h3>
                     <div class="form-group">
-                        <label for="announcement-edit">公告编辑</label>
                         <textarea id="announcement-edit" rows="4" style="width: 100%; padding: 10px; background-color: #1d3557; color: white; border: 1px solid #457b9d; border-radius: 5px;"></textarea>
                     </div>
-                    <button id="save-settings">保存设置</button>
+                    <button id="save-announcement">保存公告</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 排行榜模态框 -->
-    <div class="modal" id="leaderboard-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>本周排行榜</h2>
-            <table class="leaderboard">
-                <thead>
-                    <tr>
-                        <th>排名</th>
-                        <th>用户名</th>
-                        <th>等级</th>
-                        <th>星脉币</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr>
-                        <td class="rank-1">1</td>
-                        <td>玩家1</td>
-                        <td>45</td>
-                        <td>1200</td>
-                    </tr>
-                    <tr>
-                        <td class="rank-2">2</td>
-                        <td>玩家2</td>
-                        <td>38</td>
-                        <td>980</td>
-                    </tr>
-                    <tr>
-                        <td class="rank-3">3</td>
-                        <td>玩家3</td>
-                        <td>35</td>
-                        <td>850</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- 小游戏模态框 -->
+    <!-- 游戏模态框 -->
     <div class="modal" id="game-modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
@@ -674,14 +855,24 @@
                 "排行榜每周刷新，前三名有现金奖励",
                 "管理员微信: 19042507597"
             ],
-            leaderboard: [],
+            vipPrice: 32,
+            withdrawFee: 10,
+            vipWithdrawFee: 5,
+            paymentQR: {
+                alipay: "alipay_qr.jpg",
+                wechat: "wechat_qr.jpg"
+            },
             vipRequests: [],
             withdrawRequests: [],
             escapeRooms: {
                 rooms: ["量茶间", "太憩舱", "航指室", "星沙龙", "星洁室", "星悠室", "里空间", "音乐舱", "里悠室"],
                 players: {},
-                gameInProgress: false
-            }
+                gameInProgress: false,
+                countdown: 0,
+                countdownInterval: null,
+                bots: []
+            },
+            marketHistory: []
         };
 
         // DOM元素
@@ -715,14 +906,6 @@
             progressBar: document.getElementById('progress-bar'),
             progressText: document.getElementById('progress-text'),
             mineCoins: document.getElementById('mine-coins'),
-            showLeaderboard: document.getElementById('show-leaderboard'),
-            leaderboardModal: document.getElementById('leaderboard-modal'),
-            leaderboardBody: document.getElementById('leaderboard-body'),
-            closeBtns: document.querySelectorAll('.close-btn'),
-            gameModal: document.getElementById('game-modal'),
-            gameModalTitle: document.getElementById('game-modal-title'),
-            gameModalContent: document.getElementById('game-modal-content'),
-            playGameBtns: document.querySelectorAll('.play-game-btn'),
             inviteCode: document.getElementById('invite-code'),
             invitedCount: document.getElementById('invited-count'),
             invitedLevel5: document.getElementById('invited-level5'),
@@ -733,16 +916,47 @@
             withdrawMethod: document.getElementById('withdraw-method'),
             withdrawAccount: document.getElementById('withdraw-account'),
             submitWithdraw: document.getElementById('submit-withdraw'),
+            withdrawFee: document.getElementById('withdraw-fee'),
+            withdrawHistory: document.getElementById('withdraw-history'),
             vipRequests: document.getElementById('vip-requests'),
             withdrawRequests: document.getElementById('withdraw-requests'),
             userList: document.getElementById('user-list'),
             searchUser: document.getElementById('search-user'),
             announcementEdit: document.getElementById('announcement-edit'),
+            saveAnnouncement: document.getElementById('save-announcement'),
             saveSettings: document.getElementById('save-settings'),
+            vipPriceInput: document.getElementById('vip-price-input'),
+            withdrawFeeInput: document.getElementById('withdraw-fee-input'),
+            vipFeeInput: document.getElementById('vip-fee-input'),
+            alipayQrInput: document.getElementById('alipay-qr-input'),
+            wechatQrInput: document.getElementById('wechat-qr-input'),
+            alipayQrUpload: document.getElementById('alipay-qr-upload'),
+            wechatQrUpload: document.getElementById('wechat-qr-upload'),
+            uploadAlipay: document.getElementById('upload-alipay'),
+            uploadWechat: document.getElementById('upload-wechat'),
+            updateQr: document.getElementById('update-qr'),
             tabBtns: document.querySelectorAll('.tab-btn'),
             tabs: document.querySelectorAll('.tab-container'),
             countdown: document.getElementById('countdown'),
-            gameCountdown: document.getElementById('game-countdown')
+            gameCountdown: document.getElementById('game-countdown'),
+            gameModal: document.getElementById('game-modal'),
+            gameModalTitle: document.getElementById('game-modal-title'),
+            gameModalContent: document.getElementById('game-modal-content'),
+            playGameBtns: document.querySelectorAll('.play-game-btn'),
+            invitedList: document.getElementById('invited-list'),
+            coinToPoint: document.getElementById('coin-to-point'),
+            exchangeCoinPoint: document.getElementById('exchange-coin-point'),
+            stoneToCoin: document.getElementById('stone-to-coin'),
+            exchangeStoneCoin: document.getElementById('exchange-stone-coin'),
+            marketHistory: document.getElementById('market-history'),
+            rankTabs: document.querySelectorAll('.rank-tab'),
+            rankContents: document.querySelectorAll('.rank-content'),
+            levelRankBody: document.getElementById('level-rank-body'),
+            inviteRankBody: document.getElementById('invite-rank-body'),
+            pointsRankBody: document.getElementById('points-rank-body'),
+            vipPriceDisplay: document.getElementById('vip-price'),
+            alipayQr: document.getElementById('alipay-qr'),
+            wechatQr: document.getElementById('wechat-qr')
         };
 
         // 初始化游戏
@@ -765,6 +979,8 @@
                 const username = localStorage.getItem('pmCurrentUser');
                 if (gameData.users[username]) {
                     loginUser(username);
+                } else if (username === 'admin') {
+                    loginAdmin();
                 }
             }
         }
@@ -870,7 +1086,9 @@
                     invitedUsers: [],
                     invitedLevel5Users: [],
                     vipRequested: false,
-                    withdrawHistory: []
+                    withdrawHistory: [],
+                    marketHistory: [],
+                    energyStones: 0
                 };
                 
                 gameData.users[username] = newUser;
@@ -907,33 +1125,52 @@
                     btn.addEventListener('click', () => {
                         const tabId = btn.getAttribute('data-tab');
                         switchTab(tabId);
+                        
+                        // 如果是排行榜标签，加载排行榜数据
+                        if (tabId === 'rankings') {
+                            loadRankings('level');
+                        }
                     });
                 }
             });
             
+            // 排行榜标签切换
+            elements.rankTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const rankType = tab.getAttribute('data-rank');
+                    
+                    // 更新标签状态
+                    elements.rankTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // 更新内容显示
+                    elements.rankContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    document.getElementById(`${rankType}-rank`).style.display = 'block';
+                    
+                    // 加载排行榜数据
+                    loadRankings(rankType);
+                });
+            });
+            
             // 关闭模态框
-            elements.closeBtns.forEach(btn => {
+            document.querySelectorAll('.close-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    elements.leaderboardModal.style.display = 'none';
                     elements.gameModal.style.display = 'none';
                 });
             });
             
             // 点击模态框外部关闭
             window.addEventListener('click', (e) => {
-                if (e.target === elements.leaderboardModal) {
-                    elements.leaderboardModal.style.display = 'none';
-                }
                 if (e.target === elements.gameModal) {
                     elements.gameModal.style.display = 'none';
                 }
             });
             
-            // 收集星脉币
+            // 收集砖块币
             elements.collectBtn.addEventListener('click', collectCoins);
-            
-            // 查看排行榜
-            elements.showLeaderboard.addEventListener('click', showLeaderboard);
             
             // 升级
             elements.upgradeBtn.addEventListener('click', upgradeLevel);
@@ -959,8 +1196,50 @@
             // 管理员保存设置
             elements.saveSettings.addEventListener('click', saveAdminSettings);
             
+            // 更新支付二维码
+            elements.updateQr.addEventListener('click', updatePaymentQR);
+            
+            // 上传支付宝二维码
+            elements.uploadAlipay.addEventListener('click', () => uploadQR('alipay'));
+            
+            // 上传微信二维码
+            elements.uploadWechat.addEventListener('click', () => uploadQR('wechat'));
+            
+            // 保存公告
+            elements.saveAnnouncement.addEventListener('click', saveAnnouncement);
+            
             // 搜索用户
             elements.searchUser.addEventListener('input', searchUsers);
+            
+            // 交易市场兑换
+            elements.exchangeCoinPoint.addEventListener('click', exchangeCoinToPoint);
+            elements.exchangeStoneCoin.addEventListener('click', exchangeStoneToCoin);
+        }
+
+        // 上传二维码
+        function uploadQR(type) {
+            const fileInput = type === 'alipay' ? elements.alipayQrUpload : elements.wechatQrUpload;
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('请先选择图片文件');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataURL = e.target.result;
+                
+                // 更新对应的输入框
+                if (type === 'alipay') {
+                    elements.alipayQrInput.value = dataURL;
+                } else {
+                    elements.wechatQrInput.value = dataURL;
+                }
+                
+                alert('二维码已上传，请点击"更新二维码"保存');
+            };
+            reader.readAsDataURL(file);
         }
 
         // 生成邀请码
@@ -990,6 +1269,9 @@
             
             updateUserUI();
             startMiningTimer();
+            loadInvitedList();
+            loadWithdrawHistory();
+            loadMarketHistory();
         }
 
         // 登录管理员
@@ -1001,7 +1283,16 @@
             elements.gameContainer.style.display = 'none';
             elements.adminContainer.style.display = 'block';
             
+            // 加载管理员数据
             loadAdminData();
+            
+            // 设置表单初始值
+            elements.vipPriceInput.value = gameData.vipPrice;
+            elements.withdrawFeeInput.value = gameData.withdrawFee;
+            elements.vipFeeInput.value = gameData.vipWithdrawFee;
+            elements.alipayQrInput.value = gameData.paymentQR.alipay;
+            elements.wechatQrInput.value = gameData.paymentQR.wechat;
+            elements.announcementEdit.value = gameData.announcements.join('\n');
         }
 
         // 退出用户
@@ -1066,8 +1357,105 @@
             elements.invitedCount.textContent = user.invitedUsers.length;
             elements.invitedLevel5.textContent = user.invitedLevel5Users.length;
             
-            // 更新可提现星脉币
+            // 更新可提现砖块币
             elements.withdrawCoin.textContent = user.coins;
+            
+            // 更新提现手续费
+            elements.withdrawFee.textContent = user.isVIP ? gameData.vipWithdrawFee : gameData.withdrawFee;
+            
+            // 更新VIP价格显示
+            elements.vipPriceDisplay.textContent = gameData.vipPrice;
+        }
+
+        // 加载邀请好友列表
+        function loadInvitedList() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            if (user.invitedUsers.length === 0) {
+                elements.invitedList.innerHTML = '<p>暂无邀请好友</p>';
+                return;
+            }
+            
+            elements.invitedList.innerHTML = '';
+            user.invitedUsers.forEach(username => {
+                if (gameData.users[username]) {
+                    const invitedUser = gameData.users[username];
+                    const div = document.createElement('div');
+                    div.className = 'invited-user';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = `${username} (等级${invitedUser.level})`;
+                    
+                    const statusSpan = document.createElement('span');
+                    statusSpan.textContent = invitedUser.level >= 5 ? '已达标' : '未达标';
+                    statusSpan.style.color = invitedUser.level >= 5 ? '#4cc9f0' : '#f72585';
+                    
+                    div.appendChild(nameSpan);
+                    div.appendChild(statusSpan);
+                    elements.invitedList.appendChild(div);
+                }
+            });
+        }
+
+        // 加载提现记录
+        function loadWithdrawHistory() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            if (user.withdrawHistory.length === 0) {
+                elements.withdrawHistory.innerHTML = '<p>暂无提现记录</p>';
+                return;
+            }
+            
+            elements.withdrawHistory.innerHTML = '';
+            user.withdrawHistory.forEach((wd, index) => {
+                const div = document.createElement('div');
+                div.style.marginBottom = '10px';
+                div.style.padding = '5px';
+                div.style.borderBottom = '1px solid #333';
+                
+                const method = wd.method === 'alipay' ? '支付宝' : '微信';
+                const statusColor = wd.status === 'approved' ? '#4cc9f0' : 
+                                  wd.status === 'rejected' ? '#f72585' : '#a8dadc';
+                
+                div.innerHTML = `
+                    <p>${new Date(wd.date).toLocaleString()} - ${method} - ${wd.amount}砖块币</p>
+                    <p>手续费: ${wd.fee.toFixed(2)} - 实际到账: ${wd.received.toFixed(2)}</p>
+                    <p>状态: <span style="color: ${statusColor}">${
+                        wd.status === 'approved' ? '已批准' : 
+                        wd.status === 'rejected' ? '已拒绝' : '处理中'
+                    }</span></p>
+                `;
+                
+                elements.withdrawHistory.appendChild(div);
+            });
+        }
+
+        // 加载交易记录
+        function loadMarketHistory() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            if (user.marketHistory.length === 0) {
+                elements.marketHistory.innerHTML = '<p>暂无交易记录</p>';
+                return;
+            }
+            
+            elements.marketHistory.innerHTML = '';
+            user.marketHistory.forEach((tx, index) => {
+                const div = document.createElement('div');
+                div.style.marginBottom = '10px';
+                div.style.padding = '5px';
+                div.style.borderBottom = '1px solid #333';
+                
+                div.innerHTML = `
+                    <p>${new Date(tx.date).toLocaleString()} - ${tx.type}</p>
+                    <p>${tx.details}</p>
+                `;
+                
+                elements.marketHistory.appendChild(div);
+            });
         }
 
         // 开始挖矿计时器
@@ -1092,20 +1480,20 @@
             // 更新UI
             const progressPercent = (coinsEarned % 5 / 5) * 100;
             elements.progressBar.style.width = `${progressPercent}%`;
-            elements.progressText.textContent = `${(coinsEarned % 5).toFixed(2)}/5 星脉币`;
+            elements.progressText.textContent = `${(coinsEarned % 5).toFixed(2)}/5 砖块币`;
             
             // 保存已挖矿但未收集的币
             user.minedCoins = coinsEarned;
             saveGameData();
         }
 
-        // 收集星脉币
+        // 收集砖块币
         function collectCoins() {
             const user = gameData.currentUser;
             if (!user) return;
             
             if (user.minedCoins <= 0) {
-                alert('没有可收集的星脉币');
+                alert('没有可收集的砖块币');
                 return;
             }
             
@@ -1117,7 +1505,7 @@
             updateUserUI();
             saveGameData();
             
-            alert(`成功收集 ${coinsToAdd} 星脉币!`);
+            alert(`成功收集 ${coinsToAdd} 砖块币!`);
         }
 
         // 切换标签页
@@ -1141,73 +1529,91 @@
             });
         }
 
-        // 显示排行榜
-        function showLeaderboard() {
-            // 生成测试数据
-            if (gameData.leaderboard.length === 0) {
-                gameData.leaderboard = generateLeaderboard();
+        // 加载排行榜数据
+        function loadRankings(type) {
+            let users = [];
+            
+            // 收集所有用户数据
+            for (const username in gameData.users) {
+                users.push({
+                    username,
+                    level: gameData.users[username].level,
+                    coins: gameData.users[username].coins,
+                    points: gameData.users[username].points,
+                    invitedCount: gameData.users[username].invitedUsers.length,
+                    invitedLevel5: gameData.users[username].invitedLevel5Users.length
+                });
             }
             
-            // 更新排行榜UI
-            elements.leaderboardBody.innerHTML = '';
-            gameData.leaderboard.forEach((user, index) => {
+            // 根据类型排序
+            if (type === 'level') {
+                users.sort((a, b) => b.level - a.level || b.coins - a.coins);
+                updateRankingTable(elements.levelRankBody, users, 'level');
+            } else if (type === 'invite') {
+                users.sort((a, b) => b.invitedCount - a.invitedCount || b.invitedLevel5 - a.invitedLevel5);
+                updateRankingTable(elements.inviteRankBody, users, 'invite');
+            } else if (type === 'points') {
+                users.sort((a, b) => b.points - a.points || b.level - a.level);
+                updateRankingTable(elements.pointsRankBody, users, 'points');
+            }
+        }
+
+        // 更新排行榜表格
+        function updateRankingTable(tableElement, users, type) {
+            tableElement.innerHTML = '';
+            
+            users.slice(0, 20).forEach((user, index) => {
                 const row = document.createElement('tr');
                 
+                // 排名列
                 const rankCell = document.createElement('td');
                 if (index === 0) rankCell.className = 'rank-1';
                 else if (index === 1) rankCell.className = 'rank-2';
                 else if (index === 2) rankCell.className = 'rank-3';
                 rankCell.textContent = index + 1;
                 
+                // 用户名列
                 const nameCell = document.createElement('td');
                 nameCell.textContent = user.username;
                 
-                const levelCell = document.createElement('td');
-                levelCell.textContent = user.level;
-                
-                const coinCell = document.createElement('td');
-                coinCell.textContent = user.coins;
-                
-                row.appendChild(rankCell);
-                row.appendChild(nameCell);
-                row.appendChild(levelCell);
-                row.appendChild(coinCell);
-                
-                elements.leaderboardBody.appendChild(row);
-            });
-            
-            elements.leaderboardModal.style.display = 'flex';
-        }
-
-        // 生成排行榜数据
-        function generateLeaderboard() {
-            const users = [];
-            
-            // 添加当前用户
-            if (gameData.currentUser) {
-                users.push({
-                    username: gameData.currentUser.username,
-                    level: gameData.currentUser.level,
-                    coins: gameData.currentUser.coins
-                });
-            }
-            
-            // 添加其他用户
-            for (const username in gameData.users) {
-                if (!gameData.currentUser || username !== gameData.currentUser.username) {
-                    users.push({
-                        username,
-                        level: gameData.users[username].level,
-                        coins: gameData.users[username].coins
-                    });
+                // 根据类型添加其他列
+                if (type === 'level') {
+                    const levelCell = document.createElement('td');
+                    levelCell.textContent = user.level;
+                    
+                    const coinCell = document.createElement('td');
+                    coinCell.textContent = user.coins;
+                    
+                    row.appendChild(rankCell);
+                    row.appendChild(nameCell);
+                    row.appendChild(levelCell);
+                    row.appendChild(coinCell);
+                } else if (type === 'invite') {
+                    const inviteCell = document.createElement('td');
+                    inviteCell.textContent = user.invitedCount;
+                    
+                    const level5Cell = document.createElement('td');
+                    level5Cell.textContent = user.invitedLevel5;
+                    
+                    row.appendChild(rankCell);
+                    row.appendChild(nameCell);
+                    row.appendChild(inviteCell);
+                    row.appendChild(level5Cell);
+                } else if (type === 'points') {
+                    const pointsCell = document.createElement('td');
+                    pointsCell.textContent = user.points.toFixed(2);
+                    
+                    const levelCell = document.createElement('td');
+                    levelCell.textContent = user.level;
+                    
+                    row.appendChild(rankCell);
+                    row.appendChild(nameCell);
+                    row.appendChild(pointsCell);
+                    row.appendChild(levelCell);
                 }
-            }
-            
-            // 按等级和星脉币排序
-            return users.sort((a, b) => {
-                if (b.level !== a.level) return b.level - a.level;
-                return b.coins - a.coins;
-            }).slice(0, 10);
+                
+                tableElement.appendChild(row);
+            });
         }
 
         // 升级等级
@@ -1243,8 +1649,22 @@
             user.level++;
             user.points -= requiredPoints;
             
+            // 检查是否有邀请者，如果达到5级，给邀请者奖励
+            if (user.level === 5) {
+                for (const username in gameData.users) {
+                    const inviter = gameData.users[username];
+                    if (inviter.invitedUsers.includes(user.username) && !inviter.invitedLevel5Users.includes(user.username)) {
+                        inviter.invitedLevel5Users.push(user.username);
+                        inviter.coins += 5; // 额外奖励
+                        alert(`恭喜您达到5级！您的邀请人 ${inviter.username} 获得了5砖块币奖励`);
+                        break;
+                    }
+                }
+            }
+            
             // 更新UI
             updateUserUI();
+            loadInvitedList();
             saveGameData();
             
             alert(`升级成功! 当前等级: ${user.level}`);
@@ -1255,7 +1675,7 @@
             const user = gameData.currentUser;
             if (!user) return;
             
-            // 检查星脉币是否足够
+            // 检查砖块币是否足够
             let cost = 1;
             if (gameName === 'memory') cost = 2;
             else if (gameName === 'quiz') cost = 3;
@@ -1265,11 +1685,11 @@
             if (user.isVIP) cost = Math.floor(cost * 0.5);
             
             if (user.coins < cost) {
-                alert(`需要 ${cost} 星脉币才能玩这个游戏`);
+                alert(`需要 ${cost} 砖块币才能玩这个游戏`);
                 return;
             }
             
-            // 扣除星脉币
+            // 扣除砖块币
             user.coins -= cost;
             updateUserUI();
             
@@ -1345,6 +1765,10 @@
                                     <div>奖池</div>
                                     <div id="escape-prize-pool">0</div>
                                 </div>
+                                <div class="escape-stat">
+                                    <div>倒计时</div>
+                                    <div id="escape-countdown">20</div>
+                                </div>
                             </div>
                             
                             <h4>选择房间躲避外星人</h4>
@@ -1413,7 +1837,16 @@
             elements.gameModal.querySelector('.close-btn').addEventListener('click', () => {
                 if (pointsEarned > 0) {
                     gameData.currentUser.points += pointsEarned;
+                    
+                    // 添加交易记录
+                    gameData.currentUser.marketHistory.push({
+                        type: '游戏奖励',
+                        details: `从点击游戏获得 ${pointsEarned.toFixed(2)} 积分`,
+                        date: new Date().toISOString()
+                    });
+                    
                     updateUserUI();
+                    loadMarketHistory();
                     saveGameData();
                     alert(`游戏结束! 获得 ${pointsEarned.toFixed(2)} 积分`);
                 }
@@ -1483,7 +1916,16 @@
                         if (matchedPairs === 8) {
                             setTimeout(() => {
                                 gameData.currentUser.points += 1;
+                                
+                                // 添加交易记录
+                                gameData.currentUser.marketHistory.push({
+                                    type: '游戏奖励',
+                                    details: '从记忆游戏获得 1 积分',
+                                    date: new Date().toISOString()
+                                });
+                                
                                 updateUserUI();
+                                loadMarketHistory();
                                 saveGameData();
                                 alert('恭喜! 你完成了记忆游戏，获得1积分!');
                                 elements.gameModal.style.display = 'none';
@@ -1504,10 +1946,20 @@
                         if (attempts <= 0) {
                             setTimeout(() => {
                                 if (matchedPairs > 0) {
-                                    gameData.currentUser.points += matchedPairs * 0.1;
+                                    const pointsEarned = matchedPairs * 0.1;
+                                    gameData.currentUser.points += pointsEarned;
+                                    
+                                    // 添加交易记录
+                                    gameData.currentUser.marketHistory.push({
+                                        type: '游戏奖励',
+                                        details: `从记忆游戏获得 ${pointsEarned.toFixed(1)} 积分`,
+                                        date: new Date().toISOString()
+                                    });
+                                    
                                     updateUserUI();
+                                    loadMarketHistory();
                                     saveGameData();
-                                    alert(`游戏结束! 你匹配了 ${matchedPairs} 对卡片，获得 ${(matchedPairs * 0.1).toFixed(1)} 积分`);
+                                    alert(`游戏结束! 你匹配了 ${matchedPairs} 对卡片，获得 ${pointsEarned.toFixed(1)} 积分`);
                                 } else {
                                     alert('游戏结束! 没有匹配到任何卡片');
                                 }
@@ -1549,10 +2001,20 @@
             function showQuestion() {
                 if (currentQuestion >= questions.length) {
                     // 游戏结束
-                    gameData.currentUser.points += score * 0.2;
+                    const pointsEarned = score * 0.2;
+                    gameData.currentUser.points += pointsEarned;
+                    
+                    // 添加交易记录
+                    gameData.currentUser.marketHistory.push({
+                        type: '游戏奖励',
+                        details: `从知识问答获得 ${pointsEarned.toFixed(1)} 积分`,
+                        date: new Date().toISOString()
+                    });
+                    
                     updateUserUI();
+                    loadMarketHistory();
                     saveGameData();
-                    alert(`游戏结束! 你的得分是 ${score}，获得 ${(score * 0.2).toFixed(1)} 积分`);
+                    alert(`游戏结束! 你的得分是 ${score}，获得 ${pointsEarned.toFixed(1)} 积分`);
                     elements.gameModal.style.display = 'none';
                     return;
                 }
@@ -1600,6 +2062,7 @@
             const currentPlayersDisplay = document.getElementById('escape-current-players');
             const targetPlayersDisplay = document.getElementById('escape-target-players');
             const prizePoolDisplay = document.getElementById('escape-prize-pool');
+            const countdownDisplay = document.getElementById('escape-countdown');
             
             let selectedRoom = null;
             let currentBet = 10;
@@ -1636,11 +2099,11 @@
                 }
                 
                 if (user.coins < currentBet) {
-                    alert('星脉币不足');
+                    alert('砖块币不足');
                     return;
                 }
                 
-                // 扣除星脉币
+                // 扣除砖块币
                 user.coins -= currentBet;
                 updateUserUI();
                 
@@ -1651,7 +2114,8 @@
                 
                 gameData.escapeRooms.players[selectedRoom].push({
                     username: user.username,
-                    bet: currentBet
+                    bet: currentBet,
+                    isBot: false
                 });
                 
                 // 更新UI
@@ -1659,6 +2123,9 @@
                 leaveBtn.style.display = 'block';
                 betInput.disabled = true;
                 gameStatus.textContent = `你已加入 ${selectedRoom}，投入 ${currentBet} 能量石`;
+                
+                // 添加机器人
+                addBots();
                 
                 // 开始游戏检查
                 checkEscapeGameStart();
@@ -1673,7 +2140,7 @@
                     return;
                 }
                 
-                // 返还星脉币
+                // 返还砖块币
                 user.coins += currentBet;
                 updateUserUI();
                 
@@ -1688,6 +2155,9 @@
                     }
                 }
                 
+                // 清除机器人
+                gameData.escapeRooms.bots = [];
+                
                 // 更新UI
                 joinBtn.style.display = 'block';
                 leaveBtn.style.display = 'none';
@@ -1698,6 +2168,11 @@
                 roomsContainer.querySelectorAll('.room-card').forEach(c => {
                     c.classList.remove('selected');
                 });
+                
+                // 清除倒计时
+                clearInterval(gameData.escapeRooms.countdownInterval);
+                gameData.escapeRooms.countdown = 0;
+                countdownDisplay.textContent = '20';
                 
                 saveGameData();
                 updateEscapeGameDisplay();
@@ -1711,6 +2186,34 @@
                 }
             });
             
+            // 添加机器人
+            function addBots() {
+                const botCount = Math.floor(Math.random() * 5) + 3; // 3-7个机器人
+                gameData.escapeRooms.bots = [];
+                
+                for (let i = 0; i < botCount; i++) {
+                    const botRoom = gameData.escapeRooms.rooms[Math.floor(Math.random() * gameData.escapeRooms.rooms.length)];
+                    const botBet = Math.floor(Math.random() * 591) + 10; // 10-600随机投注
+                    
+                    if (!gameData.escapeRooms.players[botRoom]) {
+                        gameData.escapeRooms.players[botRoom] = [];
+                    }
+                    
+                    gameData.escapeRooms.players[botRoom].push({
+                        username: `机器人${i+1}`,
+                        bet: botBet,
+                        isBot: true
+                    });
+                    
+                    gameData.escapeRooms.bots.push({
+                        room: botRoom,
+                        bet: botBet
+                    });
+                }
+                
+                updateEscapeGameDisplay();
+            }
+            
             // 更新游戏显示
             function updateEscapeGameDisplay() {
                 // 更新玩家数量
@@ -1721,7 +2224,18 @@
                     const players = gameData.escapeRooms.players[room] || [];
                     const roomPlayersElement = document.getElementById(`room-players-${room}`);
                     if (roomPlayersElement) {
-                        roomPlayersElement.textContent = `${players.length}人`;
+                        const botCount = players.filter(p => p.isBot).length;
+                        const humanCount = players.filter(p => !p.isBot).length;
+                        
+                        let text = '';
+                        if (humanCount > 0) text += `${humanCount}人`;
+                        if (botCount > 0) {
+                            if (humanCount > 0) text += ' + ';
+                            text += `${botCount}机器人`;
+                        }
+                        if (humanCount === 0 && botCount === 0) text = '0人';
+                        
+                        roomPlayersElement.innerHTML = text;
                     }
                     
                     totalPlayers += players.length;
@@ -1746,12 +2260,31 @@
                 const targetPlayers = parseInt(targetPlayersDisplay.textContent);
                 
                 if (totalPlayers >= targetPlayers && !gameData.escapeRooms.gameInProgress) {
-                    startEscapeGame();
+                    startEscapeCountdown();
                 } else if (!gameData.escapeRooms.gameInProgress) {
                     // 每隔5秒检查一次
                     clearInterval(gameInterval);
                     gameInterval = setInterval(checkEscapeGameStart, 5000);
                 }
+            }
+            
+            // 开始倒计时
+            function startEscapeCountdown() {
+                gameData.escapeRooms.countdown = 20;
+                countdownDisplay.textContent = gameData.escapeRooms.countdown;
+                
+                clearInterval(gameData.escapeRooms.countdownInterval);
+                gameData.escapeRooms.countdownInterval = setInterval(() => {
+                    gameData.escapeRooms.countdown--;
+                    countdownDisplay.textContent = gameData.escapeRooms.countdown;
+                    
+                    if (gameData.escapeRooms.countdown <= 0) {
+                        clearInterval(gameData.escapeRooms.countdownInterval);
+                        startEscapeGame();
+                    }
+                }, 1000);
+                
+                gameStatus.innerHTML = '<p>游戏即将开始，倒计时20秒...</p>';
             }
             
             // 开始游戏
@@ -1804,17 +2337,39 @@
                     } else if (survivors[selectedRoom]) {
                         // 玩家幸存
                         userReward = rewardPerSurvivor;
-                        gameData.currentUser.coins += userReward;
+                        user.energyStones += userReward;
+                        
+                        // 添加交易记录
+                        user.marketHistory.push({
+                            type: '游戏奖励',
+                            details: `从大逃杀游戏获得 ${userReward} 能量石`,
+                            date: new Date().toISOString()
+                        });
+                        
                         gameStatus.innerHTML += `<p>外星人选择了 ${targetRoom}! 你幸存下来并获得 ${userReward} 能量石!</p>`;
                     }
                     
+                    // 显示被杀房间和奖励详情
+                    const killedNames = killedPlayers.map(p => 
+                        p.isBot ? `${p.username}<span class="bot-tag">机器人</span>` : p.username
+                    ).join(', ');
+                    
+                    gameStatus.innerHTML += `
+                        <p>被杀房间: ${targetRoom} (${killedNames})</p>
+                        <p>被杀房间总能量石: ${totalKilledBet}</p>
+                        <p>幸存者每人获得: ${rewardPerSurvivor} 能量石</p>
+                    `;
+                    
                     // 更新UI
                     updateUserUI();
+                    loadMarketHistory();
                     
                     // 重置游戏状态
                     setTimeout(() => {
                         gameData.escapeRooms.players = {};
+                        gameData.escapeRooms.bots = [];
                         gameData.escapeRooms.gameInProgress = false;
+                        gameData.escapeRooms.countdown = 0;
                         
                         if (selectedRoom) {
                             // 重置玩家状态
@@ -1829,6 +2384,7 @@
                         }
                         
                         updateEscapeGameDisplay();
+                        countdownDisplay.textContent = '20';
                         gameStatus.innerHTML += '<p>游戏结束! 可以开始新一局游戏</p>';
                     }, 5000);
                     
@@ -1867,7 +2423,7 @@
                 return;
             }
             
-            if (confirm('确定要申请VIP会员吗? 费用为32元')) {
+            if (confirm(`确定要申请VIP会员吗? 费用为${gameData.vipPrice}元`)) {
                 user.vipRequested = true;
                 gameData.vipRequests.push({
                     username: user.username,
@@ -1896,13 +2452,13 @@
             
             // 检查最低提现金额
             if (amount < 100) {
-                alert('最低提现金额为100星脉币');
+                alert('最低提现金额为100砖块币');
                 return;
             }
             
-            // 检查是否有足够的星脉币
+            // 检查是否有足够的砖块币
             if (amount > user.coins) {
-                alert('星脉币不足');
+                alert('砖块币不足');
                 return;
             }
             
@@ -1912,12 +2468,12 @@
             }
             
             // 计算手续费
-            const feeRate = user.isVIP ? 0.05 : 0.1;
+            const feeRate = user.isVIP ? gameData.vipWithdrawFee / 100 : gameData.withdrawFee / 100;
             const fee = amount * feeRate;
             const received = amount - fee;
             
-            if (confirm(`确定要提现 ${amount} 星脉币吗?\n手续费: ${fee.toFixed(2)} (${feeRate * 100}%)\n实际到账: ${received.toFixed(2)}`)) {
-                // 扣除星脉币
+            if (confirm(`确定要提现 ${amount} 砖块币吗?\n手续费: ${fee.toFixed(2)} (${feeRate * 100}%)\n实际到账: ${received.toFixed(2)}`)) {
+                // 扣除砖块币
                 user.coins -= amount;
                 
                 // 添加提现记录
@@ -1943,11 +2499,88 @@
                 
                 // 更新UI
                 updateUserUI();
+                loadWithdrawHistory();
                 saveGameData();
                 
                 alert('提现申请已提交，将在24小时内处理');
                 elements.withdrawAmount.value = '';
                 elements.withdrawAccount.value = '';
+            }
+        }
+
+        // 兑换砖块币为积分
+        function exchangeCoinToPoint() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            const coins = parseInt(elements.coinToPoint.value);
+            
+            if (isNaN(coins) || coins < 1) {
+                alert('请输入有效的砖块币数量');
+                return;
+            }
+            
+            if (user.coins < coins) {
+                alert('砖块币不足');
+                return;
+            }
+            
+            const points = coins * 0.5;
+            
+            if (confirm(`确定要将 ${coins} 砖块币兑换为 ${points} 积分吗?`)) {
+                user.coins -= coins;
+                user.points += points;
+                
+                // 添加交易记录
+                user.marketHistory.push({
+                    type: '兑换积分',
+                    details: `${coins} 砖块币兑换为 ${points} 积分`,
+                    date: new Date().toISOString()
+                });
+                
+                updateUserUI();
+                loadMarketHistory();
+                saveGameData();
+                
+                alert(`兑换成功! 获得 ${points} 积分`);
+            }
+        }
+
+        // 兑换能量石为砖块币
+        function exchangeStoneToCoin() {
+            const user = gameData.currentUser;
+            if (!user) return;
+            
+            const stones = parseInt(elements.stoneToCoin.value);
+            
+            if (isNaN(stones) || stones < 1) {
+                alert('请输入有效的能量石数量');
+                return;
+            }
+            
+            if (user.energyStones < stones) {
+                alert('能量石不足');
+                return;
+            }
+            
+            const coins = stones;
+            
+            if (confirm(`确定要将 ${stones} 能量石兑换为 ${coins} 砖块币吗?`)) {
+                user.energyStones -= stones;
+                user.coins += coins;
+                
+                // 添加交易记录
+                user.marketHistory.push({
+                    type: '兑换砖块币',
+                    details: `${stones} 能量石兑换为 ${coins} 砖块币`,
+                    date: new Date().toISOString()
+                });
+                
+                updateUserUI();
+                loadMarketHistory();
+                saveGameData();
+                
+                alert(`兑换成功! 获得 ${coins} 砖块币`);
             }
         }
 
@@ -1977,7 +2610,7 @@
                     const li = document.createElement('li');
                     li.className = 'user-item';
                     li.innerHTML = `
-                        <span>${request.username} - ${request.amount}星脉币 (${request.method})</span>
+                        <span>${request.username} - ${request.amount}砖块币 (${request.method})</span>
                         <div>
                             <button class="approve-withdraw" data-user="${request.username}" data-amount="${request.amount}">批准</button>
                             <button class="reject-withdraw" data-user="${request.username}" data-amount="${request.amount}">拒绝</button>
@@ -1989,9 +2622,6 @@
             
             // 加载用户列表
             searchUsers();
-            
-            // 加载公告
-            elements.announcementEdit.value = gameData.announcements.join('\n');
             
             // 添加按钮事件
             document.querySelectorAll('.approve-vip').forEach(btn => {
@@ -2039,7 +2669,8 @@
                         <span>${username} - 等级${user.level} - ${user.isVIP ? 'VIP' : '普通用户'}</span>
                         <div>
                             <button class="add-vip" data-user="${username}">${user.isVIP ? '取消VIP' : '设为VIP'}</button>
-                            <button class="add-coins" data-user="${username}">加星脉币</button>
+                            <button class="add-coins" data-user="${username}">加砖块�</button>
+                            <button class="ban-user" data-user="${username}">${user.banned ? '解封' : '封禁'}</button>
                         </div>
                     `;
                     elements.userList.appendChild(li);
@@ -2057,10 +2688,17 @@
             document.querySelectorAll('.add-coins').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const username = e.target.getAttribute('data-user');
-                    const amount = prompt(`为 ${username} 添加多少星脉币?`, "10");
+                    const amount = prompt(`为 ${username} 添加多少砖块币?`, "10");
                     if (amount && !isNaN(parseInt(amount))) {
                         addCoins(username, parseInt(amount));
                     }
+                });
+            });
+            
+            document.querySelectorAll('.ban-user').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.getAttribute('data-user');
+                    toggleBanUser(username);
                 });
             });
         }
@@ -2125,14 +2763,14 @@
                 
                 saveGameData();
                 loadAdminData();
-                alert(`已批准 ${username} 的 ${amount} 星脉币提现申请`);
+                alert(`已批准 ${username} 的 ${amount} 砖块币提现申请`);
             }
         }
 
         // 拒绝提现
         function rejectWithdraw(username, amount) {
             if (gameData.users[username]) {
-                // 返还星脉币
+                // 返还砖块币
                 gameData.users[username].coins += amount;
                 
                 // 更新用户提现记录
@@ -2153,7 +2791,7 @@
                 
                 saveGameData();
                 loadAdminData();
-                alert(`已拒绝 ${username} 的 ${amount} 星脉币提现申请，星脉币已返还`);
+                alert(`已拒绝 ${username} 的 ${amount} 砖块币提现申请，砖块币已返还`);
             }
         }
 
@@ -2174,23 +2812,71 @@
             }
         }
 
-        // 添加星脉币
+        // 切换用户封禁状态
+        function toggleBanUser(username) {
+            if (gameData.users[username]) {
+                gameData.users[username].banned = !gameData.users[username].banned;
+                
+                saveGameData();
+                searchUsers();
+                alert(`${username} 的封禁状态已更新`);
+            }
+        }
+
+        // 添加砖块币
         function addCoins(username, amount) {
             if (gameData.users[username] && amount > 0) {
                 gameData.users[username].coins += amount;
+                
+                // 添加交易记录
+                gameData.users[username].marketHistory.push({
+                    type: '管理员添加',
+                    details: `管理员添加了 ${amount} 砖块币`,
+                    date: new Date().toISOString()
+                });
+                
                 saveGameData();
                 searchUsers();
-                alert(`已为 ${username} 添加 ${amount} 星脉币`);
+                alert(`已为 ${username} 添加 ${amount} 砖块币`);
             }
         }
 
         // 保存管理员设置
         function saveAdminSettings() {
+            gameData.vipPrice = parseInt(elements.vipPriceInput.value) || 32;
+            gameData.withdrawFee = parseInt(elements.withdrawFeeInput.value) || 10;
+            gameData.vipWithdrawFee = parseInt(elements.vipFeeInput.value) || 5;
+            
+            saveGameData();
+            alert('系统设置已保存');
+        }
+
+        // 更新支付二维码
+        function updatePaymentQR() {
+            const alipayQR = elements.alipayQrInput.value.trim();
+            const wechatQR = elements.wechatQrInput.value.trim();
+            
+            if (alipayQR) {
+                gameData.paymentQR.alipay = alipayQR;
+                elements.alipayQr.src = alipayQR;
+            }
+            
+            if (wechatQR) {
+                gameData.paymentQR.wechat = wechatQR;
+                elements.wechatQr.src = wechatQR;
+            }
+            
+            saveGameData();
+            alert('支付二维码已更新');
+        }
+
+        // 保存公告
+        function saveAnnouncement() {
             const newAnnouncements = elements.announcementEdit.value.split('\n').filter(line => line.trim());
             gameData.announcements = newAnnouncements;
             
             saveGameData();
-            alert('设置已保存');
+            alert('公告已保存');
         }
 
         // 保存游戏数据
