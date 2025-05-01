@@ -467,7 +467,7 @@
             <header>
                 <h1>搬砖人生</h1>
                 <div class="countdown" id="game-countdown"></div>
-                <p id="user-info">�迎, <span id="username-display"></span> | 会员: <span id="vip-status">否</span></p>
+                <p id="user-info">欢迎, <span id="username-display"></span> | 会员: <span id="vip-status">否</span></p>
             </header>
             
             <div class="tab-buttons">
@@ -514,9 +514,7 @@
                 <div class="game-card">
                     <h3 class="game-title">公告</h3>
                     <div id="announcement">
-                        <p>1. 邀请好友升级到5级，邀请50人可联系管理员领取888红包</p>
-                        <p>2. 排行榜每周刷新，前三名有现金奖励</p>
-                        <p>3. 管理员微信: 19042507597</p>
+                        <p>加载公告中...</p>
                     </div>
                 </div>
             </div>
@@ -845,34 +843,69 @@
     </div>
     
     <script>
+        // 模拟服务器API
+        const serverAPI = {
+            async getGameData() {
+                return JSON.parse(localStorage.getItem('pmServerData') || '{}');
+            },
+            async saveGameData(data) {
+                localStorage.setItem('pmServerData', JSON.stringify(data));
+            },
+            async getUser(username) {
+                const data = await this.getGameData();
+                return data.users?.[username];
+            },
+            async saveUser(user) {
+                const data = await this.getGameData();
+                if (!data.users) data.users = {};
+                data.users[user.username] = user;
+                await this.saveGameData(data);
+            },
+            async getAllUsers() {
+                const data = await this.getGameData();
+                return data.users || {};
+            },
+            async getAdminData() {
+                const data = await this.getGameData();
+                return {
+                    vipPrice: data.vipPrice || 32,
+                    withdrawFee: data.withdrawFee || 10,
+                    vipWithdrawFee: data.vipWithdrawFee || 5,
+                    paymentQR: data.paymentQR || { alipay: "alipay_qr.jpg", wechat: "wechat_qr.jpg" },
+                    vipRequests: data.vipRequests || [],
+                    withdrawRequests: data.withdrawRequests || [],
+                    announcements: data.announcements || [
+                        "邀请好友升级到5级，邀请50人可联系管理员领取888红包",
+                        "排行榜每周刷新，前三名有现金奖励",
+                        "管理员微信: 19042507597"
+                    ],
+                    escapeRooms: data.escapeRooms || {
+                        rooms: ["量茶间", "太憩舱", "航指室", "星沙龙", "星洁室", "星悠室", "里空间", "音乐舱", "里悠室"],
+                        players: {},
+                        gameInProgress: false,
+                        countdown: 0,
+                        bots: []
+                    }
+                };
+            },
+            async saveAdminData(adminData) {
+                const data = await this.getGameData();
+                data.vipPrice = adminData.vipPrice;
+                data.withdrawFee = adminData.withdrawFee;
+                data.vipWithdrawFee = adminData.vipWithdrawFee;
+                data.paymentQR = adminData.paymentQR;
+                data.vipRequests = adminData.vipRequests;
+                data.withdrawRequests = adminData.withdrawRequests;
+                data.announcements = adminData.announcements;
+                data.escapeRooms = adminData.escapeRooms;
+                await this.saveGameData(data);
+            }
+        };
+
         // 游戏数据
         const gameData = {
-            users: {},
             currentUser: null,
-            adminUser: { username: "admin", password: "admin123" },
-            announcements: [
-                "邀请好友升级到5级，邀请50人可联系管理员领取888红包",
-                "排行榜每周刷新，前三名有现金奖励",
-                "管理员微信: 19042507597"
-            ],
-            vipPrice: 32,
-            withdrawFee: 10,
-            vipWithdrawFee: 5,
-            paymentQR: {
-                alipay: "alipay_qr.jpg",
-                wechat: "wechat_qr.jpg"
-            },
-            vipRequests: [],
-            withdrawRequests: [],
-            escapeRooms: {
-                rooms: ["量茶间", "太憩舱", "航指室", "星沙龙", "星洁室", "星悠室", "里空间", "音乐舱", "里悠室"],
-                players: {},
-                gameInProgress: false,
-                countdown: 0,
-                countdownInterval: null,
-                bots: []
-            },
-            marketHistory: []
+            adminUser: { username: "admin", password: "admin123" }
         };
 
         // DOM元素
@@ -960,11 +993,18 @@
         };
 
         // 初始化游戏
-        function initGame() {
-            // 检查本地存储
-            if (localStorage.getItem('pmGameData')) {
-                const savedData = JSON.parse(localStorage.getItem('pmGameData'));
-                Object.assign(gameData, savedData);
+        async function initGame() {
+            // 检查是否有已登录用户
+            const savedUsername = localStorage.getItem('pmCurrentUser');
+            if (savedUsername) {
+                if (savedUsername === 'admin') {
+                    loginAdmin();
+                } else {
+                    const user = await serverAPI.getUser(savedUsername);
+                    if (user) {
+                        loginUser(savedUsername);
+                    }
+                }
             }
             
             // 设置开服倒计时
@@ -974,15 +1014,30 @@
             // 事件监听器
             setupEventListeners();
             
-            // 检查是否有已登录用户
-            if (localStorage.getItem('pmCurrentUser')) {
-                const username = localStorage.getItem('pmCurrentUser');
-                if (gameData.users[username]) {
-                    loginUser(username);
-                } else if (username === 'admin') {
-                    loginAdmin();
-                }
-            }
+            // 加载公告和VIP信息
+            loadAnnouncements();
+            loadVipTab();
+        }
+
+        // 加载公告
+        async function loadAnnouncements() {
+            const data = await serverAPI.getAdminData();
+            const announcements = data.announcements;
+            
+            const announcementHTML = announcements.map(msg => `<p>${msg}</p>`).join('');
+            document.getElementById('announcement').innerHTML = announcementHTML;
+        }
+
+        // 加载VIP标签页信息
+        async function loadVipTab() {
+            const data = await serverAPI.getAdminData();
+            
+            // 更新二维码
+            elements.alipayQr.src = data.paymentQR.alipay;
+            elements.wechatQr.src = data.paymentQR.wechat;
+            
+            // 更新VIP价格
+            elements.vipPriceDisplay.textContent = data.vipPrice;
         }
 
         // 更新开服倒计时
@@ -1022,7 +1077,7 @@
             });
             
             // 登录按钮
-            elements.loginBtn.addEventListener('click', () => {
+            elements.loginBtn.addEventListener('click', async () => {
                 const username = elements.loginUsername.value.trim();
                 const password = elements.loginPassword.value.trim();
                 
@@ -1038,12 +1093,13 @@
                 }
                 
                 // 检查普通用户
-                if (!gameData.users[username]) {
+                const user = await serverAPI.getUser(username);
+                if (!user) {
                     alert('用户名不存在');
                     return;
                 }
                 
-                if (gameData.users[username].password !== password) {
+                if (user.password !== password) {
                     alert('密码错误');
                     return;
                 }
@@ -1052,7 +1108,7 @@
             });
             
             // 注册按钮
-            elements.registerBtn.addEventListener('click', () => {
+            elements.registerBtn.addEventListener('click', async () => {
                 const username = elements.regUsername.value.trim();
                 const password = elements.regPassword.value.trim();
                 const inviteCode = elements.regInvite.value.trim();
@@ -1067,7 +1123,9 @@
                     return;
                 }
                 
-                if (gameData.users[username]) {
+                // 检查用户名是否已存在
+                const existingUser = await serverAPI.getUser(username);
+                if (existingUser) {
                     alert('用户名已存在');
                     return;
                 }
@@ -1091,22 +1149,20 @@
                     energyStones: 0
                 };
                 
-                gameData.users[username] = newUser;
+                // 保存到服务器
+                await serverAPI.saveUser(newUser);
                 
                 // 处理邀请码
                 if (inviteCode) {
-                    const inviter = findUserByInviteCode(inviteCode);
+                    const inviter = await findUserByInviteCode(inviteCode);
                     if (inviter) {
                         inviter.invitedUsers.push(username);
                         inviter.coins += 1; // 邀请奖励
                         
                         // 更新邀请者数据
-                        gameData.users[inviter.username] = inviter;
+                        await serverAPI.saveUser(inviter);
                     }
                 }
-                
-                // 保存数据
-                saveGameData();
                 
                 alert('注册成功！');
                 elements.loginForm.style.display = 'block';
@@ -1248,18 +1304,22 @@
         }
 
         // 通过邀请码查找用户
-        function findUserByInviteCode(code) {
-            for (const username in gameData.users) {
-                if (gameData.users[username].inviteCode === code) {
-                    return gameData.users[username];
+        async function findUserByInviteCode(code) {
+            const users = await serverAPI.getAllUsers();
+            for (const username in users) {
+                if (users[username].inviteCode === code) {
+                    return users[username];
                 }
             }
             return null;
         }
 
         // 登录用户
-        function loginUser(username) {
-            gameData.currentUser = gameData.users[username];
+        async function loginUser(username) {
+            const user = await serverAPI.getUser(username);
+            if (!user) return;
+            
+            gameData.currentUser = user;
             localStorage.setItem('pmCurrentUser', username);
             
             // 更新UI
@@ -1275,7 +1335,7 @@
         }
 
         // 登录管理员
-        function loginAdmin() {
+        async function loginAdmin() {
             localStorage.setItem('pmCurrentUser', 'admin');
             
             // 更新UI
@@ -1287,12 +1347,13 @@
             loadAdminData();
             
             // 设置表单初始值
-            elements.vipPriceInput.value = gameData.vipPrice;
-            elements.withdrawFeeInput.value = gameData.withdrawFee;
-            elements.vipFeeInput.value = gameData.vipWithdrawFee;
-            elements.alipayQrInput.value = gameData.paymentQR.alipay;
-            elements.wechatQrInput.value = gameData.paymentQR.wechat;
-            elements.announcementEdit.value = gameData.announcements.join('\n');
+            const adminData = await serverAPI.getAdminData();
+            elements.vipPriceInput.value = adminData.vipPrice;
+            elements.withdrawFeeInput.value = adminData.withdrawFee;
+            elements.vipFeeInput.value = adminData.vipWithdrawFee;
+            elements.alipayQrInput.value = adminData.paymentQR.alipay;
+            elements.wechatQrInput.value = adminData.paymentQR.wechat;
+            elements.announcementEdit.value = adminData.announcements.join('\n');
         }
 
         // 退出用户
@@ -1327,6 +1388,7 @@
         // 更新用户界面
         function updateUserUI() {
             const user = gameData.currentUser;
+            if (!user) return;
             
             elements.usernameDisplay.textContent = user.username;
             elements.vipStatus.textContent = user.isVIP ? '是' : '否';
@@ -1361,14 +1423,11 @@
             elements.withdrawCoin.textContent = user.coins;
             
             // 更新提现手续费
-            elements.withdrawFee.textContent = user.isVIP ? gameData.vipWithdrawFee : gameData.withdrawFee;
-            
-            // 更新VIP价格显示
-            elements.vipPriceDisplay.textContent = gameData.vipPrice;
+            elements.withdrawFee.textContent = user.isVIP ? (gameData.vipWithdrawFee || 5) : (gameData.withdrawFee || 10);
         }
 
         // 加载邀请好友列表
-        function loadInvitedList() {
+        async function loadInvitedList() {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -1378,9 +1437,9 @@
             }
             
             elements.invitedList.innerHTML = '';
-            user.invitedUsers.forEach(username => {
-                if (gameData.users[username]) {
-                    const invitedUser = gameData.users[username];
+            for (const username of user.invitedUsers) {
+                const invitedUser = await serverAPI.getUser(username);
+                if (invitedUser) {
                     const div = document.createElement('div');
                     div.className = 'invited-user';
                     
@@ -1395,7 +1454,7 @@
                     div.appendChild(statusSpan);
                     elements.invitedList.appendChild(div);
                 }
-            });
+            }
         }
 
         // 加载提现记录
@@ -1484,11 +1543,11 @@
             
             // 保存已挖矿但未收集的币
             user.minedCoins = coinsEarned;
-            saveGameData();
+            saveUserData();
         }
 
         // 收集砖块币
-        function collectCoins() {
+        async function collectCoins() {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -1503,9 +1562,16 @@
             user.lastMineTime = Date.now();
             
             updateUserUI();
-            saveGameData();
+            await saveUserData();
             
             alert(`成功收集 ${coinsToAdd} 砖块币!`);
+        }
+
+        // 保存用户数据
+        async function saveUserData() {
+            if (gameData.currentUser) {
+                await serverAPI.saveUser(gameData.currentUser);
+            }
         }
 
         // 切换标签页
@@ -1530,31 +1596,32 @@
         }
 
         // 加载排行榜数据
-        function loadRankings(type) {
-            let users = [];
+        async function loadRankings(type) {
+            const users = await serverAPI.getAllUsers();
+            let usersArray = [];
             
             // 收集所有用户数据
-            for (const username in gameData.users) {
-                users.push({
+            for (const username in users) {
+                usersArray.push({
                     username,
-                    level: gameData.users[username].level,
-                    coins: gameData.users[username].coins,
-                    points: gameData.users[username].points,
-                    invitedCount: gameData.users[username].invitedUsers.length,
-                    invitedLevel5: gameData.users[username].invitedLevel5Users.length
+                    level: users[username].level,
+                    coins: users[username].coins,
+                    points: users[username].points,
+                    invitedCount: users[username].invitedUsers.length,
+                    invitedLevel5: users[username].invitedLevel5Users.length
                 });
             }
             
             // 根据类型排序
             if (type === 'level') {
-                users.sort((a, b) => b.level - a.level || b.coins - a.coins);
-                updateRankingTable(elements.levelRankBody, users, 'level');
+                usersArray.sort((a, b) => b.level - a.level || b.coins - a.coins);
+                updateRankingTable(elements.levelRankBody, usersArray, 'level');
             } else if (type === 'invite') {
-                users.sort((a, b) => b.invitedCount - a.invitedCount || b.invitedLevel5 - a.invitedLevel5);
-                updateRankingTable(elements.inviteRankBody, users, 'invite');
+                usersArray.sort((a, b) => b.invitedCount - a.invitedCount || b.invitedLevel5 - a.invitedLevel5);
+                updateRankingTable(elements.inviteRankBody, usersArray, 'invite');
             } else if (type === 'points') {
-                users.sort((a, b) => b.points - a.points || b.level - a.level);
-                updateRankingTable(elements.pointsRankBody, users, 'points');
+                usersArray.sort((a, b) => b.points - a.points || b.level - a.level);
+                updateRankingTable(elements.pointsRankBody, usersArray, 'points');
             }
         }
 
@@ -1617,7 +1684,7 @@
         }
 
         // 升级等级
-        function upgradeLevel() {
+        async function upgradeLevel() {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -1651,11 +1718,13 @@
             
             // 检查是否有邀请者，如果达到5级，给邀请者奖励
             if (user.level === 5) {
-                for (const username in gameData.users) {
-                    const inviter = gameData.users[username];
+                const allUsers = await serverAPI.getAllUsers();
+                for (const username in allUsers) {
+                    const inviter = allUsers[username];
                     if (inviter.invitedUsers.includes(user.username) && !inviter.invitedLevel5Users.includes(user.username)) {
                         inviter.invitedLevel5Users.push(user.username);
                         inviter.coins += 5; // 额外奖励
+                        await serverAPI.saveUser(inviter);
                         alert(`恭喜您达到5级！您的邀请人 ${inviter.username} 获得了5砖块币奖励`);
                         break;
                     }
@@ -1665,13 +1734,13 @@
             // 更新UI
             updateUserUI();
             loadInvitedList();
-            saveGameData();
+            await saveUserData();
             
             alert(`升级成功! 当前等级: ${user.level}`);
         }
 
         // 开始小游戏
-        function startGame(gameName) {
+        async function startGame(gameName) {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -1692,6 +1761,7 @@
             // 扣除砖块币
             user.coins -= cost;
             updateUserUI();
+            await saveUserData();
             
             // 设置游戏模态框
             elements.gameModalTitle.textContent = getGameTitle(gameName);
@@ -1716,7 +1786,9 @@
         }
 
         // 获取游戏HTML
-        function getGameHTML(gameName) {
+        async function getGameHTML(gameName) {
+            const adminData = await serverAPI.getAdminData();
+            
             switch (gameName) {
                 case 'clicker':
                     return `
@@ -1773,7 +1845,7 @@
                             
                             <h4>选择房间躲避外星人</h4>
                             <div class="escape-room" id="escape-rooms">
-                                ${gameData.escapeRooms.rooms.map(room => `
+                                ${adminData.escapeRooms.rooms.map(room => `
                                     <div class="room-card" data-room="${room}">
                                         ${room}
                                         <div class="escape-players" id="room-players-${room}">0人</div>
@@ -1834,7 +1906,7 @@
             });
             
             // 游戏结束处理
-            elements.gameModal.querySelector('.close-btn').addEventListener('click', () => {
+            elements.gameModal.querySelector('.close-btn').addEventListener('click', async () => {
                 if (pointsEarned > 0) {
                     gameData.currentUser.points += pointsEarned;
                     
@@ -1847,7 +1919,7 @@
                     
                     updateUserUI();
                     loadMarketHistory();
-                    saveGameData();
+                    await saveUserData();
                     alert(`游戏结束! 获得 ${pointsEarned.toFixed(2)} 积分`);
                 }
             });
@@ -1914,7 +1986,7 @@
                         
                         // 检查是否所有卡片都匹配
                         if (matchedPairs === 8) {
-                            setTimeout(() => {
+                            setTimeout(async () => {
                                 gameData.currentUser.points += 1;
                                 
                                 // 添加交易记录
@@ -1926,7 +1998,7 @@
                                 
                                 updateUserUI();
                                 loadMarketHistory();
-                                saveGameData();
+                                await saveUserData();
                                 alert('恭喜! 你完成了记忆游戏，获得1积分!');
                                 elements.gameModal.style.display = 'none';
                             }, 500);
@@ -1944,7 +2016,7 @@
                         
                         // 检查是否还有尝试次数
                         if (attempts <= 0) {
-                            setTimeout(() => {
+                            setTimeout(async () => {
                                 if (matchedPairs > 0) {
                                     const pointsEarned = matchedPairs * 0.1;
                                     gameData.currentUser.points += pointsEarned;
@@ -1958,7 +2030,7 @@
                                     
                                     updateUserUI();
                                     loadMarketHistory();
-                                    saveGameData();
+                                    await saveUserData();
                                     alert(`游戏结束! 你匹配了 ${matchedPairs} 对卡片，获得 ${pointsEarned.toFixed(1)} 积分`);
                                 } else {
                                     alert('游戏结束! 没有匹配到任何卡片');
@@ -2013,7 +2085,7 @@
                     
                     updateUserUI();
                     loadMarketHistory();
-                    saveGameData();
+                    saveUserData();
                     alert(`游戏结束! 你的得分是 ${score}，获得 ${pointsEarned.toFixed(1)} 积分`);
                     elements.gameModal.style.display = 'none';
                     return;
@@ -2034,7 +2106,7 @@
                 });
             }
             
-            function checkAnswer(selectedIndex) {
+            async function checkAnswer(selectedIndex) {
                 const q = questions[currentQuestion];
                 if (selectedIndex === q.answer) {
                     score++;
@@ -2052,7 +2124,10 @@
         }
 
         // 设置大逃杀游戏
-        function setupEscapeGame() {
+        async function setupEscapeGame() {
+            const adminData = await serverAPI.getAdminData();
+            const escapeRooms = adminData.escapeRooms;
+            
             const user = gameData.currentUser;
             const roomsContainer = document.getElementById('escape-rooms');
             const joinBtn = document.getElementById('escape-join-btn');
@@ -2074,7 +2149,7 @@
             // 房间选择
             roomsContainer.querySelectorAll('.room-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    if (gameData.escapeRooms.gameInProgress) return;
+                    if (escapeRooms.gameInProgress) return;
                     
                     roomsContainer.querySelectorAll('.room-card').forEach(c => {
                         c.classList.remove('selected');
@@ -2086,7 +2161,7 @@
             });
             
             // 加入游戏
-            joinBtn.addEventListener('click', () => {
+            joinBtn.addEventListener('click', async () => {
                 if (!selectedRoom) {
                     alert('请先选择一个房间');
                     return;
@@ -2106,17 +2181,21 @@
                 // 扣除砖块币
                 user.coins -= currentBet;
                 updateUserUI();
+                await saveUserData();
                 
                 // 加入房间
-                if (!gameData.escapeRooms.players[selectedRoom]) {
-                    gameData.escapeRooms.players[selectedRoom] = [];
+                if (!escapeRooms.players[selectedRoom]) {
+                    escapeRooms.players[selectedRoom] = [];
                 }
                 
-                gameData.escapeRooms.players[selectedRoom].push({
+                escapeRooms.players[selectedRoom].push({
                     username: user.username,
                     bet: currentBet,
                     isBot: false
                 });
+                
+                // 更新服务器数据
+                await serverAPI.saveAdminData(adminData);
                 
                 // 更新UI
                 joinBtn.style.display = 'none';
@@ -2125,17 +2204,15 @@
                 gameStatus.textContent = `你已加入 ${selectedRoom}，投入 ${currentBet} 能量石`;
                 
                 // 添加机器人
-                addBots();
+                await addBots();
                 
                 // 开始游戏检查
                 checkEscapeGameStart();
-                
-                saveGameData();
             });
             
             // 离开游戏
-            leaveBtn.addEventListener('click', () => {
-                if (gameData.escapeRooms.gameInProgress) {
+            leaveBtn.addEventListener('click', async () => {
+                if (escapeRooms.gameInProgress) {
                     alert('游戏已开始，无法离开');
                     return;
                 }
@@ -2143,20 +2220,24 @@
                 // 返还砖块币
                 user.coins += currentBet;
                 updateUserUI();
+                await saveUserData();
                 
                 // 从房间移除
-                if (gameData.escapeRooms.players[selectedRoom]) {
-                    gameData.escapeRooms.players[selectedRoom] = gameData.escapeRooms.players[selectedRoom].filter(
+                if (escapeRooms.players[selectedRoom]) {
+                    escapeRooms.players[selectedRoom] = escapeRooms.players[selectedRoom].filter(
                         p => p.username !== user.username
                     );
                     
-                    if (gameData.escapeRooms.players[selectedRoom].length === 0) {
-                        delete gameData.escapeRooms.players[selectedRoom];
+                    if (escapeRooms.players[selectedRoom].length === 0) {
+                        delete escapeRooms.players[selectedRoom];
                     }
                 }
                 
                 // 清除机器人
-                gameData.escapeRooms.bots = [];
+                escapeRooms.bots = [];
+                
+                // 更新服务器数据
+                await serverAPI.saveAdminData(adminData);
                 
                 // 更新UI
                 joinBtn.style.display = 'block';
@@ -2170,47 +2251,47 @@
                 });
                 
                 // 清除倒计时
-                clearInterval(gameData.escapeRooms.countdownInterval);
-                gameData.escapeRooms.countdown = 0;
+                clearInterval(escapeRooms.countdownInterval);
+                escapeRooms.countdown = 0;
                 countdownDisplay.textContent = '20';
                 
-                saveGameData();
                 updateEscapeGameDisplay();
             });
             
             // 关闭模态框时离开游戏
-            elements.gameModal.querySelector('.close-btn').addEventListener('click', () => {
-                if (selectedRoom && !gameData.escapeRooms.gameInProgress) {
+            elements.gameModal.querySelector('.close-btn').addEventListener('click', async () => {
+                if (selectedRoom && !escapeRooms.gameInProgress) {
                     // 模拟点击离开按钮
                     leaveBtn.click();
                 }
             });
             
             // 添加机器人
-            function addBots() {
+            async function addBots() {
                 const botCount = Math.floor(Math.random() * 5) + 3; // 3-7个机器人
-                gameData.escapeRooms.bots = [];
+                escapeRooms.bots = [];
                 
                 for (let i = 0; i < botCount; i++) {
-                    const botRoom = gameData.escapeRooms.rooms[Math.floor(Math.random() * gameData.escapeRooms.rooms.length)];
+                    const botRoom = escapeRooms.rooms[Math.floor(Math.random() * escapeRooms.rooms.length)];
                     const botBet = Math.floor(Math.random() * 591) + 10; // 10-600随机投注
                     
-                    if (!gameData.escapeRooms.players[botRoom]) {
-                        gameData.escapeRooms.players[botRoom] = [];
+                    if (!escapeRooms.players[botRoom]) {
+                        escapeRooms.players[botRoom] = [];
                     }
                     
-                    gameData.escapeRooms.players[botRoom].push({
+                    escapeRooms.players[botRoom].push({
                         username: `机器人${i+1}`,
                         bet: botBet,
                         isBot: true
                     });
                     
-                    gameData.escapeRooms.bots.push({
+                    escapeRooms.bots.push({
                         room: botRoom,
                         bet: botBet
                     });
                 }
                 
+                await serverAPI.saveAdminData(adminData);
                 updateEscapeGameDisplay();
             }
             
@@ -2220,8 +2301,8 @@
                 let totalPlayers = 0;
                 let totalPrize = 0;
                 
-                gameData.escapeRooms.rooms.forEach(room => {
-                    const players = gameData.escapeRooms.players[room] || [];
+                escapeRooms.rooms.forEach(room => {
+                    const players = escapeRooms.players[room] || [];
                     const roomPlayersElement = document.getElementById(`room-players-${room}`);
                     if (roomPlayersElement) {
                         const botCount = players.filter(p => p.isBot).length;
@@ -2253,15 +2334,15 @@
             }
             
             // 检查游戏是否可以开始
-            function checkEscapeGameStart() {
+            async function checkEscapeGameStart() {
                 updateEscapeGameDisplay();
                 
                 const totalPlayers = parseInt(currentPlayersDisplay.textContent);
                 const targetPlayers = parseInt(targetPlayersDisplay.textContent);
                 
-                if (totalPlayers >= targetPlayers && !gameData.escapeRooms.gameInProgress) {
+                if (totalPlayers >= targetPlayers && !escapeRooms.gameInProgress) {
                     startEscapeCountdown();
-                } else if (!gameData.escapeRooms.gameInProgress) {
+                } else if (!escapeRooms.gameInProgress) {
                     // 每隔5秒检查一次
                     clearInterval(gameInterval);
                     gameInterval = setInterval(checkEscapeGameStart, 5000);
@@ -2270,45 +2351,48 @@
             
             // 开始倒计时
             function startEscapeCountdown() {
-                gameData.escapeRooms.countdown = 20;
-                countdownDisplay.textContent = gameData.escapeRooms.countdown;
+                escapeRooms.countdown = 20;
+                countdownDisplay.textContent = escapeRooms.countdown;
                 
-                clearInterval(gameData.escapeRooms.countdownInterval);
-                gameData.escapeRooms.countdownInterval = setInterval(() => {
-                    gameData.escapeRooms.countdown--;
-                    countdownDisplay.textContent = gameData.escapeRooms.countdown;
+                clearInterval(escapeRooms.countdownInterval);
+                escapeRooms.countdownInterval = setInterval(async () => {
+                    escapeRooms.countdown--;
+                    countdownDisplay.textContent = escapeRooms.countdown;
                     
-                    if (gameData.escapeRooms.countdown <= 0) {
-                        clearInterval(gameData.escapeRooms.countdownInterval);
+                    if (escapeRooms.countdown <= 0) {
+                        clearInterval(escapeRooms.countdownInterval);
                         startEscapeGame();
                     }
+                    
+                    await serverAPI.saveAdminData(adminData);
                 }, 1000);
                 
                 gameStatus.innerHTML = '<p>游戏即将开始，倒计时20秒...</p>';
             }
             
             // 开始游戏
-            function startEscapeGame() {
-                gameData.escapeRooms.gameInProgress = true;
+            async function startEscapeGame() {
+                escapeRooms.gameInProgress = true;
                 clearInterval(gameInterval);
                 
                 gameStatus.innerHTML = '<p>游戏开始! 外星人正在选择目标房间...</p>';
                 
                 // 模拟3秒等待
-                setTimeout(() => {
+                setTimeout(async () => {
                     // 随机选择一个房间作为目标
-                    const occupiedRooms = Object.keys(gameData.escapeRooms.players).filter(
-                        room => gameData.escapeRooms.players[room].length > 0
+                    const occupiedRooms = Object.keys(escapeRooms.players).filter(
+                        room => escapeRooms.players[room].length > 0
                     );
                     
                     if (occupiedRooms.length === 0) {
                         gameStatus.innerHTML = '<p>错误: 没有玩家在房间中</p>';
-                        gameData.escapeRooms.gameInProgress = false;
+                        escapeRooms.gameInProgress = false;
+                        await serverAPI.saveAdminData(adminData);
                         return;
                     }
                     
                     const targetRoom = occupiedRooms[Math.floor(Math.random() * occupiedRooms.length)];
-                    const killedPlayers = gameData.escapeRooms.players[targetRoom];
+                    const killedPlayers = escapeRooms.players[targetRoom];
                     const totalKilledBet = killedPlayers.reduce((sum, player) => sum + player.bet, 0);
                     
                     // 计算幸存者和奖励
@@ -2317,7 +2401,7 @@
                     
                     occupiedRooms.forEach(room => {
                         if (room !== targetRoom) {
-                            survivors[room] = gameData.escapeRooms.players[room];
+                            survivors[room] = escapeRooms.players[room];
                             totalSurvivors += survivors[room].length;
                         }
                     });
@@ -2363,13 +2447,14 @@
                     // 更新UI
                     updateUserUI();
                     loadMarketHistory();
+                    await saveUserData();
                     
                     // 重置游戏状态
-                    setTimeout(() => {
-                        gameData.escapeRooms.players = {};
-                        gameData.escapeRooms.bots = [];
-                        gameData.escapeRooms.gameInProgress = false;
-                        gameData.escapeRooms.countdown = 0;
+                    setTimeout(async () => {
+                        escapeRooms.players = {};
+                        escapeRooms.bots = [];
+                        escapeRooms.gameInProgress = false;
+                        escapeRooms.countdown = 0;
                         
                         if (selectedRoom) {
                             // 重置玩家状态
@@ -2383,12 +2468,11 @@
                             });
                         }
                         
+                        await serverAPI.saveAdminData(adminData);
                         updateEscapeGameDisplay();
                         countdownDisplay.textContent = '20';
                         gameStatus.innerHTML += '<p>游戏结束! 可以开始新一局游戏</p>';
                     }, 5000);
-                    
-                    saveGameData();
                 }, 3000);
             }
         }
@@ -2409,7 +2493,7 @@
         }
 
         // 申请VIP
-        function applyForVIP() {
+        async function applyForVIP() {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -2423,23 +2507,30 @@
                 return;
             }
             
-            if (confirm(`确定要申请VIP会员吗? 费用为${gameData.vipPrice}元`)) {
+            const adminData = await serverAPI.getAdminData();
+            const vipPrice = adminData.vipPrice || 32;
+            
+            if (confirm(`确定要申请VIP会员吗? 费用为${vipPrice}元`)) {
                 user.vipRequested = true;
-                gameData.vipRequests.push({
+                await saveUserData();
+                
+                adminData.vipRequests.push({
                     username: user.username,
                     date: new Date().toISOString(),
                     status: 'pending'
                 });
                 
-                saveGameData();
+                await serverAPI.saveAdminData(adminData);
                 alert('VIP申请已提交，请支付并等待管理员审核');
             }
         }
 
         // 提交提现申请
-        function submitWithdrawRequest() {
+        async function submitWithdrawRequest() {
             const user = gameData.currentUser;
             if (!user) return;
+            
+            const adminData = await serverAPI.getAdminData();
             
             const amount = parseFloat(elements.withdrawAmount.value);
             const method = elements.withdrawMethod.value;
@@ -2468,7 +2559,7 @@
             }
             
             // 计算手续费
-            const feeRate = user.isVIP ? gameData.vipWithdrawFee / 100 : gameData.withdrawFee / 100;
+            const feeRate = user.isVIP ? adminData.vipWithdrawFee / 100 : adminData.withdrawFee / 100;
             const fee = amount * feeRate;
             const received = amount - fee;
             
@@ -2488,7 +2579,7 @@
                 });
                 
                 // 添加到管理员队列
-                gameData.withdrawRequests.push({
+                adminData.withdrawRequests.push({
                     username: user.username,
                     amount,
                     method,
@@ -2497,10 +2588,15 @@
                     status: 'pending'
                 });
                 
+                // 更新服务器数据
+                await Promise.all([
+                    saveUserData(),
+                    serverAPI.saveAdminData(adminData)
+                ]);
+                
                 // 更新UI
                 updateUserUI();
                 loadWithdrawHistory();
-                saveGameData();
                 
                 alert('提现申请已提交，将在24小时内处理');
                 elements.withdrawAmount.value = '';
@@ -2509,7 +2605,7 @@
         }
 
         // 兑换砖块币为积分
-        function exchangeCoinToPoint() {
+        async function exchangeCoinToPoint() {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -2540,14 +2636,14 @@
                 
                 updateUserUI();
                 loadMarketHistory();
-                saveGameData();
+                await saveUserData();
                 
                 alert(`兑换成功! 获得 ${points} 积分`);
             }
         }
 
         // 兑换能量石为砖块币
-        function exchangeStoneToCoin() {
+        async function exchangeStoneToCoin() {
             const user = gameData.currentUser;
             if (!user) return;
             
@@ -2578,17 +2674,19 @@
                 
                 updateUserUI();
                 loadMarketHistory();
-                saveGameData();
+                await saveUserData();
                 
                 alert(`兑换成功! 获得 ${coins} 砖块币`);
             }
         }
 
         // 加载管理员数据
-        function loadAdminData() {
+        async function loadAdminData() {
+            const adminData = await serverAPI.getAdminData();
+            
             // 加载VIP申请
             elements.vipRequests.innerHTML = '';
-            gameData.vipRequests.forEach(request => {
+            adminData.vipRequests.forEach(request => {
                 if (request.status === 'pending') {
                     const li = document.createElement('li');
                     li.className = 'user-item';
@@ -2605,7 +2703,7 @@
             
             // 加载提现申请
             elements.withdrawRequests.innerHTML = '';
-            gameData.withdrawRequests.forEach(request => {
+            adminData.withdrawRequests.forEach(request => {
                 if (request.status === 'pending') {
                     const li = document.createElement('li');
                     li.className = 'user-item';
@@ -2656,20 +2754,21 @@
         }
 
         // 搜索用户
-        function searchUsers() {
+        async function searchUsers() {
             const searchTerm = elements.searchUser.value.toLowerCase();
             elements.userList.innerHTML = '';
             
-            for (const username in gameData.users) {
+            const users = await serverAPI.getAllUsers();
+            for (const username in users) {
                 if (username.toLowerCase().includes(searchTerm)) {
-                    const user = gameData.users[username];
+                    const user = users[username];
                     const li = document.createElement('li');
                     li.className = 'user-item';
                     li.innerHTML = `
                         <span>${username} - 等级${user.level} - ${user.isVIP ? 'VIP' : '普通用户'}</span>
                         <div>
                             <button class="add-vip" data-user="${username}">${user.isVIP ? '取消VIP' : '设为VIP'}</button>
-                            <button class="add-coins" data-user="${username}">加砖块�</button>
+                            <button class="add-coins" data-user="${username}">加砖块币</button>
                             <button class="ban-user" data-user="${username}">${user.banned ? '解封' : '封禁'}</button>
                         </div>
                     `;
@@ -2704,184 +2803,206 @@
         }
 
         // 批准VIP
-        function approveVIP(username) {
-            if (gameData.users[username]) {
-                gameData.users[username].isVIP = true;
-                gameData.users[username].vipRequested = false;
+        async function approveVIP(username) {
+            const user = await serverAPI.getUser(username);
+            if (user) {
+                user.isVIP = true;
+                user.vipRequested = false;
+                await serverAPI.saveUser(user);
                 
                 // 更新申请状态
-                gameData.vipRequests = gameData.vipRequests.map(req => {
+                const adminData = await serverAPI.getAdminData();
+                adminData.vipRequests = adminData.vipRequests.map(req => {
                     if (req.username === username && req.status === 'pending') {
                         return { ...req, status: 'approved' };
                     }
                     return req;
                 });
                 
-                saveGameData();
+                await serverAPI.saveAdminData(adminData);
                 loadAdminData();
                 alert(`已批准 ${username} 的VIP申请`);
             }
         }
 
         // 拒绝VIP
-        function rejectVIP(username) {
-            if (gameData.users[username]) {
-                gameData.users[username].vipRequested = false;
+        async function rejectVIP(username) {
+            const user = await serverAPI.getUser(username);
+            if (user) {
+                user.vipRequested = false;
+                await serverAPI.saveUser(user);
                 
                 // 更新申请状态
-                gameData.vipRequests = gameData.vipRequests.map(req => {
+                const adminData = await serverAPI.getAdminData();
+                adminData.vipRequests = adminData.vipRequests.map(req => {
                     if (req.username === username && req.status === 'pending') {
                         return { ...req, status: 'rejected' };
                     }
                     return req;
                 });
                 
-                saveGameData();
+                await serverAPI.saveAdminData(adminData);
                 loadAdminData();
                 alert(`已拒绝 ${username} 的VIP申请`);
             }
         }
 
         // 批准提现
-        function approveWithdraw(username, amount) {
-            if (gameData.users[username]) {
+        async function approveWithdraw(username, amount) {
+            const user = await serverAPI.getUser(username);
+            if (user) {
                 // 更新用户提现记录
-                gameData.users[username].withdrawHistory = gameData.users[username].withdrawHistory.map(wd => {
+                user.withdrawHistory = user.withdrawHistory.map(wd => {
                     if (wd.status === 'pending' && wd.amount === amount) {
                         return { ...wd, status: 'approved' };
                     }
                     return wd;
                 });
                 
+                await serverAPI.saveUser(user);
+                
                 // 更新提现申请状态
-                gameData.withdrawRequests = gameData.withdrawRequests.map(req => {
+                const adminData = await serverAPI.getAdminData();
+                adminData.withdrawRequests = adminData.withdrawRequests.map(req => {
                     if (req.username === username && req.amount === amount && req.status === 'pending') {
                         return { ...req, status: 'approved' };
                     }
                     return req;
                 });
                 
-                saveGameData();
+                await serverAPI.saveAdminData(adminData);
                 loadAdminData();
                 alert(`已批准 ${username} 的 ${amount} 砖块币提现申请`);
             }
         }
 
         // 拒绝提现
-        function rejectWithdraw(username, amount) {
-            if (gameData.users[username]) {
+        async function rejectWithdraw(username, amount) {
+            const user = await serverAPI.getUser(username);
+            if (user) {
                 // 返还砖块币
-                gameData.users[username].coins += amount;
+                user.coins += amount;
                 
                 // 更新用户提现记录
-                gameData.users[username].withdrawHistory = gameData.users[username].withdrawHistory.map(wd => {
+                user.withdrawHistory = user.withdrawHistory.map(wd => {
                     if (wd.status === 'pending' && wd.amount === amount) {
                         return { ...wd, status: 'rejected' };
                     }
                     return wd;
                 });
                 
+                await serverAPI.saveUser(user);
+                
                 // 更新提现申请状态
-                gameData.withdrawRequests = gameData.withdrawRequests.map(req => {
+                const adminData = await serverAPI.getAdminData();
+                adminData.withdrawRequests = adminData.withdrawRequests.map(req => {
                     if (req.username === username && req.amount === amount && req.status === 'pending') {
                         return { ...req, status: 'rejected' };
                     }
                     return req;
                 });
                 
-                saveGameData();
+                await serverAPI.saveAdminData(adminData);
                 loadAdminData();
                 alert(`已拒绝 ${username} 的 ${amount} 砖块币提现申请，砖块币已返还`);
             }
         }
 
         // 切换VIP状态
-        function toggleVIP(username) {
-            if (gameData.users[username]) {
-                gameData.users[username].isVIP = !gameData.users[username].isVIP;
-                gameData.users[username].vipRequested = false;
+        async function toggleVIP(username) {
+            const user = await serverAPI.getUser(username);
+            if (user) {
+                user.isVIP = !user.isVIP;
+                user.vipRequested = false;
+                await serverAPI.saveUser(user);
                 
                 // 如果是批准VIP，从申请列表中移除
-                gameData.vipRequests = gameData.vipRequests.filter(req => 
+                const adminData = await serverAPI.getAdminData();
+                adminData.vipRequests = adminData.vipRequests.filter(req => 
                     !(req.username === username && req.status === 'pending')
                 );
                 
-                saveGameData();
+                await serverAPI.saveAdminData(adminData);
                 searchUsers();
                 alert(`${username} 的VIP状态已更新`);
             }
         }
 
         // 切换用户封禁状态
-        function toggleBanUser(username) {
-            if (gameData.users[username]) {
-                gameData.users[username].banned = !gameData.users[username].banned;
+        async function toggleBanUser(username) {
+            const user = await serverAPI.getUser(username);
+            if (user) {
+                user.banned = !user.banned;
+                await serverAPI.saveUser(user);
                 
-                saveGameData();
                 searchUsers();
                 alert(`${username} 的封禁状态已更新`);
             }
         }
 
         // 添加砖块币
-        function addCoins(username, amount) {
-            if (gameData.users[username] && amount > 0) {
-                gameData.users[username].coins += amount;
+        async function addCoins(username, amount) {
+            const user = await serverAPI.getUser(username);
+            if (user && amount > 0) {
+                user.coins += amount;
                 
                 // 添加交易记录
-                gameData.users[username].marketHistory.push({
+                user.marketHistory.push({
                     type: '管理员添加',
                     details: `管理员添加了 ${amount} 砖块币`,
                     date: new Date().toISOString()
                 });
                 
-                saveGameData();
+                await serverAPI.saveUser(user);
                 searchUsers();
                 alert(`已为 ${username} 添加 ${amount} 砖块币`);
             }
         }
 
         // 保存管理员设置
-        function saveAdminSettings() {
-            gameData.vipPrice = parseInt(elements.vipPriceInput.value) || 32;
-            gameData.withdrawFee = parseInt(elements.withdrawFeeInput.value) || 10;
-            gameData.vipWithdrawFee = parseInt(elements.vipFeeInput.value) || 5;
+        async function saveAdminSettings() {
+            const adminData = await serverAPI.getAdminData();
             
-            saveGameData();
+            adminData.vipPrice = parseInt(elements.vipPriceInput.value) || 32;
+            adminData.withdrawFee = parseInt(elements.withdrawFeeInput.value) || 10;
+            adminData.vipWithdrawFee = parseInt(elements.vipFeeInput.value) || 5;
+            
+            await serverAPI.saveAdminData(adminData);
             alert('系统设置已保存');
         }
 
         // 更新支付二维码
-        function updatePaymentQR() {
+        async function updatePaymentQR() {
+            const adminData = await serverAPI.getAdminData();
+            
             const alipayQR = elements.alipayQrInput.value.trim();
             const wechatQR = elements.wechatQrInput.value.trim();
             
             if (alipayQR) {
-                gameData.paymentQR.alipay = alipayQR;
+                adminData.paymentQR.alipay = alipayQR;
                 elements.alipayQr.src = alipayQR;
             }
             
             if (wechatQR) {
-                gameData.paymentQR.wechat = wechatQR;
+                adminData.paymentQR.wechat = wechatQR;
                 elements.wechatQr.src = wechatQR;
             }
             
-            saveGameData();
+            await serverAPI.saveAdminData(adminData);
             alert('支付二维码已更新');
         }
 
         // 保存公告
-        function saveAnnouncement() {
+        async function saveAnnouncement() {
+            const adminData = await serverAPI.getAdminData();
             const newAnnouncements = elements.announcementEdit.value.split('\n').filter(line => line.trim());
-            gameData.announcements = newAnnouncements;
+            adminData.announcements = newAnnouncements;
             
-            saveGameData();
+            await serverAPI.saveAdminData(adminData);
             alert('公告已保存');
-        }
-
-        // 保存游戏数据
-        function saveGameData() {
-            localStorage.setItem('pmGameData', JSON.stringify(gameData));
+            
+            // 更新公告显示
+            loadAnnouncements();
         }
 
         // 辅助函数: 打乱数组
