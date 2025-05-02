@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高级搬砖人生</title>
+    <!-- 引入Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <style>
         * {
             margin: 0;
@@ -693,6 +697,7 @@
                 <a id="switch-admin">管理员登录</a>
             </div>
             <div id="auth-loading" class="loader" style="display: none;"></div>
+            <div id="auth-message" style="color: red; text-align: center; margin-top: 10px;"></div>
         </div>
     </div>
     
@@ -887,159 +892,189 @@
             currentGame: null // 当前正在玩的游戏
         };
         
-        // 增强的远程数据库模拟
+        // Firebase配置 - 替换为您自己的配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEXAMPLEEXAMPLEEXAMPLEEXAMPLE",
+            authDomain: "your-project-id.firebaseapp.com",
+            databaseURL: "https://your-project-id.firebaseio.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project-id.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:exampleexampleexample"
+        };
+        
+        // 初始化Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // 简单的密码哈希函数
+        function simpleHash(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // 转换为32位整数
+            }
+            return hash.toString();
+        }
+        
+        // 增强的远程数据库实现
         const remoteDB = {
-            // 使用localStorage作为基础，模拟远程存储
-            storage: {},
-            
-            // 获取所有设备上的用户数据
+            // 获取所有用户数据
             getAllUsers: async function() {
                 try {
-                    // 尝试从服务器获取数据（模拟）
-                    const serverResponse = await this.mockServerRequest('getAllUsers');
-                    if (serverResponse && serverResponse.users) {
-                        return serverResponse.users;
-                    }
-                } catch (e) {
-                    console.log('无法连接服务器，使用本地数据');
+                    const snapshot = await db.collection('users').get();
+                    const users = [];
+                    snapshot.forEach(doc => {
+                        users.push({ id: doc.id, ...doc.data() });
+                    });
+                    return users;
+                } catch (error) {
+                    console.error('获取用户数据失败:', error);
+                    return [];
                 }
-                
-                // 从本地存储获取数据
-                const localUsers = JSON.parse(localStorage.getItem('gameUsers')) || [];
-                
-                // 合并来自不同设备的数据
-                const device1Users = JSON.parse(localStorage.getItem('device1_users')) || [];
-                const device2Users = JSON.parse(localStorage.getItem('device2_users')) || [];
-                
-                // 合并所有用户，去除重复
-                const allUsers = [...localUsers];
-                
-                device1Users.forEach(user => {
-                    if (!allUsers.some(u => u.id === user.id)) {
-                        allUsers.push(user);
-                    }
-                });
-                
-                device2Users.forEach(user => {
-                    if (!allUsers.some(u => u.id === user.id)) {
-                        allUsers.push(user);
-                    }
-                });
-                
-                return allUsers;
             },
             
-            // 保存用户数据到所有设备
-            saveAllUsers: async function(users) {
-                // 保存到本地存储
-                localStorage.setItem('gameUsers', JSON.stringify(users));
-                
+            // 获取特定用户
+            getUser: async function(username) {
                 try {
-                    // 尝试同步到服务器（模拟）
-                    await this.mockServerRequest('saveAllUsers', {users});
-                } catch (e) {
-                    console.log('无法连接服务器，仅保存到本地');
+                    const snapshot = await db.collection('users').where('username', '==', username).get();
+                    if (snapshot.empty) return null;
+                    return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+                } catch (error) {
+                    console.error('获取用户失败:', error);
+                    return null;
                 }
-                
-                // 触发数据同步事件
-                this.triggerDataSync();
             },
             
-            // 获取特定键的数据
-            getItem: async function(key) {
-                // 对于用户数据，使用特殊处理
-                if (key === 'gameUsers') {
-                    return this.getAllUsers();
-                }
-                
-                // 其他数据正常处理
+            // 添加新用户
+            addUser: async function(user) {
                 try {
-                    const serverResponse = await this.mockServerRequest('getItem', {key});
-                    if (serverResponse && serverResponse.value) {
-                        return serverResponse.value;
-                    }
-                } catch (e) {
-                    console.log('无法连接服务器，使用本地数据');
+                    const docRef = await db.collection('users').add(user);
+                    return { id: docRef.id, ...user };
+                } catch (error) {
+                    console.error('添加用户失败:', error);
+                    return null;
                 }
-                
-                return JSON.parse(localStorage.getItem(key));
             },
             
-            // 设置特定键的数据
-            setItem: async function(key, value) {
-                // 对于用户数据，使用特殊处理
-                if (key === 'gameUsers') {
-                    return this.saveAllUsers(value);
-                }
-                
-                // 保存到本地存储
-                localStorage.setItem(key, JSON.stringify(value));
-                
+            // 更新用户
+            updateUser: async function(userId, updates) {
                 try {
-                    // 尝试同步到服务器（模拟）
-                    await this.mockServerRequest('setItem', {key, value});
-                } catch (e) {
-                    console.log('无法连接服务器，仅保存到本地');
+                    await db.collection('users').doc(userId).update(updates);
+                    return true;
+                } catch (error) {
+                    console.error('更新用户失败:', error);
+                    return false;
                 }
-                
-                // 触发数据同步事件
-                this.triggerDataSync();
-                
-                return true;
             },
             
-            // 模拟服务器请求
-            mockServerRequest: function(action, data = {}) {
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        // 模拟服务器响应
-                        if (Math.random() > 0.2) { // 80%成功率
-                            if (action === 'getAllUsers') {
-                                // 模拟从服务器获取所有用户
-                                const serverUsers = JSON.parse(localStorage.getItem('server_users')) || [];
-                                resolve({users: serverUsers});
-                            } else if (action === 'saveAllUsers') {
-                                // 模拟保存用户到服务器
-                                localStorage.setItem('server_users', JSON.stringify(data.users));
-                                resolve({success: true});
-                            } else if (action === 'getItem') {
-                                const value = JSON.parse(localStorage.getItem(data.key));
-                                resolve({value});
-                            } else if (action === 'setItem') {
-                                localStorage.setItem(data.key, JSON.stringify(data.value));
-                                resolve({success: true});
-                            }
-                        } else {
-                            reject(new Error('模拟服务器错误'));
-                        }
-                    }, 300);
-                });
+            // 获取特定集合数据
+            getCollection: async function(collectionName) {
+                try {
+                    const snapshot = await db.collection(collectionName).get();
+                    const items = [];
+                    snapshot.forEach(doc => {
+                        items.push({ id: doc.id, ...doc.data() });
+                    });
+                    return items;
+                } catch (error) {
+                    console.error(`获取${collectionName}数据失败:`, error);
+                    return [];
+                }
             },
             
-            // 触发数据同步事件
-            triggerDataSync: function() {
-                // 在实际应用中，这里应该通知所有设备数据已更新
-                // 我们使用storage事件来模拟
-                const event = new Event('storage');
-                window.dispatchEvent(event);
+            // 添加集合项
+            addCollectionItem: async function(collectionName, item) {
+                try {
+                    const docRef = await db.collection(collectionName).add(item);
+                    return { id: docRef.id, ...item };
+                } catch (error) {
+                    console.error(`添加${collectionName}项失败:`, error);
+                    return null;
+                }
             },
             
-            // 初始化数据同步
+            // 更新集合项
+            updateCollectionItem: async function(collectionName, itemId, updates) {
+                try {
+                    await db.collection(collectionName).doc(itemId).update(updates);
+                    return true;
+                } catch (error) {
+                    console.error(`更新${collectionName}项失败:`, error);
+                    return false;
+                }
+            },
+            
+            // 获取设置数据
+            getSettings: async function() {
+                try {
+                    const doc = await db.collection('settings').doc('gameSettings').get();
+                    return doc.exists ? doc.data() : {};
+                } catch (error) {
+                    console.error('获取设置数据失败:', error);
+                    return {};
+                }
+            },
+            
+            // 保存设置数据
+            saveSettings: async function(settings) {
+                try {
+                    await db.collection('settings').doc('gameSettings').set(settings, { merge: true });
+                    return true;
+                } catch (error) {
+                    console.error('保存设置数据失败:', error);
+                    return false;
+                }
+            },
+            
+            // 初始化数据同步监听
             initDataSync: function() {
-                // 监听storage事件以实现多设备同步
-                window.addEventListener('storage', function(e) {
-                    if (e.key === 'gameUsers' && gameData.currentUser) {
-                        // 重新加载用户数据
-                        remoteDB.getAllUsers().then(users => {
-                            gameData.users = users;
-                            
-                            // 更新当前用户
-                            const user = users.find(u => u.id === gameData.currentUser.id);
-                            if (user) {
-                                gameData.currentUser = user;
-                                updateUserInfo();
-                            }
-                        });
+                // 监听用户数据变化
+                db.collection('users').onSnapshot(snapshot => {
+                    gameData.users = [];
+                    snapshot.forEach(doc => {
+                        gameData.users.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // 更新当前用户
+                    if (gameData.currentUser) {
+                        const user = gameData.users.find(u => u.id === gameData.currentUser.id);
+                        if (user) {
+                            gameData.currentUser = user;
+                            updateUserInfo();
+                        }
+                    }
+                });
+                
+                // 监听提现申请变化
+                db.collection('withdrawApplications').onSnapshot(snapshot => {
+                    gameData.withdrawApplications = [];
+                    snapshot.forEach(doc => {
+                        gameData.withdrawApplications.push({ id: doc.id, ...doc.data() });
+                    });
+                });
+                
+                // 监听VIP申请变化
+                db.collection('vipApplications').onSnapshot(snapshot => {
+                    gameData.vipApplications = [];
+                    snapshot.forEach(doc => {
+                        gameData.vipApplications.push({ id: doc.id, ...doc.data() });
+                    });
+                });
+                
+                // 监听设置变化
+                db.collection('settings').doc('gameSettings').onSnapshot(doc => {
+                    if (doc.exists) {
+                        const settings = doc.data();
+                        gameData.announcement = settings.announcement || gameData.announcement;
+                        gameData.paymentQRCodes = settings.paymentQRCodes || gameData.paymentQRCodes;
+                        gameData.adminCode = settings.adminCode || gameData.adminCode;
+                        gameData.bannedUsers = settings.bannedUsers || gameData.bannedUsers;
+                        gameData.withdrawRate = settings.withdrawRate || gameData.withdrawRate;
+                        
+                        // 更新公告显示
+                        announcementText.textContent = gameData.announcement;
                     }
                 });
             }
@@ -1073,6 +1108,7 @@
         const alipayQRCode = document.getElementById('alipay-qrcode');
         const wechatQRCode = document.getElementById('wechat-qrcode');
         const authLoading = document.getElementById('auth-loading');
+        const authMessage = document.getElementById('auth-message');
         
         // 菜单按钮
         const upgradeBtn = document.getElementById('upgrade-btn');
@@ -1098,18 +1134,15 @@
         
         // 初始化函数
         async function init() {
-            // 初始化数据同步
-            remoteDB.initDataSync();
-            
             // 从远程加载数据
             try {
                 authLoading.style.display = 'block';
                 
-                gameData.users = await remoteDB.getItem('gameUsers') || [];
-                gameData.withdrawApplications = await remoteDB.getItem('withdrawApplications') || [];
-                gameData.vipApplications = await remoteDB.getItem('vipApplications') || [];
+                gameData.users = await remoteDB.getAllUsers();
+                gameData.withdrawApplications = await remoteDB.getCollection('withdrawApplications');
+                gameData.vipApplications = await remoteDB.getCollection('vipApplications');
                 
-                const settings = await remoteDB.getItem('gameSettings');
+                const settings = await remoteDB.getSettings();
                 if (settings) {
                     gameData.announcement = settings.announcement || gameData.announcement;
                     gameData.paymentQRCodes = settings.paymentQRCodes || gameData.paymentQRCodes;
@@ -1149,12 +1182,23 @@
                     handleImageUpload(e, 'wechat');
                 });
                 
+                // 初始化数据同步监听
+                remoteDB.initDataSync();
+                
             } catch (error) {
                 console.error('初始化失败:', error);
-                alert('初始化数据失败，请刷新页面重试');
+                showAuthMessage('初始化数据失败，请刷新页面重试');
             } finally {
                 authLoading.style.display = 'none';
             }
+        }
+        
+        // 显示认证消息
+        function showAuthMessage(message) {
+            authMessage.textContent = message;
+            setTimeout(() => {
+                authMessage.textContent = '';
+            }, 3000);
         }
         
         // 处理图片上传
@@ -1267,33 +1311,43 @@
         
         // 注册用户
         async function registerUser() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const inviteCode = document.getElementById('invite-code').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const inviteCode = document.getElementById('invite-code').value.trim();
             
             // 检查是否被封禁
             if (gameData.bannedUsers.includes(username)) {
-                alert('该用户名已被封禁，无法注册');
+                showAuthMessage('该用户名已被封禁，无法注册');
                 return;
             }
             
             // 简单验证
             if (!username || !password) {
-                alert('请输入用户名和密码');
+                showAuthMessage('请输入用户名和密码');
+                return;
+            }
+            
+            if (username.length < 4 || username.length > 16) {
+                showAuthMessage('用户名长度需在4-16个字符之间');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAuthMessage('密码长度至少6个字符');
                 return;
             }
             
             // 检查用户名是否已存在
-            if (gameData.users.some(user => user.username === username)) {
-                alert('用户名已存在');
+            const existingUser = await remoteDB.getUser(username);
+            if (existingUser) {
+                showAuthMessage('用户名已存在');
                 return;
             }
             
             // 创建新用户
             const newUser = {
-                id: Date.now(),
                 username,
-                password,
+                password: simpleHash(password), // 简单哈希密码
                 level: 1,
                 bricks: 0.3,
                 starCoins: 0,
@@ -1311,7 +1365,8 @@
                 totalEarned: 0,
                 isAdmin: false,
                 isBanned: false,
-                device: navigator.userAgent // 记录注册设备信息
+                device: navigator.userAgent, // 记录注册设备信息
+                createdAt: new Date()
             };
             
             // 如果有邀请人，增加邀请人的邀请计数
@@ -1319,41 +1374,51 @@
                 const inviter = gameData.users.find(u => u.inviteCode === inviteCode);
                 if (inviter) {
                     inviter.invitedUsers++;
-                    await saveUsers();
+                    await remoteDB.updateUser(inviter.id, { invitedUsers: inviter.invitedUsers });
                 }
             }
             
-            gameData.users.push(newUser);
-            await saveUsers();
+            // 保存新用户
+            const createdUser = await remoteDB.addUser(newUser);
+            if (!createdUser) {
+                showAuthMessage('注册失败，请重试');
+                return;
+            }
             
-            alert('注册成功！您的邀请码是: ' + newUser.inviteCode);
-            loginUser();
+            showAuthMessage('注册成功！您的邀请码是: ' + newUser.inviteCode);
+            
+            // 自动登录
+            gameData.currentUser = createdUser;
+            authContainer.style.display = 'none';
+            mainContainer.style.display = 'block';
+            updateUserInfo();
+            loadContent('upgrade');
         }
         
         // 登录用户
-        function loginUser() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        async function loginUser() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
             
             // 简单验证
             if (!username || !password) {
-                alert('请输入用户名和密码');
+                showAuthMessage('请输入用户名和密码');
                 return;
             }
             
             // 检查是否被封禁
             if (gameData.bannedUsers.includes(username)) {
-                alert('该账号已被封禁，无法登录');
+                showAuthMessage('该账号已被封禁，无法登录');
                 return;
             }
             
             // 查找用户
-            const user = gameData.users.find(u => u.username === username && u.password === password);
+            const user = await remoteDB.getUser(username);
             
-            if (user) {
+            if (user && user.password === simpleHash(password)) {
                 // 检查用户是否被封禁
                 if (user.isBanned) {
-                    alert('该账号已被封禁，无法登录');
+                    showAuthMessage('该账号已被封禁，无法登录');
                     return;
                 }
                 
@@ -1369,35 +1434,34 @@
                     loadContent('upgrade');
                 }
             } else {
-                alert('用户名或密码错误');
+                showAuthMessage('用户名或密码错误');
             }
         }
         
         // 管理员登录
-        function adminLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const adminCode = document.getElementById('admin-code').value;
+        async function adminLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const adminCode = document.getElementById('admin-code').value.trim();
             
             if (!username || !password || !adminCode) {
-                alert('请输入用户名、密码和管理员代码');
+                showAuthMessage('请输入用户名、密码和管理员代码');
                 return;
             }
             
             if (adminCode !== gameData.adminCode) {
-                alert('管理员代码错误');
+                showAuthMessage('管理员代码错误');
                 return;
             }
             
             // 查找用户或创建管理员账户
-            let user = gameData.users.find(u => u.username === username && u.password === password);
+            let user = await remoteDB.getUser(username);
             
             if (!user) {
                 // 创建管理员账户
-                user = {
-                    id: Date.now(),
+                const newUser = {
                     username,
-                    password,
+                    password: simpleHash(password),
                     level: 99,
                     bricks: 9999,
                     starCoins: 9999,
@@ -1415,15 +1479,25 @@
                     totalEarned: 0,
                     isAdmin: true,
                     isBanned: false,
-                    device: navigator.userAgent
+                    device: navigator.userAgent,
+                    createdAt: new Date()
                 };
                 
-                gameData.users.push(user);
-                saveUsers();
+                user = await remoteDB.addUser(newUser);
+                if (!user) {
+                    showAuthMessage('创建管理员账户失败');
+                    return;
+                }
             } else {
+                // 验证密码
+                if (user.password !== simpleHash(password)) {
+                    showAuthMessage('密码错误');
+                    return;
+                }
+                
                 // 设置为管理员
                 user.isAdmin = true;
-                saveUsers();
+                await remoteDB.updateUser(user.id, { isAdmin: true });
             }
             
             gameData.currentUser = user;
@@ -1437,21 +1511,6 @@
             return Math.random().toString(36).substr(2, 8).toUpperCase();
         }
         
-        // 保存用户数据
-        async function saveUsers() {
-            await remoteDB.setItem('gameUsers', gameData.users);
-        }
-        
-        // 保存提现申请
-        async function saveWithdrawals() {
-            await remoteDB.setItem('withdrawApplications', gameData.withdrawApplications);
-        }
-        
-        // 保存VIP申请
-        async function saveVipApplications() {
-            await remoteDB.setItem('vipApplications', gameData.vipApplications);
-        }
-        
         // 保存游戏设置
         async function saveSettings() {
             const settings = {
@@ -1461,7 +1520,7 @@
                 bannedUsers: gameData.bannedUsers,
                 withdrawRate: gameData.withdrawRate
             };
-            await remoteDB.setItem('gameSettings', settings);
+            await remoteDB.saveSettings(settings);
         }
         
         // 更新用户信息显示
@@ -1766,11 +1825,18 @@
                     const inviter = gameData.users.find(u => u.inviteCode === user.invitedBy);
                     if (inviter) {
                         inviter.starCoins += 10;
+                        await remoteDB.updateUser(inviter.id, { starCoins: inviter.starCoins });
                         alert(`您的邀请人 ${inviter.username} 获得了10人脉币奖励`);
                     }
                 }
                 
-                await saveUsers();
+                await remoteDB.updateUser(user.id, {
+                    bricks: user.bricks,
+                    starCoins: user.starCoins,
+                    level: user.level,
+                    lastUpgradeTime: user.lastUpgradeTime
+                });
+                
                 updateUserInfo();
                 loadContent('upgrade');
                 alert(`升级成功！当前等级: ${nextLevel}`);
@@ -1847,7 +1913,7 @@
         
         // 猜数字游戏
         let secretNumber = 0;
-        function checkGuess() {
+        async function checkGuess() {
             if (!secretNumber) {
                 secretNumber = Math.floor(Math.random() * 100) + 1;
             }
@@ -1868,7 +1934,7 @@
                 // 猜对了
                 const reward = 1 + Math.floor(Math.random() * 5); // 1-5人脉币
                 gameData.currentUser.starCoins += reward;
-                saveUsers();
+                await remoteDB.updateUser(gameData.currentUser.id, { starCoins: gameData.currentUser.starCoins });
                 updateUserInfo();
                 
                 resultElement.innerHTML = `恭喜你猜对了！获得 ${reward} 人脉币<br>正确答案是 ${secretNumber}`;
@@ -1883,7 +1949,7 @@
         
         // 剪刀石头布游戏
         let rpsScore = { player: 0, computer: 0 };
-        function playRPS(playerChoice) {
+        async function playRPS(playerChoice) {
             const choices = ['rock', 'paper', 'scissors'];
             const computerChoice = choices[Math.floor(Math.random() * 3)];
             
@@ -1916,7 +1982,7 @@
                 if (rpsScore.player > rpsScore.computer) {
                     const reward = 2 + Math.floor(Math.random() * 5); // 2-6人脉币
                     gameData.currentUser.starCoins += reward;
-                    saveUsers();
+                    await remoteDB.updateUser(gameData.currentUser.id, { starCoins: gameData.currentUser.starCoins });
                     updateUserInfo();
                     
                     setTimeout(() => {
@@ -1976,7 +2042,7 @@
             document.getElementById('memory-result').textContent = '';
         }
         
-        function flipCard() {
+        async function flipCard() {
             const index = parseInt(this.dataset.index);
             
             // 如果卡片已经翻开或是已经匹配的，则忽略
@@ -2003,7 +2069,7 @@
                     if (matchedPairs === 8) {
                         const reward = 3 + Math.floor(Math.random() * 7); // 3-9人脉币
                         gameData.currentUser.starCoins += reward;
-                        saveUsers();
+                        await remoteDB.updateUser(gameData.currentUser.id, { starCoins: gameData.currentUser.starCoins });
                         updateUserInfo();
                         
                         setTimeout(() => {
@@ -2055,7 +2121,13 @@
                     showRewardPopup('购买成功！下次升级时间减半');
                 }
                 
-                await saveUsers();
+                await remoteDB.updateUser(user.id, {
+                    starCoins: user.starCoins,
+                    bricks: user.bricks,
+                    vip: user.vip,
+                    vipExpire: user.vipExpire
+                });
+                
                 updateUserInfo();
             } else {
                 alert('人脉币不足');
@@ -2071,17 +2143,21 @@
         async function submitVipApplication() {
             const user = gameData.currentUser;
             
-            gameData.vipApplications.push({
+            const application = {
                 userId: user.id,
                 username: user.username,
                 amount: 32,
                 status: 'pending',
                 applyTime: new Date()
-            });
+            };
             
-            await saveVipApplications();
-            paymentModal.style.display = 'none';
-            alert('VIP申请已提交，请等待管理员处理');
+            const result = await remoteDB.addCollectionItem('vipApplications', application);
+            if (result) {
+                paymentModal.style.display = 'none';
+                alert('VIP申请已提交，请等待管理员处理');
+            } else {
+                alert('提交申请失败，请重试');
+            }
         }
         
         // 提交提现申请
@@ -2106,7 +2182,7 @@
                 user.bricks -= bricksNeeded;
                 user.lastWithdrawTime = new Date();
                 
-                gameData.withdrawApplications.push({
+                const application = {
                     userId: user.id,
                     username: user.username,
                     amount: amount,
@@ -2115,12 +2191,23 @@
                     account: account,
                     status: 'pending',
                     applyTime: new Date()
+                };
+                
+                // 更新用户数据
+                await remoteDB.updateUser(user.id, {
+                    bricks: user.bricks,
+                    lastWithdrawTime: user.lastWithdrawTime
                 });
                 
-                await saveUsers();
-                await saveWithdrawals();
-                updateUserInfo();
-                alert(`提现申请已提交，预计24小时内处理。实际到账: ${amount.toFixed(2)}元 (手续费: ${(bricksNeeded * gameData.withdrawRate - amount).toFixed(2)}元)`);
+                // 添加提现申请
+                const result = await remoteDB.addCollectionItem('withdrawApplications', application);
+                
+                if (result) {
+                    updateUserInfo();
+                    alert(`提现申请已提交，预计24小时内处理。实际到账: ${amount.toFixed(2)}元 (手续费: ${(bricksNeeded * gameData.withdrawRate - amount).toFixed(2)}元)`);
+                } else {
+                    alert('提交申请失败，请重试');
+                }
             } else {
                 alert(`砖块不足，需要 ${bricksNeeded.toFixed(1)} 砖块 (含手续费)`);
             }
@@ -2238,7 +2325,12 @@
             // 扣除能量石
             gameData.currentUser.starCoins -= stones;
             gameData.currentUser.lastEscapeGameTime = new Date();
-            await saveUsers();
+            
+            await remoteDB.updateUser(gameData.currentUser.id, {
+                starCoins: gameData.currentUser.starCoins,
+                lastEscapeGameTime: gameData.currentUser.lastEscapeGameTime
+            });
+            
             updateUserInfo();
             
             // 模拟游戏结果
@@ -2260,7 +2352,11 @@
                 
                 // 返还投入的能量石加上奖励
                 gameData.currentUser.starCoins += stones + reward;
-                await saveUsers();
+                
+                await remoteDB.updateUser(gameData.currentUser.id, {
+                    starCoins: gameData.currentUser.starCoins
+                });
+                
                 updateUserInfo();
                 
                 resultMessage = `恭喜！外星人选中了${killedRoom}房间，您幸存并获得${reward.toFixed(2)}能量石奖励`;
@@ -2274,10 +2370,13 @@
         }
         
         // 开始挂机
-        function startAfk() {
+        async function startAfk() {
             const user = gameData.currentUser;
             user.lastAfkTime = new Date();
-            saveUsers();
+            
+            await remoteDB.updateUser(user.id, {
+                lastAfkTime: user.lastAfkTime
+            });
             
             // 更新按钮状态
             const startAfkBtn = document.getElementById('start-afk');
@@ -2340,7 +2439,12 @@
                 startAfkBtn.disabled = false;
             }
             
-            await saveUsers();
+            await remoteDB.updateUser(user.id, {
+                starCoins: user.starCoins,
+                afkHours: user.afkHours,
+                lastAfkTime: user.lastAfkTime
+            });
+            
             updateUserInfo();
             loadContent('afk');
             alert(`成功领取 ${reward} 人脉币`);
@@ -2353,7 +2457,7 @@
             
             const timers = JSON.parse(savedTimers);
             for (const userId in timers) {
-                const user = gameData.users.find(u => u.id === parseInt(userId));
+                const user = gameData.users.find(u => u.id === userId);
                 if (user) {
                     user.lastAfkTime = new Date(timers[userId]);
                     user.afkHours = (new Date() - user.lastAfkTime) / (1000 * 60 * 60);
@@ -2406,9 +2510,9 @@
                                         <td title="${user.device || '未知设备'}">${getDeviceType(user.device)}</td>
                                         <td>${user.isBanned ? '已封禁' : '正常'}</td>
                                         <td>
-                                            <button onclick="editUser(${user.id})">编辑</button>
+                                            <button onclick="editUser('${user.id}')">编辑</button>
                                             ${user.id !== gameData.currentUser.id ? `
-                                                <button onclick="banUser(${user.id}, ${!user.isBanned})">
+                                                <button onclick="banUser('${user.id}', ${!user.isBanned})">
                                                     ${user.isBanned ? '解封' : '封禁'}
                                                 </button>
                                             ` : ''}
@@ -2489,8 +2593,8 @@
                                         <td>${w.account}</td>
                                         <td>${new Date(w.applyTime).toLocaleString()}</td>
                                         <td>
-                                            <button onclick="processWithdrawal(${w.userId}, 'approved')">通过</button>
-                                            <button onclick="processWithdrawal(${w.userId}, 'rejected')">拒绝</button>
+                                            <button onclick="processWithdrawal('${w.id}', 'approved')">通过</button>
+                                            <button onclick="processWithdrawal('${w.id}', 'rejected')">拒绝</button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -2558,8 +2662,8 @@
                                         <td>${v.amount}元</td>
                                         <td>${new Date(v.applyTime).toLocaleString()}</td>
                                         <td>
-                                            <button onclick="processVipApplication(${v.userId}, 'approved')">通过</button>
-                                            <button onclick="processVipApplication(${v.userId}, 'rejected')">拒绝</button>
+                                            <button onclick="processVipApplication('${v.id}', 'approved')">通过</button>
+                                            <button onclick="processVipApplication('${v.id}', 'rejected')">拒绝</button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -2731,7 +2835,7 @@
             document.getElementById('user-form-title').textContent = '编辑用户';
             document.getElementById('edit-user-id').value = user.id;
             document.getElementById('admin-username').value = user.username;
-            document.getElementById('admin-password').value = user.password;
+            document.getElementById('admin-password').value = '';
             document.getElementById('admin-bricks').value = user.bricks;
             document.getElementById('admin-starcoins').value = user.starCoins;
             document.getElementById('admin-level').value = user.level;
@@ -2745,7 +2849,8 @@
             if (!user) return;
             
             if (confirm(`确定要${ban ? '封禁' : '解封'}用户 ${user.username} 吗？`)) {
-                user.isBanned = ban;
+                // 更新用户状态
+                await remoteDB.updateUser(userId, { isBanned: ban });
                 
                 // 更新封禁用户列表
                 if (ban) {
@@ -2756,7 +2861,6 @@
                     gameData.bannedUsers = gameData.bannedUsers.filter(u => u !== user.username);
                 }
                 
-                await saveUsers();
                 await saveSettings();
                 loadAdminContent('users');
                 alert(`用户 ${user.username} 已${ban ? '封禁' : '解封'}`);
@@ -2766,34 +2870,43 @@
         // 提交用户表单
         async function submitUserForm() {
             const id = document.getElementById('edit-user-id').value;
-            const username = document.getElementById('admin-username').value;
-            const password = document.getElementById('admin-password').value;
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value.trim();
             const bricks = parseFloat(document.getElementById('admin-bricks').value);
             const starcoins = parseInt(document.getElementById('admin-starcoins').value);
             const level = parseInt(document.getElementById('admin-level').value);
             const vip = document.getElementById('admin-vip').checked;
             const banned = document.getElementById('admin-banned').checked;
             
-            if (!username || !password) {
-                alert('请输入用户名和密码');
+            if (!username) {
+                alert('请输入用户名');
                 return;
             }
             
             if (id) {
                 // 编辑现有用户
-                const user = gameData.users.find(u => u.id === parseInt(id));
+                const user = gameData.users.find(u => u.id === id);
                 if (user) {
-                    user.username = username;
-                    user.password = password;
-                    user.bricks = bricks;
-                    user.starCoins = starcoins;
-                    user.level = level;
-                    user.vip = vip;
-                    user.isBanned = banned;
+                    const updates = {
+                        bricks: bricks,
+                        starCoins: starcoins,
+                        level: level,
+                        vip: vip,
+                        isBanned: banned
+                    };
                     
-                    if (vip && !user.vipExpire) {
-                        user.vipExpire = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                    // 如果密码不为空，更新密码
+                    if (password) {
+                        updates.password = simpleHash(password);
                     }
+                    
+                    // 如果是VIP且之前不是VIP，设置过期时间
+                    if (vip && !user.vip) {
+                        updates.vipExpire = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                    }
+                    
+                    // 更新用户
+                    await remoteDB.updateUser(id, updates);
                     
                     // 更新封禁用户列表
                     if (banned) {
@@ -2804,16 +2917,19 @@
                         gameData.bannedUsers = gameData.bannedUsers.filter(u => u !== username);
                     }
                     
-                    await saveUsers();
                     await saveSettings();
                     alert('用户信息已更新');
                 }
             } else {
                 // 添加新用户
+                if (!password) {
+                    alert('请输入密码');
+                    return;
+                }
+                
                 const newUser = {
-                    id: Date.now(),
                     username,
-                    password,
+                    password: simpleHash(password),
                     level,
                     bricks,
                     starCoins: starcoins,
@@ -2831,18 +2947,22 @@
                     totalEarned: 0,
                     isAdmin: false,
                     isBanned: banned,
-                    device: navigator.userAgent
+                    device: navigator.userAgent,
+                    createdAt: new Date()
                 };
                 
-                gameData.users.push(newUser);
+                const user = await remoteDB.addUser(newUser);
+                if (!user) {
+                    alert('添加用户失败');
+                    return;
+                }
                 
                 // 添加到封禁列表
                 if (banned) {
                     gameData.bannedUsers.push(username);
+                    await saveSettings();
                 }
                 
-                await saveUsers();
-                await saveSettings();
                 alert('用户已添加');
             }
             
@@ -2851,59 +2971,71 @@
         }
         
         // 处理提现申请
-        async function processWithdrawal(userId, status) {
-            const application = gameData.withdrawApplications.find(w => w.userId === userId && w.status === 'pending');
+        async function processWithdrawal(withdrawalId, status) {
+            const application = gameData.withdrawApplications.find(w => w.id === withdrawalId);
             if (!application) return;
             
-            application.status = status;
-            application.processTime = new Date();
-            
-            if (status === 'rejected') {
-                // 拒绝申请，返还砖块
-                const user = gameData.users.find(u => u.id === userId);
-                if (user) {
-                    user.bricks += application.bricks;
-                    await saveUsers();
+            if (confirm(`确定要${status === 'approved' ? '通过' : '拒绝'}该提现申请吗？`)) {
+                // 更新申请状态
+                await remoteDB.updateCollectionItem('withdrawApplications', withdrawalId, {
+                    status: status,
+                    processTime: new Date()
+                });
+                
+                if (status === 'rejected') {
+                    // 拒绝申请，返还砖块
+                    const user = gameData.users.find(u => u.id === application.userId);
+                    if (user) {
+                        user.bricks += application.bricks;
+                        await remoteDB.updateUser(user.id, { bricks: user.bricks });
+                    }
+                } else {
+                    // 通过申请，更新用户提现总额
+                    const user = gameData.users.find(u => u.id === application.userId);
+                    if (user) {
+                        user.totalWithdrawn += application.amount;
+                        await remoteDB.updateUser(user.id, { totalWithdrawn: user.totalWithdrawn });
+                    }
                 }
-            } else {
-                // 通过申请，更新用户提现总额
-                const user = gameData.users.find(u => u.id === userId);
-                if (user) {
-                    user.totalWithdrawn += application.amount;
-                    await saveUsers();
-                }
+                
+                loadAdminContent('withdraw');
+                alert(`提现申请已${status === 'approved' ? '通过' : '拒绝'}`);
             }
-            
-            await saveWithdrawals();
-            loadAdminContent('withdraw');
-            alert(`提现申请已${status === 'approved' ? '通过' : '拒绝'}`);
         }
         
         // 处理VIP申请
-        async function processVipApplication(userId, status) {
-            const application = gameData.vipApplications.find(v => v.userId === userId && v.status === 'pending');
+        async function processVipApplication(applicationId, status) {
+            const application = gameData.vipApplications.find(v => v.id === applicationId);
             if (!application) return;
             
-            application.status = status;
-            application.processTime = new Date();
-            
-            if (status === 'approved') {
-                // 批准申请，设置VIP
-                const user = gameData.users.find(u => u.id === userId);
-                if (user) {
-                    user.vip = true;
-                    if (!user.vipExpire || new Date(user.vipExpire) < new Date()) {
-                        user.vipExpire = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-                    } else {
-                        user.vipExpire = new Date(user.vipExpire.getTime() + 30 * 24 * 60 * 60 * 1000);
+            if (confirm(`确定要${status === 'approved' ? '通过' : '拒绝'}该VIP申请吗？`)) {
+                // 更新申请状态
+                await remoteDB.updateCollectionItem('vipApplications', applicationId, {
+                    status: status,
+                    processTime: new Date()
+                });
+                
+                if (status === 'approved') {
+                    // 批准申请，设置VIP
+                    const user = gameData.users.find(u => u.id === application.userId);
+                    if (user) {
+                        const updates = {
+                            vip: true
+                        };
+                        
+                        if (!user.vipExpire || new Date(user.vipExpire) < new Date()) {
+                            updates.vipExpire = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                        } else {
+                            updates.vipExpire = new Date(user.vipExpire.getTime() + 30 * 24 * 60 * 60 * 1000);
+                        }
+                        
+                        await remoteDB.updateUser(user.id, updates);
                     }
-                    await saveUsers();
                 }
+                
+                loadAdminContent('vip');
+                alert(`VIP申请已${status === 'approved' ? '通过' : '拒绝'}`);
             }
-            
-            await saveVipApplications();
-            loadAdminContent('vip');
-            alert(`VIP申请已${status === 'approved' ? '通过' : '拒绝'}`);
         }
         
         // 保存系统设置
