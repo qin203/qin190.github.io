@@ -887,65 +887,163 @@
             currentGame: null // 当前正在玩的游戏
         };
         
-        // 模拟远程数据库
+        // 增强的远程数据库模拟
         const remoteDB = {
             // 使用localStorage作为基础，模拟远程存储
             storage: {},
             
-            getItem: function(key) {
-                return new Promise(resolve => {
-                    // 模拟网络延迟
-                    setTimeout(() => {
-                        const data = this.storage[key] || localStorage.getItem(key);
-                        resolve(data ? JSON.parse(data) : null);
-                    }, 300);
-                });
-            },
-            
-            setItem: function(key, value) {
-                return new Promise(resolve => {
-                    // 模拟网络延迟
-                    setTimeout(() => {
-                        const data = JSON.stringify(value);
-                        this.storage[key] = data;
-                        localStorage.setItem(key, data);
-                        resolve(true);
-                    }, 300);
-                });
-            },
-            
-            // 同步所有设备数据
-            syncAllDevices: function() {
-                // 在实际应用中，这里应该是与服务器同步数据的API调用
-                // 这里我们简单地将storage同步到所有打开的页面
-                if (window.localStorageSync) {
-                    window.localStorageSync.forEach(callback => {
-                        callback(this.storage);
-                    });
+            // 获取所有设备上的用户数据
+            getAllUsers: async function() {
+                try {
+                    // 尝试从服务器获取数据（模拟）
+                    const serverResponse = await this.mockServerRequest('getAllUsers');
+                    if (serverResponse && serverResponse.users) {
+                        return serverResponse.users;
+                    }
+                } catch (e) {
+                    console.log('无法连接服务器，使用本地数据');
                 }
+                
+                // 从本地存储获取数据
+                const localUsers = JSON.parse(localStorage.getItem('gameUsers')) || [];
+                
+                // 合并来自不同设备的数据
+                const device1Users = JSON.parse(localStorage.getItem('device1_users')) || [];
+                const device2Users = JSON.parse(localStorage.getItem('device2_users')) || [];
+                
+                // 合并所有用户，去除重复
+                const allUsers = [...localUsers];
+                
+                device1Users.forEach(user => {
+                    if (!allUsers.some(u => u.id === user.id)) {
+                        allUsers.push(user);
+                    }
+                });
+                
+                device2Users.forEach(user => {
+                    if (!allUsers.some(u => u.id === user.id)) {
+                        allUsers.push(user);
+                    }
+                });
+                
+                return allUsers;
+            },
+            
+            // 保存用户数据到所有设备
+            saveAllUsers: async function(users) {
+                // 保存到本地存储
+                localStorage.setItem('gameUsers', JSON.stringify(users));
+                
+                try {
+                    // 尝试同步到服务器（模拟）
+                    await this.mockServerRequest('saveAllUsers', {users});
+                } catch (e) {
+                    console.log('无法连接服务器，仅保存到本地');
+                }
+                
+                // 触发数据同步事件
+                this.triggerDataSync();
+            },
+            
+            // 获取特定键的数据
+            getItem: async function(key) {
+                // 对于用户数据，使用特殊处理
+                if (key === 'gameUsers') {
+                    return this.getAllUsers();
+                }
+                
+                // 其他数据正常处理
+                try {
+                    const serverResponse = await this.mockServerRequest('getItem', {key});
+                    if (serverResponse && serverResponse.value) {
+                        return serverResponse.value;
+                    }
+                } catch (e) {
+                    console.log('无法连接服务器，使用本地数据');
+                }
+                
+                return JSON.parse(localStorage.getItem(key));
+            },
+            
+            // 设置特定键的数据
+            setItem: async function(key, value) {
+                // 对于用户数据，使用特殊处理
+                if (key === 'gameUsers') {
+                    return this.saveAllUsers(value);
+                }
+                
+                // 保存到本地存储
+                localStorage.setItem(key, JSON.stringify(value));
+                
+                try {
+                    // 尝试同步到服务器（模拟）
+                    await this.mockServerRequest('setItem', {key, value});
+                } catch (e) {
+                    console.log('无法连接服务器，仅保存到本地');
+                }
+                
+                // 触发数据同步事件
+                this.triggerDataSync();
+                
+                return true;
+            },
+            
+            // 模拟服务器请求
+            mockServerRequest: function(action, data = {}) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // 模拟服务器响应
+                        if (Math.random() > 0.2) { // 80%成功率
+                            if (action === 'getAllUsers') {
+                                // 模拟从服务器获取所有用户
+                                const serverUsers = JSON.parse(localStorage.getItem('server_users')) || [];
+                                resolve({users: serverUsers});
+                            } else if (action === 'saveAllUsers') {
+                                // 模拟保存用户到服务器
+                                localStorage.setItem('server_users', JSON.stringify(data.users));
+                                resolve({success: true});
+                            } else if (action === 'getItem') {
+                                const value = JSON.parse(localStorage.getItem(data.key));
+                                resolve({value});
+                            } else if (action === 'setItem') {
+                                localStorage.setItem(data.key, JSON.stringify(data.value));
+                                resolve({success: true});
+                            }
+                        } else {
+                            reject(new Error('模拟服务器错误'));
+                        }
+                    }, 300);
+                });
+            },
+            
+            // 触发数据同步事件
+            triggerDataSync: function() {
+                // 在实际应用中，这里应该通知所有设备数据已更新
+                // 我们使用storage事件来模拟
+                const event = new Event('storage');
+                window.dispatchEvent(event);
+            },
+            
+            // 初始化数据同步
+            initDataSync: function() {
+                // 监听storage事件以实现多设备同步
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'gameUsers' && gameData.currentUser) {
+                        // 重新加载用户数据
+                        remoteDB.getAllUsers().then(users => {
+                            gameData.users = users;
+                            
+                            // 更新当前用户
+                            const user = users.find(u => u.id === gameData.currentUser.id);
+                            if (user) {
+                                gameData.currentUser = user;
+                                updateUserInfo();
+                            }
+                        });
+                    }
+                });
             }
         };
-        
-        // 监听storage事件以实现多设备同步
-        window.addEventListener('storage', function(e) {
-            if (e.key && remoteDB.storage[e.key] !== e.newValue) {
-                remoteDB.storage[e.key] = e.newValue;
-                // 重新加载相关数据
-                if (e.key === 'gameUsers' && gameData.currentUser) {
-                    const user = JSON.parse(e.newValue).find(u => u.id === gameData.currentUser.id);
-                    if (user) {
-                        gameData.currentUser = user;
-                        updateUserInfo();
-                    }
-                }
-            }
-        });
-        
-        // 用于跨页面通信
-        window.localStorageSync = window.localStorageSync || [];
-        window.localStorageSync.push(function(data) {
-            remoteDB.storage = data;
-        });
         
         // DOM元素
         const authContainer = document.getElementById('auth-container');
@@ -1000,13 +1098,16 @@
         
         // 初始化函数
         async function init() {
+            // 初始化数据同步
+            remoteDB.initDataSync();
+            
             // 从远程加载数据
             try {
                 authLoading.style.display = 'block';
                 
-                gameData.users = (await remoteDB.getItem('gameUsers')) || [];
-                gameData.withdrawApplications = (await remoteDB.getItem('withdrawApplications')) || [];
-                gameData.vipApplications = (await remoteDB.getItem('vipApplications')) || [];
+                gameData.users = await remoteDB.getItem('gameUsers') || [];
+                gameData.withdrawApplications = await remoteDB.getItem('withdrawApplications') || [];
+                gameData.vipApplications = await remoteDB.getItem('vipApplications') || [];
                 
                 const settings = await remoteDB.getItem('gameSettings');
                 if (settings) {
@@ -1209,7 +1310,8 @@
                 totalWithdrawn: 0,
                 totalEarned: 0,
                 isAdmin: false,
-                isBanned: false
+                isBanned: false,
+                device: navigator.userAgent // 记录注册设备信息
             };
             
             // 如果有邀请人，增加邀请人的邀请计数
@@ -1312,7 +1414,8 @@
                     totalWithdrawn: 0,
                     totalEarned: 0,
                     isAdmin: true,
-                    isBanned: false
+                    isBanned: false,
+                    device: navigator.userAgent
                 };
                 
                 gameData.users.push(user);
@@ -1337,19 +1440,16 @@
         // 保存用户数据
         async function saveUsers() {
             await remoteDB.setItem('gameUsers', gameData.users);
-            remoteDB.syncAllDevices();
         }
         
         // 保存提现申请
         async function saveWithdrawals() {
             await remoteDB.setItem('withdrawApplications', gameData.withdrawApplications);
-            remoteDB.syncAllDevices();
         }
         
         // 保存VIP申请
         async function saveVipApplications() {
             await remoteDB.setItem('vipApplications', gameData.vipApplications);
-            remoteDB.syncAllDevices();
         }
         
         // 保存游戏设置
@@ -1362,7 +1462,6 @@
                 withdrawRate: gameData.withdrawRate
             };
             await remoteDB.setItem('gameSettings', settings);
-            remoteDB.syncAllDevices();
         }
         
         // 更新用户信息显示
@@ -2290,6 +2389,7 @@
                                     <th>砖块</th>
                                     <th>人脉币</th>
                                     <th>VIP</th>
+                                    <th>设备信息</th>
                                     <th>状态</th>
                                     <th>操作</th>
                                 </tr>
@@ -2303,6 +2403,7 @@
                                         <td>${user.bricks.toFixed(1)}</td>
                                         <td>${user.starCoins}</td>
                                         <td>${user.vip ? '是' : '否'}</td>
+                                        <td title="${user.device || '未知设备'}">${getDeviceType(user.device)}</td>
                                         <td>${user.isBanned ? '已封禁' : '正常'}</td>
                                         <td>
                                             <button onclick="editUser(${user.id})">编辑</button>
@@ -2568,6 +2669,25 @@
             adminContent.innerHTML = content;
         }
         
+        // 获取设备类型简写
+        function getDeviceType(userAgent) {
+            if (!userAgent) return '未知';
+            
+            if (/mobile/i.test(userAgent)) {
+                return '手机';
+            } else if (/tablet/i.test(userAgent)) {
+                return '平板';
+            } else if (/windows/i.test(userAgent)) {
+                return 'Win电脑';
+            } else if (/macintosh/i.test(userAgent)) {
+                return 'Mac电脑';
+            } else if (/linux/i.test(userAgent)) {
+                return 'Linux电脑';
+            } else {
+                return '其他设备';
+            }
+        }
+        
         // 处理管理员图片上传
         function handleAdminImageUpload(event, type) {
             const file = event.target.files[0];
@@ -2710,7 +2830,8 @@
                     totalWithdrawn: 0,
                     totalEarned: 0,
                     isAdmin: false,
-                    isBanned: banned
+                    isBanned: banned,
+                    device: navigator.userAgent
                 };
                 
                 gameData.users.push(newUser);
