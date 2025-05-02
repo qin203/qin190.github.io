@@ -608,6 +608,58 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        
+        /* 游戏界面样式 */
+        .game-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .game-board {
+            display: inline-block;
+            margin: 20px auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .game-button {
+            padding: 10px 20px;
+            margin: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        /* 上传图片样式 */
+        .upload-container {
+            margin: 20px 0;
+        }
+        
+        .upload-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        /* 加载指示器 */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -640,6 +692,7 @@
             <div class="auth-switch">
                 <a id="switch-admin">管理员登录</a>
             </div>
+            <div id="auth-loading" class="loader" style="display: none;"></div>
         </div>
     </div>
     
@@ -726,18 +779,21 @@
             
             <div class="payment-methods">
                 <div class="payment-method" id="alipay-method">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwYWFmZiIgZD0iTTE5LjMgNEg0LjdDMy43NiA0IDMgNC43NiAzIDUuN3YxMi42YzAgLjk0Ljc2IDEuNyAxLjcgMS43aDE0LjZjLjk0IDAgMS43LS43NiAxLjctMS43VjUuN2MwLS45NC0uNzYtMS43LTEuNy0xLjd6bS0xLjMgMTMuN0g2VjYuM2gxMnYxMS40eiIvPjxwYXRoIGZpbGw9IiMwMGFhZmYiIGQ9Ik0xMiAxOGMxLjY1IDAgMy0xLjM1IDMtMyAwLTEuNjUtMS4zNS0zLTMtM3MtMyAxLjM1LTMgM2MwIDEuNjUgMS4zNSAzIDMgM3oiLz48L3N2Zz4=" alt="支付宝">
+                    <img id="alipay-qrcode" src="" alt="支付宝" class="upload-preview">
                     <p>支付宝</p>
+                    <div class="upload-container">
+                        <input type="file" id="alipay-upload" accept="image/*" style="display: none;">
+                        <button onclick="document.getElementById('alipay-upload').click()">上传二维码</button>
+                    </div>
                 </div>
                 <div class="payment-method" id="wechat-method">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzA5QzEwNSIgZD0iTTguNTQgMTYuNUMyLjUgMTQuNTYuNSAxMC4xNS41IDkuMzVjMC0yLjM0IDIuMS00LjI1IDQuNzUtNC4yNSAyLjUgMCA0LjUgMS4zNSA1LjUgMy4yNWgtLjVjLTEuNS0yLTMuNS0zLTUtMy0yLjUgMC00LjUgMS43NS00LjUgNCAwIC43NS43NSAyLjUgNC4yNSAzLjI1bC0uNS0xLjV6bTcuNS0xLjVjMS41IDAgMi41LS41IDIuNS0xLjVzLTEtMS41LTIuNS0xLjUtMi41LjUtMi41IDEuNSAxIDEuNSAyLjUgMS41em0tNS0zYzEuNSAwIDIuNS0uNSAyLjUtMS41UzEyLjUgOSAxMSA5IDguNSA5LjUgOC41IDEwLjUgOS41IDEyIDExIDEyem0xMS41IDFjMCAyLjM0LTIuMSA0LjI1LTQuNzUgNC4yNS0xLjI1IDAtMi41LS4yNS0zLjUtLjc1bC0xLjUgMS41LjUgMS41YzQuNS0xLjUgNS4yNS00Ljc1IDUuMjUtNS41IDAtMi4zNC0yLjEtNC4yNS00Ljc1LTQuMjUtLjI1IDAtLjUgMC0uNzUuMDVoLS4yNWMuNS0yIDIuNS0zLjUgNS0zLjUgMi42NSAwIDQuNzUgMS45MSA0Ljc1IDQuMjV6Ii8+PC9zdmc+" alt="微信支付">
+                    <img id="wechat-qrcode" src="" alt="微信" class="upload-preview">
                     <p>微信支付</p>
+                    <div class="upload-container">
+                        <input type="file" id="wechat-upload" accept="image/*" style="display: none;">
+                        <button onclick="document.getElementById('wechat-upload').click()">上传二维码</button>
+                    </div>
                 </div>
-            </div>
-            
-            <div id="payment-qrcode" style="text-align: center; margin-top: 20px; display: none;">
-                <img id="qrcode-img" src="" alt="支付二维码" style="max-width: 200px;">
-                <p>请使用对应APP扫码支付</p>
             </div>
             
             <div style="margin-top: 20px;">
@@ -756,6 +812,14 @@
         <button onclick="document.getElementById('reward-popup').style.display = 'none'">确定</button>
     </div>
     
+    <!-- 游戏容器 -->
+    <div class="container game-container" id="game-container" style="display: none;">
+        <button class="back-btn" onclick="backToMainFromGame()">返回</button>
+        <div id="game-content">
+            <!-- 游戏内容将通过JavaScript动态加载 -->
+        </div>
+    </div>
+    
     <script>
         // 游戏数据
         const gameData = {
@@ -768,8 +832,8 @@
             serverStartTime: new Date('2025-05-01T00:00:00'),
             announcement: "欢迎来到高级搬砖人生！邀请好友升级到5级可获得888红包",
             paymentQRCodes: {
-                alipay: "https://via.placeholder.com/200?text=支付宝收款码",
-                wechat: "https://via.placeholder.com/200?text=微信收款码"
+                alipay: "",
+                wechat: ""
             },
             rooms: [
                 "量茶间", "太憩舱", "航指室", "星沙龙", "星洁室", "星悠室",
@@ -783,31 +847,112 @@
                 "专属客服支持"
             ],
             games: [
-                { id: 1, name: "砖块消消乐", reward: "0.1-0.5砖块", difficulty: "简单", cost: 0 },
-                { id: 2, name: "人脉连连看", reward: "1-3人脉币", difficulty: "中等", cost: 0 },
-                { id: 3, name: "金币大冒险", reward: "0.3-1砖块", difficulty: "困难", cost: 1 },
-                { id: 4, name: "幸运轮盘", reward: "随机奖励", difficulty: "简单", cost: 1 },
-                { id: 5, name: "数字记忆", reward: "0.5-2砖块", difficulty: "困难", cost: 2 },
-                { id: 6, name: "反应测试", reward: "0.2-0.8砖块", difficulty: "中等", cost: 1 }
+                { 
+                    id: 1, 
+                    name: "猜数字", 
+                    description: "猜一个1-100之间的数字，猜中即可获得奖励",
+                    reward: "1-5人脉币", 
+                    difficulty: "简单", 
+                    cost: 0 
+                },
+                { 
+                    id: 2, 
+                    name: "剪刀石头布", 
+                    description: "与电脑对战，三局两胜",
+                    reward: "2-6人脉币", 
+                    difficulty: "中等", 
+                    cost: 1 
+                },
+                { 
+                    id: 3, 
+                    name: "记忆翻牌", 
+                    description: "翻开卡片匹配相同的图案",
+                    reward: "3-9人脉币", 
+                    difficulty: "困难", 
+                    cost: 2 
+                }
             ],
             marketItems: [
-                { id: 1, name: "砖块礼包", price: "5人脉币", amount: "10砖块" },
-                { id: 2, name: "人脉礼包", price: "50人脉币", amount: "1砖块" },
-                { id: 3, name: "会员体验卡", price: "10人脉币", amount: "1天会员" },
-                { id: 4, name: "升级加速器", price: "3砖块", amount: "升级时间减半" }
+                { id: 1, name: "砖块礼包", price: 5, amount: "10砖块" },
+                { id: 2, name: "人脉礼包", price: 50, amount: "1砖块" },
+                { id: 3, name: "会员体验卡", price: 10, amount: "1天会员" },
+                { id: 4, name: "升级加速器", price: 3, amount: "升级时间减半" }
             ],
+            withdrawRate: 0.9, // 提现比例 1砖块=0.9元
             withdrawApplications: [],
             vipApplications: [],
             afkRewardRate: 5, // 每小时获得5人脉币
             afkTimers: {},
-            bannedUsers: [] // 封禁用户列表
+            bannedUsers: [], // 封禁用户列表
+            currentGame: null // 当前正在玩的游戏
         };
+        
+        // 模拟远程数据库
+        const remoteDB = {
+            // 使用localStorage作为基础，模拟远程存储
+            storage: {},
+            
+            getItem: function(key) {
+                return new Promise(resolve => {
+                    // 模拟网络延迟
+                    setTimeout(() => {
+                        const data = this.storage[key] || localStorage.getItem(key);
+                        resolve(data ? JSON.parse(data) : null);
+                    }, 300);
+                });
+            },
+            
+            setItem: function(key, value) {
+                return new Promise(resolve => {
+                    // 模拟网络延迟
+                    setTimeout(() => {
+                        const data = JSON.stringify(value);
+                        this.storage[key] = data;
+                        localStorage.setItem(key, data);
+                        resolve(true);
+                    }, 300);
+                });
+            },
+            
+            // 同步所有设备数据
+            syncAllDevices: function() {
+                // 在实际应用中，这里应该是与服务器同步数据的API调用
+                // 这里我们简单地将storage同步到所有打开的页面
+                if (window.localStorageSync) {
+                    window.localStorageSync.forEach(callback => {
+                        callback(this.storage);
+                    });
+                }
+            }
+        };
+        
+        // 监听storage事件以实现多设备同步
+        window.addEventListener('storage', function(e) {
+            if (e.key && remoteDB.storage[e.key] !== e.newValue) {
+                remoteDB.storage[e.key] = e.newValue;
+                // 重新加载相关数据
+                if (e.key === 'gameUsers' && gameData.currentUser) {
+                    const user = JSON.parse(e.newValue).find(u => u.id === gameData.currentUser.id);
+                    if (user) {
+                        gameData.currentUser = user;
+                        updateUserInfo();
+                    }
+                }
+            }
+        });
+        
+        // 用于跨页面通信
+        window.localStorageSync = window.localStorageSync || [];
+        window.localStorageSync.push(function(data) {
+            remoteDB.storage = data;
+        });
         
         // DOM元素
         const authContainer = document.getElementById('auth-container');
         const mainContainer = document.getElementById('main-container');
         const escapeGameContainer = document.getElementById('escape-game-container');
         const adminContainer = document.getElementById('admin-container');
+        const gameContainer = document.getElementById('game-container');
         const authTitle = document.getElementById('auth-title');
         const authForm = document.getElementById('auth-form');
         const authSubmit = document.getElementById('auth-submit');
@@ -817,6 +962,7 @@
         const adminGroup = document.getElementById('admin-group');
         const contentArea = document.getElementById('content-area');
         const adminContent = document.getElementById('admin-content');
+        const gameContent = document.getElementById('game-content');
         const displayUsername = document.getElementById('display-username');
         const userLevel = document.getElementById('user-level');
         const brickCount = document.getElementById('brick-count');
@@ -826,6 +972,9 @@
         const rewardPopup = document.getElementById('reward-popup');
         const rewardTitle = document.getElementById('reward-title');
         const rewardMessage = document.getElementById('reward-message');
+        const alipayQRCode = document.getElementById('alipay-qrcode');
+        const wechatQRCode = document.getElementById('wechat-qrcode');
+        const authLoading = document.getElementById('auth-loading');
         
         // 菜单按钮
         const upgradeBtn = document.getElementById('upgrade-btn');
@@ -842,8 +991,6 @@
         const closeModal = document.getElementById('close-modal');
         const alipayMethod = document.getElementById('alipay-method');
         const wechatMethod = document.getElementById('wechat-method');
-        const paymentQRCode = document.getElementById('payment-qrcode');
-        const qrcodeImg = document.getElementById('qrcode-img');
         
         // 大逃杀游戏相关
         const escapeRooms = document.getElementById('escape-rooms');
@@ -852,44 +999,79 @@
         const escapeResult = document.getElementById('escape-result');
         
         // 初始化函数
-        function init() {
-            // 从本地存储加载数据
-            const savedUsers = localStorage.getItem('gameUsers');
-            if (savedUsers) {
-                gameData.users = JSON.parse(savedUsers);
+        async function init() {
+            // 从远程加载数据
+            try {
+                authLoading.style.display = 'block';
+                
+                gameData.users = (await remoteDB.getItem('gameUsers')) || [];
+                gameData.withdrawApplications = (await remoteDB.getItem('withdrawApplications')) || [];
+                gameData.vipApplications = (await remoteDB.getItem('vipApplications')) || [];
+                
+                const settings = await remoteDB.getItem('gameSettings');
+                if (settings) {
+                    gameData.announcement = settings.announcement || gameData.announcement;
+                    gameData.paymentQRCodes = settings.paymentQRCodes || gameData.paymentQRCodes;
+                    gameData.adminCode = settings.adminCode || gameData.adminCode;
+                    gameData.bannedUsers = settings.bannedUsers || gameData.bannedUsers;
+                    gameData.withdrawRate = settings.withdrawRate || gameData.withdrawRate;
+                    
+                    if (gameData.paymentQRCodes.alipay) {
+                        alipayQRCode.src = gameData.paymentQRCodes.alipay;
+                        alipayQRCode.style.display = 'block';
+                    }
+                    if (gameData.paymentQRCodes.wechat) {
+                        wechatQRCode.src = gameData.paymentQRCodes.wechat;
+                        wechatQRCode.style.display = 'block';
+                    }
+                }
+                
+                // 设置公告
+                announcementText.textContent = gameData.announcement;
+                
+                // 设置事件监听器
+                setupEventListeners();
+                
+                // 更新服务器运行时间
+                updateUptime();
+                setInterval(updateUptime, 1000);
+                
+                // 恢复挂机计时器
+                restoreAfkTimers();
+                
+                // 设置图片上传事件
+                document.getElementById('alipay-upload').addEventListener('change', function(e) {
+                    handleImageUpload(e, 'alipay');
+                });
+                
+                document.getElementById('wechat-upload').addEventListener('change', function(e) {
+                    handleImageUpload(e, 'wechat');
+                });
+                
+            } catch (error) {
+                console.error('初始化失败:', error);
+                alert('初始化数据失败，请刷新页面重试');
+            } finally {
+                authLoading.style.display = 'none';
             }
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
             
-            const savedWithdrawals = localStorage.getItem('withdrawApplications');
-            if (savedWithdrawals) {
-                gameData.withdrawApplications = JSON.parse(savedWithdrawals);
-            }
-            
-            const savedVipApps = localStorage.getItem('vipApplications');
-            if (savedVipApps) {
-                gameData.vipApplications = JSON.parse(savedVipApps);
-            }
-            
-            const savedSettings = localStorage.getItem('gameSettings');
-            if (savedSettings) {
-                const settings = JSON.parse(savedSettings);
-                gameData.announcement = settings.announcement || gameData.announcement;
-                gameData.paymentQRCodes = settings.paymentQRCodes || gameData.paymentQRCodes;
-                gameData.adminCode = settings.adminCode || gameData.adminCode;
-                gameData.bannedUsers = settings.bannedUsers || gameData.bannedUsers;
-            }
-            
-            // 设置公告
-            announcementText.textContent = gameData.announcement;
-            
-            // 设置事件监听器
-            setupEventListeners();
-            
-            // 更新服务器运行时间
-            updateUptime();
-            setInterval(updateUptime, 1000);
-            
-            // 恢复挂机计时器
-            restoreAfkTimers();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(`${type}-qrcode`);
+                img.src = e.target.result;
+                img.style.display = 'block';
+                
+                // 保存到游戏数据
+                gameData.paymentQRCodes[type] = e.target.result;
+                saveSettings();
+            };
+            reader.readAsDataURL(file);
         }
         
         // 设置事件监听器
@@ -908,6 +1090,7 @@
                 } else {
                     loginUser();
                 }
+                return false;
             });
             
             // 菜单按钮点击
@@ -922,8 +1105,6 @@
             
             // 支付相关
             closeModal.addEventListener('click', () => paymentModal.style.display = 'none');
-            alipayMethod.addEventListener('click', () => showQRCode('alipay'));
-            wechatMethod.addEventListener('click', () => showQRCode('wechat'));
             
             // 大逃杀游戏
             escapeStartBtn.addEventListener('click', startEscapeGame);
@@ -984,7 +1165,7 @@
         }
         
         // 注册用户
-        function registerUser() {
+        async function registerUser() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const inviteCode = document.getElementById('invite-code').value;
@@ -1036,12 +1217,12 @@
                 const inviter = gameData.users.find(u => u.inviteCode === inviteCode);
                 if (inviter) {
                     inviter.invitedUsers++;
-                    saveUsers();
+                    await saveUsers();
                 }
             }
             
             gameData.users.push(newUser);
-            saveUsers();
+            await saveUsers();
             
             alert('注册成功！您的邀请码是: ' + newUser.inviteCode);
             loginUser();
@@ -1154,29 +1335,34 @@
         }
         
         // 保存用户数据
-        function saveUsers() {
-            localStorage.setItem('gameUsers', JSON.stringify(gameData.users));
+        async function saveUsers() {
+            await remoteDB.setItem('gameUsers', gameData.users);
+            remoteDB.syncAllDevices();
         }
         
         // 保存提现申请
-        function saveWithdrawals() {
-            localStorage.setItem('withdrawApplications', JSON.stringify(gameData.withdrawApplications));
+        async function saveWithdrawals() {
+            await remoteDB.setItem('withdrawApplications', gameData.withdrawApplications);
+            remoteDB.syncAllDevices();
         }
         
         // 保存VIP申请
-        function saveVipApplications() {
-            localStorage.setItem('vipApplications', JSON.stringify(gameData.vipApplications));
+        async function saveVipApplications() {
+            await remoteDB.setItem('vipApplications', gameData.vipApplications);
+            remoteDB.syncAllDevices();
         }
         
         // 保存游戏设置
-        function saveSettings() {
+        async function saveSettings() {
             const settings = {
                 announcement: gameData.announcement,
                 paymentQRCodes: gameData.paymentQRCodes,
                 adminCode: gameData.adminCode,
-                bannedUsers: gameData.bannedUsers
+                bannedUsers: gameData.bannedUsers,
+                withdrawRate: gameData.withdrawRate
             };
-            localStorage.setItem('gameSettings', JSON.stringify(settings));
+            await remoteDB.setItem('gameSettings', settings);
+            remoteDB.syncAllDevices();
         }
         
         // 更新用户信息显示
@@ -1207,6 +1393,7 @@
             if (!gameData.currentUser) return;
             
             escapeGameContainer.style.display = 'none';
+            gameContainer.style.display = 'none';
             mainContainer.style.display = 'block';
             
             let content = '';
@@ -1228,9 +1415,10 @@
                         <p>通过小游戏可以赚取砖块和人脉币</p>
                         <div class="games-container">
                             ${gameData.games.map(game => `
-                                <div class="game-card" onclick="playGame(${game.id})">
+                                <div class="game-card" onclick="startGame(${game.id})">
                                     <img src="https://via.placeholder.com/150?text=${game.name}" alt="${game.name}">
                                     <h3>${game.name}</h3>
+                                    <p>${game.description}</p>
                                     <p>奖励: ${game.reward}</p>
                                     <p>难度: ${game.difficulty}</p>
                                     ${game.cost > 0 ? `<p>消耗: ${game.cost}人脉币</p>` : ''}
@@ -1252,7 +1440,7 @@
                                         <h3>${item.name}</h3>
                                         <p>包含: ${item.amount}</p>
                                     </div>
-                                    <div class="market-price">${item.price}</div>
+                                    <div class="market-price">${item.price}人脉币</div>
                                     <button class="market-btn" onclick="buyItem(${item.id})">购买</button>
                                 </div>
                             `).join('')}
@@ -1282,6 +1470,9 @@
                     break;
                     
                 case 'withdraw':
+                    const feeRate = gameData.currentUser.vip ? 0.05 : 0.1;
+                    const actualRate = gameData.withdrawRate * (1 - feeRate);
+                    
                     content = `
                         <h2 class="section-title">提现功能</h2>
                         <p>将您的砖块转换为现金</p>
@@ -1290,6 +1481,7 @@
                                 <div class="form-group">
                                     <label for="withdraw-amount">提现金额(元)</label>
                                     <input type="number" id="withdraw-amount" min="10" required>
+                                    <p style="font-size: 12px; color: #666;">实际需要: <span id="withdraw-bricks-needed">0</span> 砖块</p>
                                 </div>
                                 <div class="form-group">
                                     <label for="withdraw-method">提现方式</label>
@@ -1307,12 +1499,25 @@
                             <p style="margin-top: 20px;">提现规则:</p>
                             <ul>
                                 <li>最低提现金额: 10元</li>
-                                <li>提现手续费: ${gameData.currentUser.vip ? '5%' : '10%'}</li>
+                                <li>提现手续费: ${feeRate * 100}%</li>
+                                <li>提现比例: 1砖块 = ${gameData.withdrawRate}元</li>
+                                <li>实际到账: 1砖块 = ${actualRate.toFixed(2)}元</li>
                                 <li>提现处理时间: 24小时内</li>
-                                <li>1砖块 = 1元</li>
                             </ul>
                         </div>
                     `;
+                    
+                    // 设置提现金额变化事件
+                    setTimeout(() => {
+                        const amountInput = document.getElementById('withdraw-amount');
+                        if (amountInput) {
+                            amountInput.addEventListener('input', function() {
+                                const amount = parseFloat(this.value) || 0;
+                                const bricksNeeded = amount / actualRate;
+                                document.getElementById('withdraw-bricks-needed').textContent = bricksNeeded.toFixed(2);
+                            });
+                        }
+                    }, 100);
                     break;
                     
                 case 'rank':
@@ -1322,7 +1527,6 @@
                             <div class="rank-tab active" onclick="showRankTab('level')">等级榜</div>
                             <div class="rank-tab" onclick="showRankTab('bricks')">财富榜</div>
                             <div class="rank-tab" onclick="showRankTab('invite')">邀请榜</div>
-                            <div class="rank-tab" onclick="showRankTab('games')">游戏榜</div>
                         </div>
                         <div id="rank-tab-content">
                             ${generateRankTable('level')}
@@ -1437,7 +1641,7 @@
         }
         
         // 用户升级
-        function upgradeUser() {
+        async function upgradeUser() {
             const user = gameData.currentUser;
             const nextLevel = user.level + 1;
             const bricksNeeded = calculateBricksNeeded(nextLevel);
@@ -1467,15 +1671,15 @@
                     }
                 }
                 
-                saveUsers();
+                await saveUsers();
                 updateUserInfo();
                 loadContent('upgrade');
                 alert(`升级成功！当前等级: ${nextLevel}`);
             }
         }
         
-        // 玩游戏
-        function playGame(gameId) {
+        // 开始游戏
+        function startGame(gameId) {
             const game = gameData.games.find(g => g.id === gameId);
             if (!game) return;
             
@@ -1487,132 +1691,285 @@
                 return;
             }
             
-            // 扣除费用
-            if (game.cost > 0) {
-                user.starCoins -= game.cost;
-            }
+            gameData.currentGame = game;
             
-            // 模拟游戏结果
-            let reward = 0;
-            let rewardType = '砖块';
-            
+            let gameHTML = '';
             switch (gameId) {
-                case 1: // 砖块消消乐
-                    reward = 0.1 + Math.random() * 0.4;
+                case 1: // 猜数字
+                    gameHTML = `
+                        <h2 class="section-title">猜数字游戏</h2>
+                        <p>猜一个1-100之间的数字，猜中即可获得奖励</p>
+                        <div class="game-board">
+                            <p>我已经想好了一个1-100之间的数字，你能猜出来吗？</p>
+                            <input type="number" id="guess-number" min="1" max="100" placeholder="输入你的猜测">
+                            <button class="game-button" onclick="checkGuess()">猜一猜</button>
+                            <p id="guess-result"></p>
+                        </div>
+                    `;
                     break;
-                case 2: // 人脉连连看
-                    reward = 1 + Math.floor(Math.random() * 3);
-                    rewardType = '人脉币';
+                    
+                case 2: // 剪刀石头布
+                    gameHTML = `
+                        <h2 class="section-title">剪刀石头布</h2>
+                        <p>与电脑对战，三局两胜</p>
+                        <div class="game-board">
+                            <p>请选择你的出拳:</p>
+                            <button class="game-button" onclick="playRPS('rock')">✊ 石头</button>
+                            <button class="game-button" onclick="playRPS('paper')">✋ 布</button>
+                            <button class="game-button" onclick="playRPS('scissors')">✌️ 剪刀</button>
+                            <div id="rps-result" style="margin-top: 20px;"></div>
+                            <div id="rps-score" style="margin-top: 10px;"></div>
+                        </div>
+                    `;
                     break;
-                case 3: // 金币大冒险
-                    reward = 0.3 + Math.random() * 0.7;
-                    break;
-                case 4: // 幸运轮盘
-                    const rand = Math.random();
-                    if (rand < 0.6) {
-                        reward = 0.1 + Math.random() * 0.4;
-                    } else if (rand < 0.9) {
-                        reward = 1 + Math.floor(Math.random() * 3);
-                        rewardType = '人脉币';
-                    } else {
-                        reward = 1 + Math.random() * 2;
-                    }
-                    break;
-                case 5: // 数字记忆
-                    reward = 0.5 + Math.random() * 1.5;
-                    break;
-                case 6: // 反应测试
-                    reward = 0.2 + Math.random() * 0.6;
+                    
+                case 3: // 记忆翻牌
+                    gameHTML = `
+                        <h2 class="section-title">记忆翻牌</h2>
+                        <p>翻开卡片匹配相同的图案</p>
+                        <div class="game-board">
+                            <div id="memory-board" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+                            <div id="memory-result" style="margin-top: 20px;"></div>
+                        </div>
+                        <button class="game-button" onclick="setupMemoryGame()" style="margin-top: 20px;">开始游戏</button>
+                    `;
                     break;
             }
             
-            // 应用奖励
-            if (rewardType === '砖块') {
-                user.bricks += reward;
-                showRewardPopup(`游戏成功！获得 ${reward.toFixed(1)} 砖块`);
-            } else {
-                user.starCoins += reward;
-                showRewardPopup(`游戏成功！获得 ${reward} 人脉币`);
+            gameContent.innerHTML = gameHTML;
+            
+            if (gameId === 3) {
+                setupMemoryGame();
             }
             
-            saveUsers();
-            updateUserInfo();
+            mainContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
         }
         
-        // 显示奖励弹窗
-        function showRewardPopup(message) {
-            rewardTitle.textContent = "游戏奖励";
-            rewardMessage.textContent = message;
-            rewardPopup.style.display = 'block';
+        // 猜数字游戏
+        let secretNumber = 0;
+        function checkGuess() {
+            if (!secretNumber) {
+                secretNumber = Math.floor(Math.random() * 100) + 1;
+            }
+            
+            const guess = parseInt(document.getElementById('guess-number').value);
+            const resultElement = document.getElementById('guess-result');
+            
+            if (isNaN(guess)) {
+                resultElement.textContent = '请输入一个有效的数字';
+                return;
+            }
+            
+            if (guess < secretNumber) {
+                resultElement.textContent = '太小了，再大一点！';
+            } else if (guess > secretNumber) {
+                resultElement.textContent = '太大了，再小一点！';
+            } else {
+                // 猜对了
+                const reward = 1 + Math.floor(Math.random() * 5); // 1-5人脉币
+                gameData.currentUser.starCoins += reward;
+                saveUsers();
+                updateUserInfo();
+                
+                resultElement.innerHTML = `恭喜你猜对了！获得 ${reward} 人脉币<br>正确答案是 ${secretNumber}`;
+                secretNumber = 0;
+                
+                setTimeout(() => {
+                    backToMainFromGame();
+                    showRewardPopup(`猜数字游戏成功！获得 ${reward} 人脉币`);
+                }, 2000);
+            }
+        }
+        
+        // 剪刀石头布游戏
+        let rpsScore = { player: 0, computer: 0 };
+        function playRPS(playerChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            
+            let result = '';
+            if (playerChoice === computerChoice) {
+                result = '平局！';
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                rpsScore.player++;
+                result = '你赢了这一局！';
+            } else {
+                rpsScore.computer++;
+                result = '电脑赢了这一局！';
+            }
+            
+            const resultElement = document.getElementById('rps-result');
+            resultElement.innerHTML = `
+                你出了 ${getRPSName(playerChoice)}，电脑出了 ${getRPSName(computerChoice)}<br>
+                ${result}
+            `;
+            
+            const scoreElement = document.getElementById('rps-score');
+            scoreElement.textContent = `比分: 你 ${rpsScore.player} - ${rpsScore.computer} 电脑`;
+            
+            // 检查游戏是否结束
+            if (rpsScore.player >= 2 || rpsScore.computer >= 2) {
+                if (rpsScore.player > rpsScore.computer) {
+                    const reward = 2 + Math.floor(Math.random() * 5); // 2-6人脉币
+                    gameData.currentUser.starCoins += reward;
+                    saveUsers();
+                    updateUserInfo();
+                    
+                    setTimeout(() => {
+                        backToMainFromGame();
+                        showRewardPopup(`剪刀石头布游戏胜利！获得 ${reward} 人脉币`);
+                    }, 2000);
+                } else {
+                    setTimeout(() => {
+                        backToMainFromGame();
+                        alert('很遗憾，你输给了电脑');
+                    }, 2000);
+                }
+            }
+        }
+        
+        function getRPSName(choice) {
+            switch (choice) {
+                case 'rock': return '✊ 石头';
+                case 'paper': return '✋ 布';
+                case 'scissors': return '✌️ 剪刀';
+            }
+        }
+        
+        // 记忆翻牌游戏
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        
+        function setupMemoryGame() {
+            const symbols = ['🍎', '🍌', '🍒', '🍓', '🍊', '🍋', '🍐', '🍉'];
+            memoryCards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+            flippedCards = [];
+            matchedPairs = 0;
+            
+            const board = document.getElementById('memory-board');
+            board.innerHTML = '';
+            
+            memoryCards.forEach((symbol, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.index = index;
+                card.dataset.symbol = symbol;
+                card.style.width = '60px';
+                card.style.height = '60px';
+                card.style.backgroundColor = '#6e8efb';
+                card.style.color = 'white';
+                card.style.display = 'flex';
+                card.style.justifyContent = 'center';
+                card.style.alignItems = 'center';
+                card.style.cursor = 'pointer';
+                card.style.fontSize = '24px';
+                card.style.borderRadius = '5px';
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
+            });
+            
+            document.getElementById('memory-result').textContent = '';
+        }
+        
+        function flipCard() {
+            const index = parseInt(this.dataset.index);
+            
+            // 如果卡片已经翻开或是已经匹配的，则忽略
+            if (flippedCards.includes(index) || this.textContent) {
+                return;
+            }
+            
+            // 翻开卡片
+            this.textContent = this.dataset.symbol;
+            flippedCards.push(index);
+            
+            // 如果翻开了两张卡片，检查是否匹配
+            if (flippedCards.length === 2) {
+                const [firstIndex, secondIndex] = flippedCards;
+                const firstCard = document.querySelector(`.memory-card[data-index="${firstIndex}"]`);
+                const secondCard = document.querySelector(`.memory-card[data-index="${secondIndex}"]`);
+                
+                if (memoryCards[firstIndex] === memoryCards[secondIndex]) {
+                    // 匹配成功
+                    matchedPairs++;
+                    flippedCards = [];
+                    
+                    // 检查游戏是否结束
+                    if (matchedPairs === 8) {
+                        const reward = 3 + Math.floor(Math.random() * 7); // 3-9人脉币
+                        gameData.currentUser.starCoins += reward;
+                        saveUsers();
+                        updateUserInfo();
+                        
+                        setTimeout(() => {
+                            backToMainFromGame();
+                            showRewardPopup(`记忆翻牌游戏成功！获得 ${reward} 人脉币`);
+                        }, 1000);
+                    }
+                } else {
+                    // 不匹配，翻回去
+                    setTimeout(() => {
+                        firstCard.textContent = '';
+                        secondCard.textContent = '';
+                        flippedCards = [];
+                    }, 1000);
+                }
+            }
+        }
+        
+        // 从游戏返回主界面
+        function backToMainFromGame() {
+            gameContainer.style.display = 'none';
+            mainContainer.style.display = 'block';
+            gameData.currentGame = null;
         }
         
         // 购买物品
-        function buyItem(itemId) {
+        async function buyItem(itemId) {
             const item = gameData.marketItems.find(i => i.id === itemId);
             if (!item) return;
             
             const user = gameData.currentUser;
             
-            // 检查价格并处理购买
-            if (item.price.includes('人脉币')) {
-                const price = parseInt(item.price);
-                if (user.starCoins >= price) {
-                    user.starCoins -= price;
-                    
-                    // 处理物品效果
-                    if (item.name.includes('砖块礼包')) {
-                        user.bricks += 10;
-                        showRewardPopup('购买成功！获得10砖块');
-                    } else if (item.name.includes('会员体验卡')) {
-                        if (!user.vip || new Date(user.vipExpire) < new Date()) {
-                            user.vipExpire = new Date(Date.now() + 24 * 60 * 60 * 1000);
-                        } else {
-                            user.vipExpire = new Date(user.vipExpire.getTime() + 24 * 60 * 60 * 1000);
-                        }
-                        user.vip = true;
-                        showRewardPopup('购买成功！会员已延长1天');
-                    } else if (item.name.includes('升级加速器')) {
-                        showRewardPopup('购买成功！下次升级时间减半');
+            if (user.starCoins >= item.price) {
+                user.starCoins -= item.price;
+                
+                // 处理物品效果
+                if (item.name.includes('砖块礼包')) {
+                    user.bricks += 10;
+                    showRewardPopup('购买成功！获得10砖块');
+                } else if (item.name.includes('会员体验卡')) {
+                    if (!user.vip || new Date(user.vipExpire) < new Date()) {
+                        user.vipExpire = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                    } else {
+                        user.vipExpire = new Date(user.vipExpire.getTime() + 24 * 60 * 60 * 1000);
                     }
-                    
-                    saveUsers();
-                    updateUserInfo();
-                } else {
-                    alert('人脉币不足');
+                    user.vip = true;
+                    showRewardPopup('购买成功！会员已延长1天');
+                } else if (item.name.includes('升级加速器')) {
+                    showRewardPopup('购买成功！下次升级时间减半');
                 }
-            } else if (item.price.includes('砖块')) {
-                const price = parseFloat(item.price);
-                if (user.bricks >= price) {
-                    user.bricks -= price;
-                    
-                    // 处理物品效果
-                    if (item.name.includes('人脉礼包')) {
-                        user.starCoins += 50;
-                        showRewardPopup('购买成功！获得50人脉币');
-                    }
-                    
-                    saveUsers();
-                    updateUserInfo();
-                } else {
-                    alert('砖块不足');
-                }
+                
+                await saveUsers();
+                updateUserInfo();
+            } else {
+                alert('人脉币不足');
             }
         }
         
         // 显示支付弹窗
         function showPaymentModal() {
             paymentModal.style.display = 'block';
-            paymentQRCode.style.display = 'none';
-        }
-        
-        // 显示支付二维码
-        function showQRCode(type) {
-            qrcodeImg.src = gameData.paymentQRCodes[type];
-            paymentQRCode.style.display = 'block';
         }
         
         // 提交VIP申请
-        function submitVipApplication() {
+        async function submitVipApplication() {
             const user = gameData.currentUser;
             
             gameData.vipApplications.push({
@@ -1623,13 +1980,13 @@
                 applyTime: new Date()
             });
             
-            saveVipApplications();
+            await saveVipApplications();
             paymentModal.style.display = 'none';
             alert('VIP申请已提交，请等待管理员处理');
         }
         
         // 提交提现申请
-        function submitWithdraw(e) {
+        async function submitWithdraw(e) {
             e.preventDefault();
             
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
@@ -1638,7 +1995,8 @@
             
             const user = gameData.currentUser;
             const feeRate = user.vip ? 0.05 : 0.1;
-            const bricksNeeded = amount / (1 - feeRate);
+            const actualRate = gameData.withdrawRate * (1 - feeRate);
+            const bricksNeeded = amount / actualRate;
             
             if (amount < 10) {
                 alert('最低提现金额为10元');
@@ -1660,10 +2018,10 @@
                     applyTime: new Date()
                 });
                 
-                saveUsers();
-                saveWithdrawals();
+                await saveUsers();
+                await saveWithdrawals();
                 updateUserInfo();
-                alert(`提现申请已提交，预计24小时内处理。实际到账: ${amount.toFixed(2)}元 (手续费: ${(bricksNeeded - amount).toFixed(2)}砖块)`);
+                alert(`提现申请已提交，预计24小时内处理。实际到账: ${amount.toFixed(2)}元 (手续费: ${(bricksNeeded * gameData.withdrawRate - amount).toFixed(2)}元)`);
             } else {
                 alert(`砖块不足，需要 ${bricksNeeded.toFixed(1)} 砖块 (含手续费)`);
             }
@@ -1706,14 +2064,6 @@
                         .sort((a, b) => b.invitedUsers - a.invitedUsers || b.level - a.level)
                         .slice(0, 10);
                     break;
-                    
-                case 'games':
-                    // 游戏榜按照总游戏次数排序
-                    rankedUsers = [...gameData.users]
-                        .filter(u => !u.isBanned)
-                        .sort((a, b) => (b.totalGames || 0) - (a.totalGames || 0) || b.level - a.level)
-                        .slice(0, 10);
-                    break;
             }
             
             return `
@@ -1725,7 +2075,6 @@
                             ${type === 'level' ? '<th>等级</th>' : ''}
                             ${type === 'bricks' ? '<th>砖块</th>' : ''}
                             ${type === 'invite' ? '<th>邀请人数</th>' : ''}
-                            ${type === 'games' ? '<th>游戏次数</th>' : ''}
                             <th>人脉币</th>
                         </tr>
                     </thead>
@@ -1737,7 +2086,6 @@
                                 ${type === 'level' ? `<td>${user.level}</td>` : ''}
                                 ${type === 'bricks' ? `<td>${user.bricks.toFixed(1)}</td>` : ''}
                                 ${type === 'invite' ? `<td>${user.invitedUsers}</td>` : ''}
-                                ${type === 'games' ? `<td>${user.totalGames || 0}</td>` : ''}
                                 <td>${user.starCoins}</td>
                             </tr>
                         `).join('')}
@@ -1774,7 +2122,7 @@
         }
         
         // 开始大逃杀游戏
-        function startEscapeGame() {
+        async function startEscapeGame() {
             const selectedRoom = document.querySelector('.escape-selected');
             const stones = parseInt(energyStones.value) || 10;
             
@@ -1791,7 +2139,7 @@
             // 扣除能量石
             gameData.currentUser.starCoins -= stones;
             gameData.currentUser.lastEscapeGameTime = new Date();
-            saveUsers();
+            await saveUsers();
             updateUserInfo();
             
             // 模拟游戏结果
@@ -1808,14 +2156,15 @@
                 const totalPlayers = 36; // 35机器人 + 1玩家
                 const killedPlayers = Math.floor(Math.random() * 5) + 3;
                 const survivingPlayers = totalPlayers - killedPlayers;
-                const totalStones = killedPlayers * stones * 0.95; // 扣除5%手续费
+                const totalStones = killedPlayers * stones;
                 const reward = totalStones / survivingPlayers;
                 
-                gameData.currentUser.starCoins += reward;
-                saveUsers();
+                // 返还投入的能量石加上奖励
+                gameData.currentUser.starCoins += stones + reward;
+                await saveUsers();
                 updateUserInfo();
                 
-                resultMessage = `恭喜！外星人选中了${killedRoom}房间，您幸存并获得${reward.toFixed(2)}能量石`;
+                resultMessage = `恭喜！外星人选中了${killedRoom}房间，您幸存并获得${reward.toFixed(2)}能量石奖励`;
             }
             
             escapeResult.innerHTML = `
@@ -1867,7 +2216,7 @@
         }
         
         // 领取挂机奖励
-        function claimAfkReward() {
+        async function claimAfkReward() {
             const user = gameData.currentUser;
             if (!user.lastAfkTime) return;
             
@@ -1892,7 +2241,7 @@
                 startAfkBtn.disabled = false;
             }
             
-            saveUsers();
+            await saveUsers();
             updateUserInfo();
             loadContent('afk');
             alert(`成功领取 ${reward} 人脉币`);
@@ -2152,14 +2501,46 @@
                                 <label for="admin-announcement">系统公告</label>
                                 <textarea id="admin-announcement" rows="3" style="width: 100%;">${gameData.announcement}</textarea>
                             </div>
+                            
+                            <h4 style="margin-top: 20px;">支付二维码</h4>
                             <div class="form-group">
-                                <label for="admin-alipay-qrcode">支付宝收款码URL</label>
-                                <input type="text" id="admin-alipay-qrcode" value="${gameData.paymentQRCodes.alipay}" style="width: 100%;">
+                                <label>支付宝二维码</label>
+                                <img id="alipay-preview" src="${gameData.paymentQRCodes.alipay}" class="upload-preview" ${gameData.paymentQRCodes.alipay ? '' : 'style="display: none;"'}>
+                                <input type="file" id="admin-alipay-upload" accept="image/*" style="display: none;">
+                                <button onclick="document.getElementById('admin-alipay-upload').click()">上传支付宝二维码</button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>微信支付二维码</label>
+                                <img id="wechat-preview" src="${gameData.paymentQRCodes.wechat}" class="upload-preview" ${gameData.paymentQRCodes.wechat ? '' : 'style="display: none;"'}>
+                                <input type="file" id="admin-wechat-upload" accept="image/*" style="display: none;">
+                                <button onclick="document.getElementById('admin-wechat-upload').click()">上传微信支付二维码</button>
+                            </div>
+                            
+                            <h4 style="margin-top: 20px;">交易市场设置</h4>
+                            <div class="form-group">
+                                <label for="market-item-1-price">砖块礼包价格</label>
+                                <input type="number" id="market-item-1-price" value="${gameData.marketItems[0].price}">
                             </div>
                             <div class="form-group">
-                                <label for="admin-wechat-qrcode">微信收款码URL</label>
-                                <input type="text" id="admin-wechat-qrcode" value="${gameData.paymentQRCodes.wechat}" style="width: 100%;">
+                                <label for="market-item-2-price">人脉礼包价格</label>
+                                <input type="number" id="market-item-2-price" value="${gameData.marketItems[1].price}">
                             </div>
+                            <div class="form-group">
+                                <label for="market-item-3-price">会员体验卡价格</label>
+                                <input type="number" id="market-item-3-price" value="${gameData.marketItems[2].price}">
+                            </div>
+                            <div class="form-group">
+                                <label for="market-item-4-price">升级加速器价格</label>
+                                <input type="number" id="market-item-4-price" value="${gameData.marketItems[3].price}">
+                            </div>
+                            
+                            <h4 style="margin-top: 20px;">提现设置</h4>
+                            <div class="form-group">
+                                <label for="withdraw-rate">提现比例 (1砖块=多少元)</label>
+                                <input type="number" id="withdraw-rate" step="0.01" value="${gameData.withdrawRate}">
+                            </div>
+                            
                             <div class="form-group">
                                 <label for="admin-code">管理员密码</label>
                                 <input type="password" id="admin-new-code" value="${gameData.adminCode}">
@@ -2167,6 +2548,17 @@
                             <button onclick="saveSystemSettings()">保存设置</button>
                         </div>
                     `;
+                    
+                    // 设置管理员图片上传事件
+                    setTimeout(() => {
+                        document.getElementById('admin-alipay-upload').addEventListener('change', function(e) {
+                            handleAdminImageUpload(e, 'alipay');
+                        });
+                        
+                        document.getElementById('admin-wechat-upload').addEventListener('change', function(e) {
+                            handleAdminImageUpload(e, 'wechat');
+                        });
+                    }, 100);
                     break;
                     
                 default:
@@ -2174,6 +2566,24 @@
             }
             
             adminContent.innerHTML = content;
+        }
+        
+        // 处理管理员图片上传
+        function handleAdminImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(`${type}-preview`);
+                img.src = e.target.result;
+                img.style.display = 'block';
+                
+                // 保存到游戏数据
+                gameData.paymentQRCodes[type] = e.target.result;
+                saveSettings();
+            };
+            reader.readAsDataURL(file);
         }
         
         // 显示添加用户表单
@@ -2210,7 +2620,7 @@
         }
         
         // 封禁/解封用户
-        function banUser(userId, ban) {
+        async function banUser(userId, ban) {
             const user = gameData.users.find(u => u.id === userId);
             if (!user) return;
             
@@ -2226,15 +2636,15 @@
                     gameData.bannedUsers = gameData.bannedUsers.filter(u => u !== user.username);
                 }
                 
-                saveUsers();
-                saveSettings();
+                await saveUsers();
+                await saveSettings();
                 loadAdminContent('users');
                 alert(`用户 ${user.username} 已${ban ? '封禁' : '解封'}`);
             }
         }
         
         // 提交用户表单
-        function submitUserForm() {
+        async function submitUserForm() {
             const id = document.getElementById('edit-user-id').value;
             const username = document.getElementById('admin-username').value;
             const password = document.getElementById('admin-password').value;
@@ -2274,8 +2684,8 @@
                         gameData.bannedUsers = gameData.bannedUsers.filter(u => u !== username);
                     }
                     
-                    saveUsers();
-                    saveSettings();
+                    await saveUsers();
+                    await saveSettings();
                     alert('用户信息已更新');
                 }
             } else {
@@ -2310,8 +2720,8 @@
                     gameData.bannedUsers.push(username);
                 }
                 
-                saveUsers();
-                saveSettings();
+                await saveUsers();
+                await saveSettings();
                 alert('用户已添加');
             }
             
@@ -2320,7 +2730,7 @@
         }
         
         // 处理提现申请
-        function processWithdrawal(userId, status) {
+        async function processWithdrawal(userId, status) {
             const application = gameData.withdrawApplications.find(w => w.userId === userId && w.status === 'pending');
             if (!application) return;
             
@@ -2332,24 +2742,24 @@
                 const user = gameData.users.find(u => u.id === userId);
                 if (user) {
                     user.bricks += application.bricks;
-                    saveUsers();
+                    await saveUsers();
                 }
             } else {
                 // 通过申请，更新用户提现总额
                 const user = gameData.users.find(u => u.id === userId);
                 if (user) {
                     user.totalWithdrawn += application.amount;
-                    saveUsers();
+                    await saveUsers();
                 }
             }
             
-            saveWithdrawals();
+            await saveWithdrawals();
             loadAdminContent('withdraw');
             alert(`提现申请已${status === 'approved' ? '通过' : '拒绝'}`);
         }
         
         // 处理VIP申请
-        function processVipApplication(userId, status) {
+        async function processVipApplication(userId, status) {
             const application = gameData.vipApplications.find(v => v.userId === userId && v.status === 'pending');
             if (!application) return;
             
@@ -2366,29 +2776,34 @@
                     } else {
                         user.vipExpire = new Date(user.vipExpire.getTime() + 30 * 24 * 60 * 60 * 1000);
                     }
-                    saveUsers();
+                    await saveUsers();
                 }
             }
             
-            saveVipApplications();
+            await saveVipApplications();
             loadAdminContent('vip');
             alert(`VIP申请已${status === 'approved' ? '通过' : '拒绝'}`);
         }
         
         // 保存系统设置
-        function saveSystemSettings() {
+        async function saveSystemSettings() {
             const announcement = document.getElementById('admin-announcement').value;
-            const alipayQRCode = document.getElementById('admin-alipay-qrcode').value;
-            const wechatQRCode = document.getElementById('admin-wechat-qrcode').value;
             const adminCode = document.getElementById('admin-new-code').value;
             
+            // 更新市场价格
+            gameData.marketItems[0].price = parseInt(document.getElementById('market-item-1-price').value) || 5;
+            gameData.marketItems[1].price = parseInt(document.getElementById('market-item-2-price').value) || 50;
+            gameData.marketItems[2].price = parseInt(document.getElementById('market-item-3-price').value) || 10;
+            gameData.marketItems[3].price = parseInt(document.getElementById('market-item-4-price').value) || 3;
+            
+            // 更新提现比例
+            gameData.withdrawRate = parseFloat(document.getElementById('withdraw-rate').value) || 0.9;
+            
             gameData.announcement = announcement;
-            gameData.paymentQRCodes.alipay = alipayQRCode;
-            gameData.paymentQRCodes.wechat = wechatQRCode;
             gameData.adminCode = adminCode;
             
             announcementText.textContent = announcement;
-            saveSettings();
+            await saveSettings();
             alert('系统设置已保存');
         }
         
@@ -2415,8 +2830,19 @@
             loadContent('upgrade');
         }
         
+        // 显示奖励弹窗
+        function showRewardPopup(message) {
+            rewardTitle.textContent = "游戏奖励";
+            rewardMessage.textContent = message;
+            rewardPopup.style.display = 'block';
+        }
+        
         // 全局函数
-        window.playGame = playGame;
+        window.startGame = startGame;
+        window.checkGuess = checkGuess;
+        window.playRPS = playRPS;
+        window.setupMemoryGame = setupMemoryGame;
+        window.flipCard = flipCard;
         window.buyItem = buyItem;
         window.upgradeUser = upgradeUser;
         window.showPaymentModal = showPaymentModal;
@@ -2426,6 +2852,7 @@
         window.startAfk = startAfk;
         window.claimAfkReward = claimAfkReward;
         window.backToMain = backToMain;
+        window.backToMainFromGame = backToMainFromGame;
         window.loadAdminContent = loadAdminContent;
         window.showAddUserForm = showAddUserForm;
         window.editUser = editUser;
