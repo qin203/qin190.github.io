@@ -1,2124 +1,2221 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>云手机模拟器挂机游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博深渊：极限挑战</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        :root {
+            --neon-blue: #0ff0fc;
+            --neon-pink: #ff2a6d;
+            --neon-purple: #9d00ff;
+            --neon-green: #00ff9d;
+            --neon-yellow: #f0ff00;
+            --dark-bg: #0a0a20;
+            --panel-bg: rgba(10, 10, 30, 0.8);
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-            padding: 0;
+            background: var(--dark-bg);
+            color: white;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
             margin: 0;
-        }
-        .container {
-            max-width: 100%;
             padding: 10px;
         }
-        .header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            border-radius: 0 0 10px 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #4CAF50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
+        .cyber-panel {
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-pink);
+            background: var(--panel-bg);
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
             border-radius: 5px;
-            width: 100%;
         }
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 14px;
-        }
-        .btn-blue {
-            background-color: #2196F3;
-        }
-        .btn-orange {
-            background-color: #FF9800;
-        }
-        .btn-red {
-            background-color: #F44336;
-        }
-        .btn-purple {
-            background-color: #9C27B0;
-        }
-        .btn-vip {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            color: #000;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .stat-item {
-            flex: 1;
-            text-align: center;
-            padding: 5px;
-        }
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #4CAF50;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-        }
-        .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .task-info {
-            flex: 1;
-        }
-        .task-reward {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .tab-container {
-            display: none;
-        }
-        .tab-container.active {
-            display: block;
-        }
-        .nav-tabs {
-            display: flex;
-            list-style: none;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        .nav-tab {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            cursor: pointer;
-        }
-        .nav-tab.active {
-            border-bottom: 2px solid #4CAF50;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        .modal {
-            display: block; /* 修改为默认显示登录模态框 */
-            position: fixed;
-            z-index: 1;
-            left: 0;
+        .cyber-panel::before {
+            content: "";
+            position: absolute;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
         }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
+        .resource {
+            display: inline-block;
+            margin: 0 1rem;
+            text-shadow: 0 0 5px var(--neon-blue);
         }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        button {
+            background: black;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 0.5rem 1rem;
             cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
         }
-        .alert {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
+        button:hover {
+            background: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 10px var(--neon-blue);
         }
-        .alert-success {
-            background-color: #dff0d8;
-            color: #3c763d;
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
-        .alert-danger {
-            background-color: #f2dede;
-            color: #a94442;
+        #game-over {
+            display: none;
+            color: var(--neon-pink);
+            font-size: 2rem;
+            text-align: center;
+            animation: glitch 1s linear infinite;
+        }
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 var(--neon-blue); }
+            20% { text-shadow: -2px 0 var(--neon-pink); }
+            40% { text-shadow: 2px 0 var(--neon-purple); }
+            60% { text-shadow: -2px 0 var(--neon-blue); }
+            80% { text-shadow: 2px 0 var(--neon-pink); }
+            100% { text-shadow: -2px 0 var(--neon-purple); }
         }
         .progress-bar {
             height: 20px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--neon-blue);
             margin: 10px 0;
-            overflow: hidden;
+            position: relative;
         }
-        .progress {
+        .progress-fill {
             height: 100%;
-            background-color: #4CAF50;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
             width: 0%;
             transition: width 0.3s;
         }
-        .badge {
-            display: inline-block;
-            padding: 3px 6px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 3px;
-            font-size: 12px;
-            margin-left: 5px;
-        }
-        .badge-blue {
-            background-color: #2196F3;
-        }
-        .badge-orange {
-            background-color: #FF9800;
-        }
-        .badge-purple {
-            background-color: #9C27B0;
-        }
-        .badge-vip {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            color: #000;
-        }
-        .simulator-status {
-            font-size: 12px;
-            color: #666;
-        }
-        .status-online {
-            color: #4CAF50;
-        }
-        .status-offline {
-            color: #F44336;
-        }
-        .status-working {
-            color: #FF9800;
-        }
-        .status-boosted {
-            color: #9C27B0;
-        }
-        .language-selector {
-            position: absolute;
-            top: 15px;
-            right: 15px;
+        .event-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 100;
+            background: var(--dark-bg);
+            border: 2px solid var(--neon-pink);
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
         }
-        .vip-benefits {
-            background: linear-gradient(45deg, #FFF8E1, #FFECB3);
+        .tech-tree {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .tech-item {
+            border: 1px solid var(--neon-purple);
             padding: 10px;
-            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tech-item:hover {
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+        .tech-item.unlocked {
+            border-color: var(--neon-blue);
+            background: rgba(15, 240, 252, 0.1);
+        }
+        .tech-item.locked {
+            opacity: 0.5;
+        }
+        #hack-code {
+            font-size: 2rem;
+            letter-spacing: 5px;
+            margin: 20px 0;
+            color: var(--neon-pink);
+        }
+        #hack-input {
+            background: black;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 10px;
+            font-size: 1.2rem;
+            width: 200px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        .tab-container {
+            display: flex;
             margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid var(--neon-blue);
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .tab.active {
+            background: var(--neon-blue);
+            color: black;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .upgrade {
+            border: 1px solid var(--neon-blue);
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .upgrade:hover {
+            background: rgba(15, 240, 252, 0.1);
+        }
+        .upgrade.unlocked {
+            border-color: var(--neon-pink);
+        }
+        .upgrade.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .achievement {
+            border: 1px solid var(--neon-purple);
+            padding: 10px;
+            margin: 5px 0;
+            opacity: 0.5;
+        }
+        .achievement.unlocked {
+            opacity: 1;
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+        .mission {
+            border: 1px solid var(--neon-green);
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .mission.completed {
+            border-color: var(--neon-yellow);
+            background: rgba(240, 255, 0, 0.1);
+        }
+        .mission.reward {
+            color: var(--neon-green);
+        }
+        .cybernetics-item {
+            border: 1px solid var(--neon-purple);
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .cybernetics-item.active {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 157, 0.1);
+        }
+        #virus-scan {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg, red, yellow, green);
+            position: relative;
+        }
+        #virus-scan-pointer {
+            position: absolute;
+            top: -5px;
+            width: 2px;
+            height: 30px;
+            background: white;
+            left: 0;
+        }
+        .corporation {
+            border: 1px solid var(--neon-blue);
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .corporation.unlocked {
+            border-color: var(--neon-green);
+        }
+        #minigame-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        #code-minigame {
+            background: var(--dark-bg);
+            border: 2px solid var(--neon-blue);
+            padding: 20px;
+            text-align: center;
+        }
+        .code-line {
+            font-family: monospace;
+            text-align: left;
+            margin: 5px 0;
+        }
+        .code-line.error {
+            color: var(--neon-pink);
+        }
+        #cyberspace-view {
+            width: 100%;
+            height: 200px;
+            background: black;
+            border: 1px solid var(--neon-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        .data-node {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+        }
+        .data-link {
+            position: absolute;
+            height: 1px;
+            background: rgba(15, 240, 252, 0.3);
+            transform-origin: 0 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 语言选择器 -->
-        <div class="language-selector">
-            <select id="languageSelect" onchange="changeLanguage()">
-                <option value="zh">中文</option>
-                <option value="en">English</option>
-            </select>
+    <div id="game-over">
+        <h1>系统崩溃</h1>
+        <p>你的赛博帝国已经瓦解...</p>
+        <button onclick="resetGame()">重建系统</button>
+    </div>
+
+    <div class="event-panel" id="hack-event">
+        <h2>黑客入侵!</h2>
+        <p>快速输入以下代码阻止数据泄露:</p>
+        <div id="hack-code">XXXXXX</div>
+        <input type="text" id="hack-input" maxlength="6">
+        <p id="hack-timer">剩余时间: 10秒</p>
+        <button onclick="resolveHack(true)">确认</button>
+    </div>
+
+    <div class="event-panel" id="overload-event">
+        <h2>系统过载!</h2>
+        <p>你的算力使用已达到危险水平!</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="overload-bar"></div>
+        </div>
+        <p>快速点击降温按钮防止系统崩溃!</p>
+        <button onclick="coolSystem()">紧急降温</button>
+        <p id="overload-timer">倒计时: 10秒</p>
+    </div>
+
+    <div class="event-panel" id="virus-event">
+        <h2>病毒检测!</h2>
+        <p>系统检测到恶意软件感染!</p>
+        <div id="virus-scan">
+            <div id="virus-scan-pointer"></div>
+        </div>
+        <p>在扫描指针到达绿色区域时点击清除病毒!</p>
+        <button onclick="scanVirus()">扫描清除</button>
+        <p id="virus-timer">倒计时: 15秒</p>
+    </div>
+
+    <div id="minigame-container">
+        <div id="code-minigame">
+            <h2>紧急修复</h2>
+            <div id="code-display"></div>
+            <p>找出以下代码中的错误行:</p>
+            <div id="code-errors"></div>
+            <button onclick="closeMinigame()">完成修复</button>
+        </div>
+    </div>
+
+    <h1 style="text-align: center; text-shadow: 0 0 10px var(--neon-blue);">赛博深渊：极限挑战</h1>
+
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('main')">主控台</div>
+        <div class="tab" onclick="switchTab('tech')">科技树</div>
+        <div class="tab" onclick="switchTab('upgrades')">升级</div>
+        <div class="tab" onclick="switchTab('achievements')">成就</div>
+        <div class="tab" onclick="switchTab('missions')">任务</div>
+        <div class="tab" onclick="switchTab('cybernetics')">义体改造</div>
+        <div class="tab" onclick="switchTab('corporations')">企业</div>
+        <div class="tab" onclick="switchTab('cyberspace')">赛博空间</div>
+    </div>
+
+    <div class="tab-content active" id="main-tab">
+        <div class="cyber-panel">
+            <h2>资源监控</h2>
+            <div>
+                <span class="resource">能源: <span id="energy">0</span></span>
+                <span class="resource">数据碎片: <span id="data">0</span></span>
+                <span class="resource">算力: <span id="compute">0</span>/<span id="max-compute">100</span></span>
+                <span class="resource">信用点: <span id="credits">0</span></span>
+                <span class="resource">声望: <span id="reputation">0</span></span>
+                <span class="resource">生物芯片: <span id="biochips">0</span></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="compute-bar"></div>
+            </div>
+            <p>系统稳定性: <span id="stability">100</span>%</p>
+            <p>网络影响力: <span id="influence">0</span></p>
+            <p>游戏时间: <span id="play-time">0</span>秒</p>
         </div>
 
-        <div class="header">
-            <h1 id="appTitle">云手机模拟器</h1>
-            <p id="userInfo">未登录</p>
-        </div>
-
-        <!-- 登录/注册模态框 -->
-        <div id="loginModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('loginModal')">&times;</span>
-                <h2 id="loginTitle">登录/注册</h2>
-                <div id="loginAlert" class="alert" style="display: none;"></div>
-                <div class="form-group">
-                    <input type="tel" id="loginPhone" class="form-control" placeholder="请输入手机号码" maxlength="11">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="loginPassword" class="form-control" placeholder="请输入密码">
-                </div>
-                <button onclick="login()" class="btn" id="loginBtn">登录</button>
-                <button onclick="showRegister()" class="btn btn-blue" id="registerBtn">注册新账号</button>
-                <button onclick="quickLogin()" class="btn btn-orange" id="quickLoginBtn">快速体验</button>
-            </div>
-        </div>
-
-        <!-- 注册模态框 -->
-        <div id="registerModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('registerModal')">&times;</span>
-                <h2 id="registerTitle">注册新账号</h2>
-                <div id="registerAlert" class="alert" style="display: none;"></div>
-                <div class="form-group">
-                    <input type="tel" id="registerPhone" class="form-control" placeholder="请输入手机号码" maxlength="11">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="registerPassword" class="form-control" placeholder="请输入密码(至少6位)">
-                </div>
-                <div class="form-group">
-                    <input type="password" id="registerPassword2" class="form-control" placeholder="请再次输入密码">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="inviteCode" class="form-control" placeholder="邀请码(选填)">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="agreeTerms"> <span id="agreeTermsText">我已阅读并同意《用户协议》和《隐私政策》</span>
-                    </label>
-                </div>
-                <button onclick="register()" class="btn" id="registerSubmitBtn">立即注册</button>
-            </div>
-        </div>
-
-        <!-- 绑定支付宝模态框 -->
-        <div id="alipayModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('alipayModal')">&times;</span>
-                <h2 id="alipayTitle">绑定支付宝</h2>
-                <div id="alipayAlert" class="alert" style="display: none;"></div>
-                <div class="form-group">
-                    <input type="text" id="alipayAccount" class="form-control" placeholder="支付宝账号">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="alipayName" class="form-control" placeholder="支付宝实名姓名">
-                </div>
-                <button onclick="bindAlipay()" class="btn" id="bindAlipaySubmitBtn">确认绑定</button>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;" id="alipayNote">注意：每个支付宝账号只能绑定一个游戏账号</p>
-            </div>
-        </div>
-
-        <!-- 主内容区域 -->
-        <div id="mainContent" style="display: none;">
-            <ul class="nav-tabs">
-                <li class="nav-tab active" onclick="switchTab('home')" id="homeTabBtn">首页</li>
-                <li class="nav-tab" onclick="switchTab('tasks')" id="tasksTabBtn">任务中心</li>
-                <li class="nav-tab" onclick="switchTab('withdraw')" id="withdrawTabBtn">提现中心</li>
-                <li class="nav-tab" onclick="switchTab('profile')" id="profileTabBtn">我的</li>
-                <li class="nav-tab" onclick="switchTab('shop')" id="shopTabBtn">商城</li>
-            </ul>
-
-            <!-- 首页 -->
-            <div id="homeTab" class="tab-container active">
-                <div class="card">
-                    <div class="card-title">实时收益展示</div>
-                    <div id="userStats"></div>
-                    <div class="progress-bar">
-                        <div id="earningProgress" class="progress"></div>
-                    </div>
-                    <p id="nextEarning">下次收益: <span id="nextEarningTime">60</span>秒</p>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">项目共享 <span class="badge">热</span></div>
-                    <div class="task-item">
-                        <div class="task-info">一键拉新日赚500</div>
-                        <button class="btn btn-small btn-blue" onclick="joinProject(1)" id="joinProject1Btn">加入</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">AI慧算宝简单分红 <span class="badge badge-blue">新</span></div>
-                        <button class="btn btn-small btn-blue" onclick="joinProject(2)" id="joinProject2Btn">加入</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">视频号挂机每天50~100 <span class="badge badge-orange">推荐</span></div>
-                        <button class="btn btn-small btn-blue" onclick="joinProject(3)" id="joinProject3Btn">加入</button>
-                    </div>
-                </div>
-
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="simulatorCount">0</div>
-                        <div class="stat-label" id="simulatorLabel">模拟器数量</div>
-                        <button class="btn btn-small" onclick="upgradeAgent()" id="upgradeAgentBtn">升级代理</button>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="checkinStatus">未签到</div>
-                        <div class="stat-label" id="checkinLabel">签到状态</div>
-                        <button class="btn btn-small" onclick="dailyCheckin()" id="checkinBtn">点击签到</button>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="todayEarnings">0</div>
-                        <div class="stat-label" id="todayEarningsLabel">今日金币</div>
-                        <button class="btn btn-small" onclick="switchTab('withdraw')" id="viewEarningsBtn">查看收益</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">我的模拟器 <span class="badge" id="onlineSimulators">0/0在线</span></div>
-                    <div id="simulatorList"></div>
-                    <button class="btn" onclick="addSimulator()" id="addSimulatorBtn">添加云手机模拟器</button>
-                    <button class="btn btn-orange" onclick="optimizeSimulators()" id="optimizeBtn">一键优化</button>
-                    <!-- 新增：模拟器加速按钮 -->
-                    <button class="btn btn-purple" onclick="boostSimulators()" id="boostBtn">加速模拟器(1小时)</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">活动中心 <span class="badge badge-purple">活动</span></div>
-                    <div class="task-item">
-                        <div class="task-info">新手礼包 - 注册即送1个模拟器</div>
-                        <div class="task-reward">+1模拟器</div>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">连续签到7天奖励</div>
-                        <div class="task-reward">+5元</div>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">邀请好友得现金</div>
-                        <div class="task-reward">最高+100元</div>
-                        <button class="btn btn-small" onclick="showInvite()" id="inviteBtn">去邀请</button>
-                    </div>
-                </div>
-
-                <!-- 新增：VIP会员专区 -->
-                <div class="card" id="vipSection">
-                    <div class="card-title">VIP会员专区 <span class="badge badge-vip">VIP</span></div>
-                    <div class="vip-benefits">
-                        <p><strong>VIP特权:</strong></p>
-                        <ul>
-                            <li>所有模拟器收益+50%</li>
-                            <li>每日签到奖励翻倍</li>
-                            <li>专属VIP任务</li>
-                            <li>提现免手续费</li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-vip" onclick="purchaseVIP()" id="purchaseVipBtn">开通VIP会员 (30元/月)</button>
-                </div>
-            </div>
-
-            <!-- 任务中心 -->
-            <div id="tasksTab" class="tab-container">
-                <div class="card">
-                    <div class="card-title">日常任务 <span class="badge">每日刷新</span></div>
-                    <div id="taskList"></div>
-                    <!-- 新增：任务自动完成开关 -->
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="autoCompleteTasks" onchange="toggleAutoCompleteTasks()"> 
-                            <span id="autoCompleteLabel">自动完成任务</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">推广任务 <span class="badge badge-orange">高收益</span></div>
-                    <div class="task-item">
-                        <div class="task-info">邀请好友注册</div>
-                        <div class="task-reward">+1模拟器</div>
-                        <button class="btn btn-small" onclick="showInvite()">去邀请</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">好友首次完成任务</div>
-                        <div class="task-reward">+3元</div>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">好友达到10个模拟器</div>
-                        <div class="task-reward">+10元</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">高级任务 <span class="badge badge-blue">VIP</span></div>
-                    <div class="task-item">
-                        <div class="task-info">游戏试玩30分钟</div>
-                        <div class="task-reward">+5元</div>
-                        <button class="btn btn-small" onclick="startAdvancedTask(1)">开始</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">APP体验1小时</div>
-                        <div class="task-reward">+8元</div>
-                        <button class="btn btn-small" onclick="startAdvancedTask(2)">开始</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">问卷调查10分钟</div>
-                        <div class="task-reward">+3元</div>
-                        <button class="btn btn-small" onclick="startAdvancedTask(3)">开始</button>
-                    </div>
-                    <!-- 新增：VIP专属任务 -->
-                    <div class="task-item" id="vipTask" style="display: none;">
-                        <div class="task-info">VIP专属任务 - 观看广告</div>
-                        <div class="task-reward">+15元</div>
-                        <button class="btn btn-small btn-vip" onclick="startVipTask()">开始</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 提现中心 -->
-            <div id="withdrawTab" class="tab-container">
-                <div class="card">
-                    <div class="card-title">我的收益</div>
-                    <div id="earningsStats"></div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">提现申请 <span class="badge">实时到账</span></div>
-                    <div class="form-group">
-                        <select id="withdrawAmount" class="form-control">
-                            <option value="10">10元</option>
-                            <option value="30">30元</option>
-                            <option value="50">50元</option>
-                            <option value="100">100元</option>
-                        </select>
-                    </div>
-                    <button class="btn" onclick="withdraw()" id="withdrawBtn">申请提现</button>
-                    <p style="font-size: 12px; color: #666; margin-top: 10px;" id="withdrawTime">提现时间: 每日20:00-24:00</p>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">提现记录</div>
-                    <div id="withdrawHistory"></div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">金币兑换 <span class="badge badge-orange">1元=10000金币</span></div>
-                    <div class="form-group">
-                        <input type="number" id="exchangeGold" class="form-control" placeholder="输入兑换金币数量" min="10000" step="1000">
-                    </div>
-                    <button class="btn" onclick="exchangeGold()" id="exchangeBtn">兑换现金</button>
-                </div>
-            </div>
-
-            <!-- 个人中心 -->
-            <div id="profileTab" class="tab-container">
-                <div class="card">
-                    <div class="card-title">账号信息</div>
-                    <div id="accountInfo"></div>
-                    <button class="btn" onclick="logout()" id="logoutBtn">退出登录</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">支付宝绑定</div>
-                    <div id="alipayInfo"></div>
-                    <button class="btn" onclick="showAlipayModal()" id="bindAlipayBtn">绑定支付宝</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">推广中心 <span class="badge">赚钱</span></div>
-                    <div id="inviteInfo"></div>
-                    <button class="btn" onclick="showInvite()">邀请好友</button>
-                    <button class="btn btn-blue" onclick="viewTeam()">查看团队</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">签到日历</div>
-                    <div id="checkinCalendar"></div>
-                    <!-- 新增：签到奖励翻倍卡 -->
-                    <button class="btn btn-orange" onclick="useCheckinBoost()" id="checkinBoostBtn">使用签到翻倍卡</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">系统设置</div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="autoCheckin"> <span id="autoCheckinLabel">自动签到</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="autoWithdraw"> <span id="autoWithdrawLabel">自动提现(满10元)</span>
-                        </label>
-                    </div>
-                    <button class="btn btn-small" onclick="saveSettings()" id="saveSettingsBtn">保存设置</button>
-                </div>
-            </div>
-
-            <!-- 商城 -->
-            <div id="shopTab" class="tab-container">
-                <div class="card">
-                    <div class="card-title">模拟器商城 <span class="badge">热卖</span></div>
-                    <div class="task-item">
-                        <div class="task-info">普通模拟器</div>
-                        <div class="task-info">收益: 1金币/分钟</div>
-                        <div class="task-reward">10元/个</div>
-                        <button class="btn btn-small" onclick="buySimulator(1)">购买</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">高级模拟器 <span class="badge badge-blue">推荐</span></div>
-                        <div class="task-info">收益: 2金币/分钟</div>
-                        <div class="task-reward">18元/个</div>
-                        <button class="btn btn-small" onclick="buySimulator(2)">购买</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">VIP模拟器 <span class="badge badge-purple">热销</span></div>
-                        <div class="task-info">收益: 5金币/分钟</div>
-                        <div class="task-reward">40元/个</div>
-                        <button class="btn btn-small" onclick="buySimulator(3)">购买</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">特权卡 <span class="badge badge-orange">限时</span></div>
-                    <div class="task-item">
-                        <div class="task-info">周卡</div>
-                        <div class="task-info">所有模拟器收益+20%</div>
-                        <div class="task-reward">15元</div>
-                        <button class="btn btn-small" onclick="buyCard(1)">购买</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">月卡 <span class="badge">超值</span></div>
-                        <div class="task-info">所有模拟器收益+30%</div>
-                        <div class="task-reward">50元</div>
-                        <button class="btn btn-small" onclick="buyCard(2)">购买</button>
-                    </div>
-                    <div class="task-item">
-                        <div class="task-info">季卡</div>
-                        <div class="task-info">所有模拟器收益+50%</div>
-                        <div class="task-reward">120元</div>
-                        <button class="btn btn-small" onclick="buyCard(3)">购买</button>
-                    </div>
-                    <!-- 新增：签到奖励翻倍卡 -->
-                    <div class="task-item">
-                        <div class="task-info">签到翻倍卡</div>
-                        <div class="task-info">下次签到奖励翻倍</div>
-                        <div class="task-reward">8元</div>
-                        <button class="btn btn-small" onclick="buyCheckinBoost()">购买</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">我的道具</div>
-                    <div id="myItems"></div>
-                </div>
+        <div class="cyber-panel">
+            <h2>核心设施</h2>
+            <button onclick="buyGenerator()">建造能源发生器 (消耗: 50信用点)</button>
+            <button onclick="buyDataCenter()">建造数据中心 (消耗: 100信用点)</button>
+            <button onclick="buyQuantumComputer()">建造量子计算机 (消耗: 500信用点)</button>
+            <button onclick="buyFirewall()">升级防火墙 (消耗: 200数据碎片)</button>
+            <button onclick="buyBiochipLab()">建造生物芯片实验室 (消耗: 1000信用点)</button>
+            <button onclick="buyInfluenceNode()">部署影响力节点 (消耗: 500信用点 + 200数据碎片)</button>
+            
+            <div style="margin-top: 20px;">
+                <h3>自动化设置</h3>
+                <label>
+                    <input type="checkbox" id="auto-energy"> 自动分配能源
+                </label>
+                <label>
+                    <input type="checkbox" id="auto-data"> 自动分析数据
+                </label>
+                <label>
+                    <input type="checkbox" id="auto-biochips"> 自动生产生物芯片
+                </label>
             </div>
         </div>
 
-        <!-- 邀请好友模态框 -->
-        <div id="inviteModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('inviteModal')">&times;</span>
-                <h2>邀请好友</h2>
-                <p>每邀请1位好友，您将获得1个模拟器</p>
-                <div class="form-group">
-                    <label>您的邀请码</label>
-                    <input type="text" id="myInviteCode" class="form-control" readonly>
-                </div>
-                <div class="form-group">
-                    <label>邀请链接</label>
-                    <input type="text" id="inviteLink" class="form-control" readonly>
-                </div>
-                <button class="btn" onclick="copyInviteLink()">复制链接</button>
-                <button class="btn btn-blue" onclick="shareInvite()">分享好友</button>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">好友注册时填写您的邀请码，双方都能获得奖励</p>
-            </div>
+        <div class="cyber-panel">
+            <h2>行动</h2>
+            <button onclick="harvestEnergy()">收集能源</button>
+            <button onclick="mineData()">挖掘数据</button>
+            <button onclick="runComputation()">执行计算</button>
+            <button onclick="sellData()">出售数据 (10数据碎片 = 1信用点)</button>
+            <button onclick="buyCredits()">黑市交易 (高风险)</button>
+            <button onclick="launchDDoS()">发起DDoS攻击 (需要影响力)</button>
+            <button onclick="startVirusScan()">运行病毒扫描</button>
+            <button onclick="enterCyberspace()">进入赛博空间</button>
         </div>
 
-        <!-- 团队查看模态框 -->
-        <div id="teamModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('teamModal')">&times;</span>
-                <h2>我的团队</h2>
-                <div id="teamList"></div>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">团队总人数: <span id="teamCount">0</span>人</p>
-                <p style="font-size: 12px; color: #666;">团队总收益: <span id="teamEarnings">0</span>元</p>
+        <div class="cyber-panel">
+            <h2>日志</h2>
+            <div id="log" style="height: 100px; overflow-y: scroll; border: 1px solid var(--neon-blue); padding: 5px;">
+                <p>系统启动... 欢迎来到赛博深渊</p>
             </div>
+            <button onclick="clearLog()">清除日志</button>
+            <button onclick="exportSave()">导出存档</button>
+            <input type="file" id="import-save" style="display: none;" accept=".json">
+            <button onclick="document.getElementById('import-save').click()">导入存档</button>
         </div>
+    </div>
 
-        <!-- 高级任务模态框 -->
-        <div id="advancedTaskModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeAdvancedTask()">&times;</span>
-                <h2 id="advancedTaskTitle">高级任务</h2>
-                <div class="progress-bar">
-                    <div id="taskProgress" class="progress"></div>
+    <div class="tab-content" id="tech-tab">
+        <div class="cyber-panel">
+            <h2>科技树</h2>
+            <p>研究点数: <span id="research-points">0</span></p>
+            <div class="tech-tree">
+                <div class="tech-item locked" id="tech-ai" onclick="researchTech('ai')">
+                    <h3>基础AI</h3>
+                    <p>解锁自动化功能</p>
+                    <p>需求: 10研究点数</p>
                 </div>
-                <p id="taskRemainingTime">剩余时间: <span id="taskTime">00:00</span></p>
-                <div id="taskInstructions"></div>
-                <button class="btn" id="taskCompleteBtn" style="display:none;" onclick="completeAdvancedTask()">领取奖励</button>
-                <button class="btn btn-red" id="taskCancelBtn" onclick="cancelAdvancedTask()">取消任务</button>
+                <div class="tech-item locked" id="tech-quantum" onclick="researchTech('quantum')">
+                    <h3>量子计算</h3>
+                    <p>算力上限+200%</p>
+                    <p>稳定性-20%</p>
+                    <p>需求: 25研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-neural" onclick="researchTech('neural')">
+                    <h3>神经链接</h3>
+                    <p>资源获取速度+50%</p>
+                    <p>黑客风险+30%</p>
+                    <p>需求: 20研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-darkweb" onclick="researchTech('darkweb')">
+                    <h3>暗网接入</h3>
+                    <p>解锁黑市交易</p>
+                    <p>系统风险+40%</p>
+                    <p>需求: 15研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-nanotech" onclick="researchTech('nanotech')">
+                    <h3>纳米科技</h3>
+                    <p>设施效率+30%</p>
+                    <p>维护成本+50%</p>
+                    <p>需求: 40研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-singularity" onclick="researchTech('singularity')">
+                    <h3>技术奇点</h3>
+                    <p>解锁终极能力</p>
+                    <p>系统极度不稳定</p>
+                    <p>需求: 100研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-biotech" onclick="researchTech('biotech')">
+                    <h3>生物科技</h3>
+                    <p>解锁生物芯片生产</p>
+                    <p>需求: 30研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-cyberwar" onclick="researchTech('cyberwar')">
+                    <h3>网络战争</h3>
+                    <p>解锁DDoS攻击</p>
+                    <p>需求: 35研究点数</p>
+                </div>
+                <div class="tech-item locked" id="tech-virtual" onclick="researchTech('virtual')">
+                    <h3>虚拟现实</h3>
+                    <p>解锁赛博空间</p>
+                    <p>需求: 45研究点数</p>
+                </div>
             </div>
         </div>
     </div>
 
+    <div class="tab-content" id="upgrades-tab">
+        <div class="cyber-panel">
+            <h2>设施升级</h2>
+            <div class="upgrade locked" id="upgrade-gen1" onclick="buyUpgrade('gen1')">
+                <h3>能源发生器 Mk.II</h3>
+                <p>能源产出+50%</p>
+                <p>成本: 200信用点</p>
+            </div>
+            <div class="upgrade locked" id="upgrade-data1" onclick="buyUpgrade('data1')">
+                <h3>数据中心 Mk.II</h3>
+                <p>数据处理+50%</p>
+                <p>成本: 300信用点</p>
+            </div>
+            <div class="upgrade locked" id="upgrade-quant1" onclick="buyUpgrade('quant1')">
+                <h3>量子优化</h3>
+                <p>算力效率+30%</p>
+                <p>成本: 500信用点</p>
+            </div>
+            <div class="upgrade locked" id="upgrade-firewall1" onclick="buyUpgrade('firewall1')">
+                <h3>高级防火墙</h3>
+                <p>黑客风险-40%</p>
+                <p>成本: 400数据碎片</p>
+            </div>
+            <div class="upgrade locked" id="upgrade-bio1" onclick="buyUpgrade('bio1')">
+                <h3>生物芯片优化</h3>
+                <p>生物芯片生产+50%</p>
+                <p>成本: 600信用点</p>
+            </div>
+            <div class="upgrade locked" id="upgrade-influence1" onclick="buyUpgrade('influence1')">
+                <h3>影响力放大器</h3>
+                <p>影响力获取+50%</p>
+                <p>成本: 800信用点</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="achievements-tab">
+        <div class="cyber-panel">
+            <h2>成就系统</h2>
+            <div class="achievement" id="achieve-start">
+                <h3>初次启动</h3>
+                <p>启动你的第一个设施</p>
+            </div>
+            <div class="achievement" id="achieve-hack">
+                <h3>防火墙测试</h3>
+                <p>成功抵御一次黑客攻击</p>
+            </div>
+            <div class="achievement" id="achieve-overload">
+                <h3>冷静应对</h3>
+                <p>防止系统过载崩溃</p>
+            </div>
+            <div class="achievement" id="achieve-quantum">
+                <h3>量子跃迁</h3>
+                <p>研究量子计算技术</p>
+            </div>
+            <div class="achievement" id="achieve-singularity">
+                <h3>奇点临近</h3>
+                <p>达到技术奇点</p>
+            </div>
+            <div class="achievement" id="achieve-bio">
+                <h3>生化电子人</h3>
+                <p>生产100个生物芯片</p>
+            </div>
+            <div class="achievement" id="achieve-ddos">
+                <h3>网络恐怖分子</h3>
+                <p>发起10次DDoS攻击</p>
+            </div>
+            <div class="achievement" id="achieve-virus">
+                <h3>杀毒专家</h3>
+                <p>清除5次病毒</p>
+            </div>
+            <div class="achievement" id="achieve-cyberspace">
+                <h3>数字幽灵</h3>
+                <p>进入赛博空间10次</p>
+            </div>
+            <div class="achievement" id="achieve-time">
+                <h3>时间领主</h3>
+                <p>游戏时间超过1小时</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="missions-tab">
+        <div class="cyber-panel">
+            <h2>任务系统</h2>
+            <div class="mission" id="mission-start">
+                <h3>新手入门</h3>
+                <p>建造第一个能源发生器</p>
+                <p class="reward">奖励: 50信用点</p>
+            </div>
+            <div class="mission" id="mission-research">
+                <h3>科研先锋</h3>
+                <p>研究3项科技</p>
+                <p class="reward">奖励: 20研究点数</p>
+            </div>
+            <div class="mission" id="mission-hack">
+                <h3>网络安全</h3>
+                <p>成功抵御黑客攻击</p>
+                <p class="reward">奖励: 防火墙升级</p>
+            </div>
+            <div class="mission" id="mission-bio">
+                <h3>生物黑客</h3>
+                <p>生产50个生物芯片</p>
+                <p class="reward">奖励: 生物科技研究点数</p>
+            </div>
+            <div class="mission" id="mission-ddos">
+                <h3>网络战争</h3>
+                <p>发起5次DDoS攻击</p>
+                <p class="reward">奖励: 影响力+100</p>
+            </div>
+            <div class="mission" id="mission-stability">
+                <h3>系统稳定</h3>
+                <p>保持系统稳定性>80%持续5分钟</p>
+                <p class="reward">奖励: 稳定性+10%</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="cybernetics-tab">
+        <div class="cyber-panel">
+            <h2>义体改造</h2>
+            <p>生物芯片: <span id="biochips-cyber">0</span></p>
+            <div class="cybernetics-item" id="cyber-neural" onclick="installCyberware('neural')">
+                <h3>神经加速器</h3>
+                <p>提升所有操作速度20%</p>
+                <p>消耗: 10生物芯片</p>
+            </div>
+            <div class="cybernetics-item" id="cyber-memory" onclick="installCyberware('memory')">
+                <h3>记忆增强器</h3>
+                <p>研究点数获取+30%</p>
+                <p>消耗: 15生物芯片</p>
+            </div>
+            <div class="cybernetics-item" id="cyber-reflex" onclick="installCyberware('reflex')">
+                <h3>反射增强器</h3>
+                <p>事件反应时间+2秒</p>
+                <p>消耗: 20生物芯片</p>
+            </div>
+            <div class="cybernetics-item" id="cyber-stability" onclick="installCyberware('stability')">
+                <h3>系统稳定器</h3>
+                <p>系统稳定性+15%</p>
+                <p>消耗: 25生物芯片</p>
+            </div>
+            <div class="cybernetics-item" id="cyber-ai" onclick="installCyberware('ai')">
+                <h3>AI协同处理器</h3>
+                <p>自动化效率+40%</p>
+                <p>消耗: 50生物芯片</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="corporations-tab">
+        <div class="cyber-panel">
+            <h2>企业关系</h2>
+            <p>声望: <span id="reputation-corps">0</span></p>
+            <div class="corporation" id="corp-neura">
+                <h3>NeuraLink科技</h3>
+                <p>神经技术专家</p>
+                <p>解锁需求: 500声望</p>
+                <button onclick="unlockCorporation('neura')">建立联系</button>
+            </div>
+            <div class="corporation" id="corp-quant">
+                <h3>Quantum Dynamics</h3>
+                <p>量子计算先驱</p>
+                <p>解锁需求: 800声望</p>
+                <button onclick="unlockCorporation('quant')">建立联系</button>
+            </div>
+            <div class="corporation" id="corp-cyber">
+                <h3>CyberSys安全</h3>
+                <p>网络安全巨头</p>
+                <p>解锁需求: 1200声望</p>
+                <button onclick="unlockCorporation('cyber')">建立联系</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="cyberspace-tab">
+        <div class="cyber-panel">
+            <h2>赛博空间</h2>
+            <p>网络影响力: <span id="influence-cyber">0</span></p>
+            <div id="cyberspace-view"></div>
+            <button onclick="exploreCyberspace()">探索数据节点</button>
+            <button onclick="hackCorporation()">入侵企业网络</button>
+            <button onclick="defendNode()">防御网络节点</button>
+        </div>
+    </div>
+
     <script>
-        // 全局变量
-        let currentUser = null;
-        let tasks = [
-            { id: 1, name: "快手视频点赞", reward: 100, time: 1, completed: false },
-            { id: 2, name: "观看短视频", reward: 50, time: 0.5, completed: false },
-            { id: 3, name: "游戏试玩", reward: 500, time: 10, completed: false },
-            { id: 4, name: "悬赏任务", reward: 300, time: 5, completed: false }
-        ];
-        
-        let advancedTasks = [
-            { id: 1, name: "游戏试玩30分钟", reward: 50000, time: 30, instructions: "请打开游戏并试玩30分钟，期间请不要关闭页面" },
-            { id: 2, name: "APP体验1小时", reward: 80000, time: 60, instructions: "请下载并体验指定APP1小时" },
-            { id: 3, name: "问卷调查10分钟", reward: 30000, time: 10, instructions: "请认真填写问卷调查，预计需要10分钟" }
-        ];
-        
-        let shopItems = [
-            { id: 1, name: "普通模拟器", price: 10, type: "simulator", value: 1 },
-            { id: 2, name: "高级模拟器", price: 18, type: "simulator", value: 2 },
-            { id: 3, name: "VIP模拟器", price: 40, type: "simulator", value: 5 },
-            { id: 4, name: "周卡", price: 15, type: "card", value: 0.2, duration: 7 },
-            { id: 5, name: "月卡", price: 50, type: "card", value: 0.3, duration: 30 },
-            { id: 6, name: "季卡", price: 120, type: "card", value: 0.5, duration: 90 },
-            { id: 7, name: "签到翻倍卡", price: 8, type: "boost", subtype: "checkin" }
-        ];
-        
-        // 模拟数据库
-        let users = [];
-        let alipayBindings = [];
-        let withdrawHistory = [];
-        let currentAdvancedTask = null;
-        let taskInterval = null;
-        let earningInterval = null;
-        let countdownInterval = null;
-        let nextEarningTime = 60;
-        let autoCompleteTasks = false;
-        let simulatorBoostEndTime = null;
-        let currentLanguage = 'zh';
-        
-        // 多语言支持
-        const translations = {
-            zh: {
-                appTitle: "云手机模拟器",
-                loginTitle: "登录/注册",
-                loginBtn: "登录",
-                registerBtn: "注册新账号",
-                quickLoginBtn: "快速体验",
-                registerTitle: "注册新账号",
-                agreeTermsText: "我已阅读并同意《用户协议》和《隐私政策》",
-                registerSubmitBtn: "立即注册",
-                alipayTitle: "绑定支付宝",
-                bindAlipaySubmitBtn: "确认绑定",
-                alipayNote: "注意：每个支付宝账号只能绑定一个游戏账号",
-                homeTabBtn: "首页",
-                tasksTabBtn: "任务中心",
-                withdrawTabBtn: "提现中心",
-                profileTabBtn: "我的",
-                shopTabBtn: "商城",
-                joinProject1Btn: "加入",
-                joinProject2Btn: "加入",
-                joinProject3Btn: "加入",
-                simulatorLabel: "模拟器数量",
-                upgradeAgentBtn: "升级代理",
-                checkinLabel: "签到状态",
-                checkinBtn: "点击签到",
-                todayEarningsLabel: "今日金币",
-                viewEarningsBtn: "查看收益",
-                addSimulatorBtn: "添加云手机模拟器",
-                optimizeBtn: "一键优化",
-                boostBtn: "加速模拟器(1小时)",
-                inviteBtn: "去邀请",
-                purchaseVipBtn: "开通VIP会员 (30元/月)",
-                autoCompleteLabel: "自动完成任务",
-                withdrawBtn: "申请提现",
-                withdrawTime: "提现时间: 每日20:00-24:00",
-                exchangeBtn: "兑换现金",
-                logoutBtn: "退出登录",
-                checkinBoostBtn: "使用签到翻倍卡",
-                autoCheckinLabel: "自动签到",
-                autoWithdrawLabel: "自动提现(满10元)",
-                saveSettingsBtn: "保存设置"
+        // 游戏状态
+        const game = {
+            resources: {
+                energy: 0,
+                data: 0,
+                compute: 0,
+                maxCompute: 100,
+                credits: 50,
+                research: 0,
+                reputation: 0,
+                biochips: 0,
+                influence: 0
             },
-            en: {
-                appTitle: "Cloud Phone Simulator",
-                loginTitle: "Login/Register",
-                loginBtn: "Login",
-                registerBtn: "Register",
-                quickLoginBtn: "Quick Experience",
-                registerTitle: "Register New Account",
-                agreeTermsText: "I agree to the Terms of Service and Privacy Policy",
-                registerSubmitBtn: "Register Now",
-                alipayTitle: "Bind Alipay",
-                bindAlipaySubmitBtn: "Confirm Binding",
-                alipayNote: "Note: Each Alipay account can only be bound to one game account",
-                homeTabBtn: "Home",
-                tasksTabBtn: "Tasks",
-                withdrawTabBtn: "Withdraw",
-                profileTabBtn: "Profile",
-                shopTabBtn: "Shop",
-                joinProject1Btn: "Join",
-                joinProject2Btn: "Join",
-                joinProject3Btn: "Join",
-                simulatorLabel: "Simulators",
-                upgradeAgentBtn: "Upgrade Agent",
-                checkinLabel: "Check-in Status",
-                checkinBtn: "Check-in",
-                todayEarningsLabel: "Today's Coins",
-                viewEarningsBtn: "View Earnings",
-                addSimulatorBtn: "Add Simulator",
-                optimizeBtn: "Optimize All",
-                boostBtn: "Boost Simulators (1h)",
-                inviteBtn: "Invite Friends",
-                purchaseVipBtn: "Purchase VIP (¥30/month)",
-                autoCompleteLabel: "Auto Complete Tasks",
-                withdrawBtn: "Withdraw",
-                withdrawTime: "Withdrawal Time: Daily 20:00-24:00",
-                exchangeBtn: "Exchange Coins",
-                logoutBtn: "Logout",
-                checkinBoostBtn: "Use Check-in Boost",
-                autoCheckinLabel: "Auto Check-in",
-                autoWithdrawLabel: "Auto Withdraw (≥¥10)",
-                saveSettingsBtn: "Save Settings"
-            }
+            facilities: {
+                generators: 0,
+                dataCenters: 0,
+                quantumComputers: 0,
+                firewalls: 0,
+                biochipLabs: 0,
+                influenceNodes: 0
+            },
+            rates: {
+                energy: 0,
+                data: 0,
+                compute: 0,
+                biochips: 0,
+                influence: 0
+            },
+            upgrades: {
+                gen1: false,
+                data1: false,
+                quant1: false,
+                firewall1: false,
+                bio1: false,
+                influence1: false
+            },
+            tech: {
+                ai: false,
+                quantum: false,
+                neural: false,
+                darkweb: false,
+                nanotech: false,
+                singularity: false,
+                biotech: false,
+                cyberwar: false,
+                virtual: false
+            },
+            cybernetics: {
+                neural: false,
+                memory: false,
+                reflex: false,
+                stability: false,
+                ai: false
+            },
+            corporations: {
+                neura: false,
+                quant: false,
+                cyber: false
+            },
+            missions: {
+                start: false,
+                research: false,
+                hack: false,
+                bio: false,
+                ddos: false,
+                stability: false
+            },
+            achievements: {
+                start: false,
+                hack: false,
+                overload: false,
+                quantum: false,
+                singularity: false,
+                bio: false,
+                ddos: false,
+                virus: false,
+                cyberspace: false,
+                time: false
+            },
+            stats: {
+                playTime: 0,
+                hackDefended: 0,
+                overloadPrevented: 0,
+                virusesCleaned: 0,
+                ddosLaunched: 0,
+                cyberspaceEntered: 0,
+                lastStabilityCheck: 0
+            },
+            stability: 100,
+            lastUpdate: Date.now(),
+            hackActive: false,
+            overloadActive: false,
+            virusActive: false,
+            minigameActive: false,
+            hackTime: 0,
+            overloadTime: 0,
+            virusTime: 0,
+            gameOver: false,
+            cyberspaceNodes: [],
+            cyberspaceLinks: []
         };
-        
-        // 初始化函数
-        function init() {
-            // 检查URL中的邀请码
-            const urlParams = new URLSearchParams(window.location.search);
-            const inviteCode = urlParams.get('invite');
-            if (inviteCode) {
-                document.getElementById('inviteCode').value = inviteCode;
-            }
-            
-            // 检查本地存储中是否有用户数据
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                updateUI();
-                document.getElementById('mainContent').style.display = 'block';
-                document.getElementById('loginModal').style.display = 'none';
-                startEarningInterval();
-            } else {
-                document.getElementById('loginModal').style.display = 'block';
-            }
-            
-            // 初始化任务列表
-            renderTaskList();
-            renderCheckinCalendar();
-            
-            // 设置语言
-            changeLanguage();
-        }
-        
-        // 切换语言
-        function changeLanguage() {
-            currentLanguage = document.getElementById('languageSelect').value;
-            
-            // 更新所有文本
-            for (const [key, value] of Object.entries(translations[currentLanguage])) {
-                const element = document.getElementById(key);
-                if (element) {
-                    if (element.tagName === 'INPUT' && element.type === 'button') {
-                        element.value = value;
-                    } else {
-                        element.textContent = value;
-                    }
+
+        // 加载游戏
+        function loadGame() {
+            const saved = localStorage.getItem('cyberAbyss');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(game, parsed);
+                    updateUI();
+                    addLog("游戏加载完成");
+                } catch (e) {
+                    addLog("存档损坏，创建新游戏");
                 }
             }
         }
-        
-        // 显示模态框
-        function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+
+        // 保存游戏
+        function saveGame() {
+            localStorage.setItem('cyberAbyss', JSON.stringify(game));
         }
-        
-        // 关闭模态框
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+
+        // 导出存档
+        function exportSave() {
+            const data = JSON.stringify(game);
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cyber-abyss-save-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            addLog("存档已导出");
         }
-        
-        // 快速体验
-        function quickLogin() {
-            // 检查是否已有体验账号
-            let quickUser = users.find(u => u.phone === '13800000000');
-            if (!quickUser) {
-                quickUser = {
-                    id: 'quick_' + Date.now().toString(),
-                    phone: '13800000000',
-                    password: '123456',
-                    inviteCode: 'QUICK' + Math.floor(1000 + Math.random() * 9000),
-                    invitedBy: '',
-                    balance: 0,
-                    totalEarnings: 0,
-                    withdrawn: 0,
-                    simulators: 1,
-                    lastCheckin: null,
-                    todayEarnings: 0,
-                    alipayAccount: null,
-                    alipayName: null,
-                    isAgent: false,
-                    isPartner: false,
-                    teamCount: 0,
-                    isQuick: true,
-                    isVip: false,
-                    vipExpire: null,
-                    hasCheckinBoost: false,
-                    settings: {
-                        autoCheckin: false,
-                        autoWithdraw: false
-                    },
-                    items: []
-                };
-                users.push(quickUser);
-            }
+
+        // 导入存档
+        document.getElementById('import-save').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             
-            currentUser = quickUser;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            closeModal('loginModal');
-            updateUI();
-            document.getElementById('mainContent').style.display = 'block';
-            startEarningInterval();
-            
-            // 显示体验提示
-            setTimeout(() => {
-                alert(currentLanguage === 'zh' ? 
-                    '您正在使用体验账号，数据将保存在本地浏览器中。注册正式账号可永久保存数据并获得更多功能！' : 
-                    'You are using a trial account. Data will be saved in local browser. Register a formal account to save data permanently and get more features!');
-            }, 500);
-        }
-        
-        // 登录函数
-        function login() {
-            const phone = document.getElementById('loginPhone').value;
-            const password = document.getElementById('loginPassword').value;
-            const alertBox = document.getElementById('loginAlert');
-            
-            if (!phone || !password) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '请输入手机号和密码' : 'Please enter phone number and password', 'danger');
-                return;
-            }
-            
-            // 检查用户是否存在
-            const user = users.find(u => u.phone === phone && u.password === password);
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                closeModal('loginModal');
-                updateUI();
-                document.getElementById('mainContent').style.display = 'block';
-                startEarningInterval();
-            } else {
-                showAlert(alertBox, currentLanguage === 'zh' ? '手机号或密码错误' : 'Invalid phone number or password', 'danger');
-            }
-        }
-        
-        // 显示注册表单
-        function showRegister() {
-            closeModal('loginModal');
-            showModal('registerModal');
-        }
-        
-        // 注册函数
-        function register() {
-            const phone = document.getElementById('registerPhone').value;
-            const password = document.getElementById('registerPassword').value;
-            const password2 = document.getElementById('registerPassword2').value;
-            const inviteCode = document.getElementById('inviteCode').value;
-            const agreeTerms = document.getElementById('agreeTerms').checked;
-            const alertBox = document.getElementById('registerAlert');
-            
-            // 验证输入
-            if (!phone || !password || !password2) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '请填写所有必填项' : 'Please fill all required fields', 'danger');
-                return;
-            }
-            
-            if (password !== password2) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '两次输入的密码不一致' : 'Passwords do not match', 'danger');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '密码长度至少6位' : 'Password must be at least 6 characters', 'danger');
-                return;
-            }
-            
-            if (!agreeTerms) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '请阅读并同意用户协议' : 'Please agree to the terms', 'danger');
-                return;
-            }
-            
-            // 检查手机号是否已注册
-            if (users.some(u => u.phone === phone)) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '该手机号已注册' : 'Phone number already registered', 'danger');
-                return;
-            }
-            
-            // 创建新用户
-            const newUser = {
-                id: Date.now().toString(),
-                phone: phone,
-                password: password,
-                inviteCode: generateInviteCode(),
-                invitedBy: inviteCode,
-                balance: 0,
-                totalEarnings: 0,
-                withdrawn: 0,
-                simulators: 1,
-                lastCheckin: null,
-                todayEarnings: 0,
-                alipayAccount: null,
-                alipayName: null,
-                isAgent: false,
-                isPartner: false,
-                isVip: false,
-                vipExpire: null,
-                hasCheckinBoost: false,
-                teamCount: 0,
-                isQuick: false,
-                settings: {
-                    autoCheckin: false,
-                    autoWithdraw: false
-                },
-                items: [],
-                joinProjects: [],
-                registerTime: new Date().toISOString(),
-                checkinDays: 0,
-                lastCheckinDate: null
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    Object.assign(game, data);
+                    updateUI();
+                    saveGame();
+                    addLog("存档已导入");
+                } catch (err) {
+                    addLog("导入失败: 存档文件损坏");
+                }
             };
-            
-            users.push(newUser);
-            currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // 如果有邀请人，给邀请人奖励
-            if (inviteCode) {
-                const inviter = users.find(u => u.inviteCode === inviteCode);
-                if (inviter) {
-                    inviter.simulators += 1;
-                    inviter.teamCount += 1;
-                    // 保存邀请人数据
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                }
+            reader.readAsText(file);
+        });
+
+        // 重置游戏
+        function resetGame() {
+            if (confirm("确定要重置游戏吗？所有进度将丢失！")) {
+                localStorage.removeItem('cyberAbyss');
+                location.reload();
             }
-            
-            showAlert(alertBox, currentLanguage === 'zh' ? '注册成功！' : 'Registration successful!', 'success');
-            
-            setTimeout(() => {
-                closeModal('registerModal');
-                updateUI();
-                document.getElementById('mainContent').style.display = 'block';
-                startEarningInterval();
-            }, 1000);
         }
-        
-        // 显示提示信息
-        function showAlert(element, message, type) {
-            element.style.display = 'block';
-            element.className = `alert alert-${type}`;
-            element.innerHTML = message;
-        }
-        
-        // 生成邀请码
-        function generateInviteCode() {
-            return Math.random().toString(36).substr(2, 6).toUpperCase();
-        }
-        
+
         // 更新UI
         function updateUI() {
-            if (!currentUser) return;
+            // 资源显示
+            document.getElementById('energy').textContent = Math.floor(game.resources.energy);
+            document.getElementById('data').textContent = Math.floor(game.resources.data);
+            document.getElementById('compute').textContent = Math.floor(game.resources.compute);
+            document.getElementById('max-compute').textContent = game.resources.maxCompute;
+            document.getElementById('credits').textContent = Math.floor(game.resources.credits);
+            document.getElementById('research-points').textContent = Math.floor(game.resources.research);
+            document.getElementById('reputation').textContent = Math.floor(game.resources.reputation);
+            document.getElementById('biochips').textContent = Math.floor(game.resources.biochips);
+            document.getElementById('influence').textContent = Math.floor(game.resources.influence);
+            document.getElementById('stability').textContent = Math.floor(game.stability);
+            document.getElementById('play-time').textContent = Math.floor(game.stats.playTime / 60);
             
-            // 更新用户信息
-            const phoneDisplay = currentUser.isQuick ? 
-                (currentLanguage === 'zh' ? '体验账号' : 'Trial Account') : 
-                `${currentUser.phone.substr(0, 3)}***${currentUser.phone.substr(7)}`;
-            document.getElementById('userInfo').innerHTML = currentLanguage === 'zh' ? 
-                `用户: ${phoneDisplay}` : `User: ${phoneDisplay}`;
+            // 进度条
+            const computePercent = (game.resources.compute / game.resources.maxCompute) * 100;
+            document.getElementById('compute-bar').style.width = `${computePercent}%`;
             
-            // 更新统计信息
-            document.getElementById('userStats').innerHTML = `
-                <p>${currentLanguage === 'zh' ? '已提现' : 'Withdrawn'}: ${currentUser.withdrawn.toFixed(2)}${currentLanguage === 'zh' ? '元' : '¥'}</p>
-                <p>${currentLanguage === 'zh' ? '总收入' : 'Total Earnings'}: ${currentUser.totalEarnings.toFixed(2)}${currentLanguage === 'zh' ? '元' : '¥'}</p>
-                <p>${currentLanguage === 'zh' ? '模拟器效率' : 'Efficiency'}: ${getEfficiencyMultiplier()}x</p>
-            `;
+            // 设施状态
+            document.getElementById('auto-energy').checked = game.tech.ai;
+            document.getElementById('auto-data').checked = game.tech.ai;
+            document.getElementById('auto-biochips').checked = game.tech.biotech;
             
-            document.getElementById('simulatorCount').innerHTML = currentUser.simulators;
-            document.getElementById('todayEarnings').innerHTML = currentUser.todayEarnings;
+            // 科技树
+            updateTechTree();
             
-            const today = new Date().toDateString();
-            const lastCheckinDate = currentUser.lastCheckinDate ? new Date(currentUser.lastCheckinDate).toDateString() : null;
-            document.getElementById('checkinStatus').innerHTML = 
-                lastCheckinDate === today ? (currentLanguage === 'zh' ? '已签到' : 'Checked-in') : (currentLanguage === 'zh' ? '未签到' : 'Not checked-in');
+            // 升级
+            updateUpgrades();
             
-            // 更新模拟器列表
-            let simulatorHtml = '';
-            let onlineCount = 0;
-            const isBoosted = simulatorBoostEndTime && new Date(simulatorBoostEndTime) > new Date();
+            // 成就
+            updateAchievements();
             
-            for (let i = 0; i < currentUser.simulators; i++) {
-                const isOnline = Math.random() > 0.3;
-                const isWorking = isOnline && Math.random() > 0.5;
-                if (isOnline) onlineCount++;
-                
-                let statusClass = '';
-                let statusText = '';
-                
-                if (!isOnline) {
-                    statusClass = 'status-offline';
-                    statusText = currentLanguage === 'zh' ? '离线' : 'Offline';
-                } else if (isBoosted) {
-                    statusClass = 'status-boosted';
-                    statusText = currentLanguage === 'zh' ? '加速中' : 'Boosted';
-                } else if (isWorking) {
-                    statusClass = 'status-working';
-                    statusText = currentLanguage === 'zh' ? '工作中' : 'Working';
+            // 任务
+            updateMissions();
+            
+            // 义体改造
+            updateCybernetics();
+            
+            // 企业关系
+            updateCorporations();
+            
+            // 赛博空间
+            updateCyberspace();
+            
+            // 游戏状态
+            if (game.gameOver) {
+                document.getElementById('game-over').style.display = 'block';
+            } else {
+                document.getElementById('game-over').style.display = 'none';
+            }
+        }
+
+        // 更新科技树
+        function updateTechTree() {
+            const techItems = ['ai', 'quantum', 'neural', 'darkweb', 'nanotech', 'singularity', 'biotech', 'cyberwar', 'virtual'];
+            techItems.forEach(tech => {
+                const element = document.getElementById(`tech-${tech}`);
+                if (game.tech[tech]) {
+                    element.classList.add('unlocked');
+                    element.classList.remove('locked');
                 } else {
-                    statusClass = 'status-online';
-                    statusText = currentLanguage === 'zh' ? '在线' : 'Online';
+                    element.classList.remove('unlocked');
+                    // 检查是否满足研究条件
+                    const canResearch = canResearchTech(tech);
+                    element.classList.toggle('locked', !canResearch);
                 }
-                
-                simulatorHtml += `
-                    <div class="task-item">
-                        <div class="task-info">${currentLanguage === 'zh' ? '手机模拟器' : 'Simulator'} ${i+1}</div>
-                        <div class="simulator-status ${statusClass}">
-                            ${statusText}
-                        </div>
-                        <button class="btn btn-small" onclick="restartSimulator(${i})">${currentLanguage === 'zh' ? '重启' : 'Restart'}</button>
-                    </div>
-                `;
+            });
+        }
+
+        // 检查是否可以研究科技
+        function canResearchTech(tech) {
+            const requirements = {
+                ai: game.resources.research >= 10,
+                quantum: game.resources.research >= 25,
+                neural: game.resources.research >= 20,
+                darkweb: game.resources.research >= 15,
+                nanotech: game.resources.research >= 40 && game.tech.ai && game.tech.neural,
+                singularity: game.resources.research >= 100 && game.tech.quantum && game.tech.nanotech,
+                biotech: game.resources.research >= 30,
+                cyberwar: game.resources.research >= 35 && game.tech.darkweb,
+                virtual: game.resources.research >= 45 && game.tech.quantum
+            };
+            return requirements[tech] && !game.tech[tech];
+        }
+
+        // 研究科技
+        function researchTech(tech) {
+            if (!canResearchTech(tech)) return;
+            
+            const costs = {
+                ai: 10,
+                quantum: 25,
+                neural: 20,
+                darkweb: 15,
+                nanotech: 40,
+                singularity: 100,
+                biotech: 30,
+                cyberwar: 35,
+                virtual: 45
+            };
+            
+            game.resources.research -= costs[tech];
+            game.tech[tech] = true;
+            
+            // 应用科技效果
+            switch(tech) {
+                case 'ai':
+                    addLog("AI系统已上线，自动化功能解锁");
+                    unlockMission('start');
+                    break;
+                case 'quantum':
+                    game.resources.maxCompute *= 3;
+                    game.stability -= 20;
+                    addLog("量子计算技术已激活 - 算力上限大幅提升，但系统稳定性下降");
+                    unlockAchievement('quantum');
+                    break;
+                case 'neural':
+                    addLog("神经链接已建立 - 资源获取速度提升");
+                    break;
+                case 'darkweb':
+                    addLog("暗网接入成功 - 高风险交易选项已解锁");
+                    break;
+                case 'nanotech':
+                    addLog("纳米科技已部署 - 设施效率提升");
+                    break;
+                case 'singularity':
+                    game.stability -= 40;
+                    addLog("警告: 技术奇点已达成 - 系统极度不稳定");
+                    unlockAchievement('singularity');
+                    break;
+                case 'biotech':
+                    addLog("生物科技解锁 - 现在可以生产生物芯片");
+                    unlockMission('bio');
+                    break;
+                case 'cyberwar':
+                    addLog("网络战争协议激活 - DDoS攻击功能解锁");
+                    unlockMission('ddos');
+                    break;
+                case 'virtual':
+                    addLog("虚拟现实系统上线 - 赛博空间已开放");
+                    break;
             }
-            document.getElementById('simulatorList').innerHTML = simulatorHtml;
-            document.getElementById('onlineSimulators').innerHTML = `${onlineCount}/${currentUser.simulators}${currentLanguage === 'zh' ? '在线' : 'Online'}`;
             
-            // 更新账户信息
-            document.getElementById('accountInfo').innerHTML = `
-                <p>${currentLanguage === 'zh' ? '手机号' : 'Phone'}: ${currentUser.phone}</p>
-                <p>${currentLanguage === 'zh' ? '注册时间' : 'Register Time'}: ${new Date(currentUser.registerTime).toLocaleDateString()}</p>
-                <p>${currentLanguage === 'zh' ? '团队人数' : 'Team Members'}: ${currentUser.teamCount}</p>
-                <p>${currentLanguage === 'zh' ? '身份' : 'Status'}: ${currentUser.isPartner ? 
-                    (currentLanguage === 'zh' ? '合伙人' : 'Partner') : 
-                    currentUser.isAgent ? (currentLanguage === 'zh' ? '代理' : 'Agent') : 
-                    currentUser.isVip ? 'VIP' : (currentLanguage === 'zh' ? '普通用户' : 'Normal User')}</p>
-                <p>${currentLanguage === 'zh' ? '连续签到' : 'Check-in Days'}: ${currentUser.checkinDays || 0}${currentLanguage === 'zh' ? '天' : 'days'}</p>
-                ${currentUser.isVip ? `<p>VIP ${currentLanguage === 'zh' ? '到期' : 'Expire'}: ${new Date(currentUser.vipExpire).toLocaleDateString()}</p>` : ''}
-            `;
+            checkMission('research');
+            updateUI();
+            saveGame();
+        }
+
+        // 更新升级
+        function updateUpgrades() {
+            const upgrades = ['gen1', 'data1', 'quant1', 'firewall1', 'bio1', 'influence1'];
+            upgrades.forEach(upgrade => {
+                const element = document.getElementById(`upgrade-${upgrade}`);
+                if (game.upgrades[upgrade]) {
+                    element.classList.add('unlocked');
+                    element.classList.remove('locked');
+                } else {
+                    // 检查是否满足升级条件
+                    const canUpgrade = canBuyUpgrade(upgrade);
+                    element.classList.toggle('locked', !canUpgrade);
+                }
+            });
+        }
+
+        // 检查是否可以购买升级
+        function canBuyUpgrade(upgrade) {
+            const requirements = {
+                gen1: game.facilities.generators >= 1 && game.resources.credits >= 200,
+                data1: game.facilities.dataCenters >= 1 && game.resources.credits >= 300,
+                quant1: game.facilities.quantumComputers >= 1 && game.resources.credits >= 500,
+                firewall1: game.facilities.firewalls >= 1 && game.resources.data >= 400,
+                bio1: game.facilities.biochipLabs >= 1 && game.resources.credits >= 600,
+                influence1: game.facilities.influenceNodes >= 1 && game.resources.credits >= 800
+            };
+            return requirements[upgrade] && !game.upgrades[upgrade];
+        }
+
+        // 购买升级
+        function buyUpgrade(upgrade) {
+            if (!canBuyUpgrade(upgrade)) return;
             
-            // 更新支付宝信息
-            if (currentUser.alipayAccount) {
-                document.getElementById('alipayInfo').innerHTML = `
-                    <p>${currentLanguage === 'zh' ? '支付宝账号' : 'Alipay Account'}: ${currentUser.alipayAccount}</p>
-                    <p>${currentLanguage === 'zh' ? '实名姓名' : 'Real Name'}: ${currentUser.alipayName}</p>
-                `;
-                document.getElementById('bindAlipayBtn').innerHTML = currentLanguage === 'zh' ? '修改绑定' : 'Change Binding';
-            } else {
-                document.getElementById('alipayInfo').innerHTML = `<p>${currentLanguage === 'zh' ? '未绑定支付宝' : 'Alipay not bound'}</p>`;
-                document.getElementById('bindAlipayBtn').innerHTML = currentLanguage === 'zh' ? '绑定支付宝' : 'Bind Alipay';
+            const costs = {
+                gen1: { credits: 200 },
+                data1: { credits: 300 },
+                quant1: { credits: 500 },
+                firewall1: { data: 400 },
+                bio1: { credits: 600 },
+                influence1: { credits: 800 }
+            };
+            
+            if (costs[upgrade].credits) game.resources.credits -= costs[upgrade].credits;
+            if (costs[upgrade].data) game.resources.data -= costs[upgrade].data;
+            
+            game.upgrades[upgrade] = true;
+            
+            // 应用升级效果
+            switch(upgrade) {
+                case 'gen1':
+                    game.rates.energy += game.facilities.generators * 0.25;
+                    addLog("能源发生器升级完成 - 能源产出增加");
+                    break;
+                case 'data1':
+                    game.rates.data += game.facilities.dataCenters * 0.15;
+                    addLog("数据中心升级完成 - 数据处理能力提升");
+                    break;
+                case 'quant1':
+                    addLog("量子优化完成 - 算力效率提高");
+                    break;
+                case 'firewall1':
+                    game.stability += 10;
+                    addLog("高级防火墙已部署 - 系统安全性提升");
+                    checkMission('hack');
+                    break;
+                case 'bio1':
+                    game.rates.biochips += game.facilities.biochipLabs * 0.1;
+                    addLog("生物芯片优化完成 - 生产效率提升");
+                    break;
+                case 'influence1':
+                    game.rates.influence += game.facilities.influenceNodes * 0.2;
+                    addLog("影响力放大器安装完成 - 网络影响力增长加速");
+                    break;
             }
             
-            // 更新邀请信息
-            document.getElementById('inviteInfo').innerHTML = `
-                <p>${currentLanguage === 'zh' ? '您的邀请码' : 'Your Invite Code'}: ${currentUser.inviteCode}</p>
-                <p>${currentLanguage === 'zh' ? '已邀请好友' : 'Invited Friends'}: ${currentUser.teamCount}${currentLanguage === 'zh' ? '人' : ''}</p>
-                <p>${currentLanguage === 'zh' ? '邀请奖励' : 'Invite Rewards'}: ${currentUser.teamCount * 10}${currentLanguage === 'zh' ? '元' : '¥'}</p>
-            `;
-            
-            // 更新收益统计
-            document.getElementById('earningsStats').innerHTML = `
-                <p>${currentLanguage === 'zh' ? '今日收益' : "Today's Earnings"}: ${currentUser.todayEarnings}${currentLanguage === 'zh' ? '金币' : 'coins'}</p>
-                <p>${currentLanguage === 'zh' ? '可提现余额' : 'Withdrawable Balance'}: ${currentUser.balance.toFixed(2)}${currentLanguage === 'zh' ? '元' : '¥'}</p>
-                <p>${currentLanguage === 'zh' ? '累计收益' : 'Total Earnings'}: ${currentUser.totalEarnings.toFixed(2)}${currentLanguage === 'zh' ? '元' : '¥'}</p>
-                <p>${currentLanguage === 'zh' ? '待结算' : 'Pending'}: ${(currentUser.todayEarnings / 10000).toFixed(2)}${currentLanguage === 'zh' ? '元' : '¥'}</p>
-            `;
-            
-            // 更新提现记录
-            renderWithdrawHistory();
-            
-            // 更新商城道具
-            renderMyItems();
-            
-            // 更新设置
-            if (currentUser.settings) {
-                document.getElementById('autoCheckin').checked = currentUser.settings.autoCheckin || false;
-                document.getElementById('autoWithdraw').checked = currentUser.settings.autoWithdraw || false;
-            }
-            
-            // 更新VIP任务显示
-            document.getElementById('vipTask').style.display = currentUser.isVip ? 'flex' : 'none';
-            
-            // 更新签到翻倍按钮状态
-            document.getElementById('checkinBoostBtn').disabled = !currentUser.hasCheckinBoost;
-            
-            // 更新加速按钮状态
-            const isBoostActive = simulatorBoostEndTime && new Date(simulatorBoostEndTime) > new Date();
-            document.getElementById('boostBtn').disabled = isBoostActive;
-            if (isBoostActive) {
-                const remaining = Math.ceil((new Date(simulatorBoostEndTime) - new Date()) / 1000 / 60);
-                document.getElementById('boostBtn').textContent = 
-                    currentLanguage === 'zh' ? `加速中 (剩余${remaining}分钟)` : `Boosted (${remaining}min left)`;
+            updateUI();
+            saveGame();
+        }
+
+        // 更新任务
+        function updateMissions() {
+            const missions = ['start', 'research', 'hack', 'bio', 'ddos', 'stability'];
+            missions.forEach(mission => {
+                const element = document.getElementById(`mission-${mission}`);
+                if (game.missions[mission]) {
+                    element.classList.add('completed');
+                } else {
+                    element.classList.remove('completed');
+                }
+            });
+        }
+
+        // 解锁任务
+        function unlockMission(mission) {
+            if (!game.missions[mission]) {
+                const element = document.getElementById(`mission-${mission}`);
+                element.style.display = 'block';
             }
         }
-        
-        // 渲染提现记录
-        function renderWithdrawHistory() {
-            let historyHtml = '';
-            const userHistory = withdrawHistory.filter(w => w.userId === currentUser.id);
+
+        // 检查任务完成
+        function checkMission(mission) {
+            if (game.missions[mission]) return;
             
-            if (userHistory.length === 0) {
-                historyHtml = `<p>${currentLanguage === 'zh' ? '暂无提现记录' : 'No withdrawal history'}</p>`;
-            } else {
-                userHistory.forEach(record => {
-                    historyHtml += `
-                        <div class="task-item">
-                            <div class="task-info">${new Date(record.time).toLocaleString()}</div>
-                            <div class="task-reward">${record.amount.toFixed(2)}${currentLanguage === 'zh' ? '元' : '¥'}</div>
-                            <div class="simulator-status ${record.status === 'completed' ? 'status-online' : 'status-working'}">
-                                ${record.status === 'completed' ? (currentLanguage === 'zh' ? '已完成' : 'Completed') : (currentLanguage === 'zh' ? '处理中' : 'Processing')}
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            document.getElementById('withdrawHistory').innerHTML = historyHtml;
-        }
-        
-        // 渲染我的道具
-        function renderMyItems() {
-            let itemsHtml = '';
-            if (!currentUser.items || currentUser.items.length === 0) {
-                itemsHtml = `<p>${currentLanguage === 'zh' ? '暂无道具' : 'No items'}</p>`;
-            } else {
-                currentUser.items.forEach(item => {
-                    if (item.expireTime && new Date(item.expireTime) < new Date()) return;
-                    
-                    let itemInfo = '';
-                    if (item.type === 'card') {
-                        const expireDate = item.expireTime ? new Date(item.expireTime).toLocaleDateString() : (currentLanguage === 'zh' ? '永久' : 'Permanent');
-                        itemInfo = `${currentLanguage === 'zh' ? '效率+' : 'Efficiency+' }${item.value*100}% (${currentLanguage === 'zh' ? '到期' : 'Expire'}: ${expireDate})`;
-                    } else if (item.type === 'simulator') {
-                        itemInfo = `${currentLanguage === 'zh' ? '效率' : 'Efficiency'}: ${item.value}${currentLanguage === 'zh' ? '金币/分钟' : 'coins/min'}`;
-                    } else if (item.type === 'boost' && item.subtype === 'checkin') {
-                        itemInfo = currentLanguage === 'zh' ? '下次签到奖励翻倍' : 'Double next check-in reward';
+            let completed = false;
+            switch(mission) {
+                case 'start':
+                    completed = game.facilities.generators > 0;
+                    if (completed) {
+                        game.resources.credits += 50;
+                        addLog("任务完成: 新手入门 - 获得50信用点");
                     }
-                    
-                    itemsHtml += `
-                        <div class="task-item">
-                            <div class="task-info">${item.name}</div>
-                            <div class="simulator-status">${itemInfo}</div>
-                        </div>
-                    `;
-                });
-            }
-            document.getElementById('myItems').innerHTML = itemsHtml;
-        }
-        
-        // 获取效率倍数
-        function getEfficiencyMultiplier() {
-            let multiplier = 1;
-            if (!currentUser.items) return multiplier;
-            
-            // 检查加速状态
-            const isBoosted = simulatorBoostEndTime && new Date(simulatorBoostEndTime) > new Date();
-            if (isBoosted) {
-                multiplier *= 2; // 加速期间效率翻倍
-            }
-            
-            // VIP加成
-            if (currentUser.isVip) {
-                multiplier *= 1.5; // VIP用户获得50%加成
-            }
-            
-            // 道具加成
-            currentUser.items.forEach(item => {
-                if (item.type === 'card' && (!item.expireTime || new Date(item.expireTime) > new Date())) {
-                    multiplier += item.value;
-                }
-            });
-            
-            // 代理加成
-            if (currentUser.isAgent) multiplier += 0.2;
-            if (currentUser.isPartner) multiplier += 0.5;
-            
-            return multiplier.toFixed(1);
-        }
-        
-        // 渲染任务列表
-        function renderTaskList() {
-            let taskHtml = '';
-            tasks.forEach(task => {
-                taskHtml += `
-                    <div class="task-item">
-                        <div class="task-info">${task.name}</div>
-                        <div class="task-reward">+${task.reward}${currentLanguage === 'zh' ? '金币' : 'coins'}</div>
-                        <button class="btn btn-small" onclick="completeTask(${task.id})" ${task.completed ? 'disabled' : ''}>
-                            ${task.completed ? (currentLanguage === 'zh' ? '已完成' : 'Completed') : (currentLanguage === 'zh' ? '去做任务' : 'Do Task')}
-                        </button>
-                    </div>
-                `;
-            });
-            document.getElementById('taskList').innerHTML = taskHtml;
-        }
-        
-        // 渲染签到日历
-        function renderCheckinCalendar() {
-            const calendarHtml = `
-                <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-                    ${Array.from({length: 7}, (_, i) => {
-                        const day = i + 1;
-                        const isChecked = currentUser.checkinDays >= day;
-                        return `
-                            <div style="width: 14%; text-align: center; padding: 5px; 
-                                background: ${isChecked ? '#4CAF50' : '#f5f5f5'}; 
-                                color: ${isChecked ? 'white' : '#333'};
-                                border-radius: 5px; margin: 1px;">
-                                ${currentLanguage === 'zh' ? '第' : 'Day '}${day}${currentLanguage === 'zh' ? '天' : ''}
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-                <p style="font-size: 12px; margin-top: 10px;">
-                    ${currentLanguage === 'zh' ? '连续签到7天可获得5元现金奖励' : 'Check in for 7 consecutive days to get ¥5 reward'}
-                </p>
-            `;
-            document.getElementById('checkinCalendar').innerHTML = calendarHtml;
-        }
-        
-        // 完成任务
-        function completeTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task || task.completed) return;
-            
-            task.completed = true;
-            currentUser.todayEarnings += task.reward;
-            currentUser.balance += task.reward / 10000; // 假设10000金币=1元
-            currentUser.totalEarnings += task.reward / 10000;
-            
-            // 保存更新
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // 更新UI
-            renderTaskList();
-            updateUI();
-            
-            // 模拟任务完成后的延迟
-            setTimeout(() => {
-                task.completed = false;
-                renderTaskList();
-                
-                // 如果开启了自动完成任务，则自动再次完成任务
-                if (autoCompleteTasks) {
-                    setTimeout(() => completeTask(taskId), 1000);
-                }
-            }, task.time * 60 * 1000); // 转换为毫秒
-        }
-        
-        // 每日签到
-        function dailyCheckin() {
-            const today = new Date();
-            const todayStr = today.toDateString();
-            const lastCheckinDate = currentUser.lastCheckinDate ? new Date(currentUser.lastCheckinDate).toDateString() : null;
-            
-            // 检查是否已签到
-            if (lastCheckinDate === todayStr) {
-                alert(currentLanguage === 'zh' ? '今天已经签到过了' : 'Already checked in today');
-                return;
-            }
-            
-            // 检查是否连续签到
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toDateString();
-            
-            if (lastCheckinDate === yesterdayStr) {
-                currentUser.checkinDays = (currentUser.checkinDays || 0) + 1;
-            } else {
-                currentUser.checkinDays = 1;
-            }
-            
-            let reward = 1000 + currentUser.checkinDays * 100; // 基础奖励+连续签到额外奖励
-            
-            // 检查是否有签到翻倍卡
-            if (currentUser.hasCheckinBoost) {
-                reward *= 2;
-                currentUser.hasCheckinBoost = false;
-                alert(currentLanguage === 'zh' ? '签到奖励已翻倍！' : 'Check-in reward doubled!');
-            }
-            
-            // VIP用户签到奖励增加
-            if (currentUser.isVip) {
-                reward *= 1.5;
-            }
-            
-            currentUser.lastCheckin = new Date();
-            currentUser.lastCheckinDate = today.toISOString();
-            currentUser.todayEarnings += reward;
-            currentUser.balance += reward / 10000;
-            currentUser.totalEarnings += reward / 10000;
-            
-            // 检查连续签到奖励
-            let bonusMessage = '';
-            if (currentUser.checkinDays % 7 === 0) {
-                const bonus = 50000; // 7天奖励5元(50000金币)
-                currentUser.balance += bonus / 10000;
-                currentUser.totalEarnings += bonus / 10000;
-                bonusMessage = currentLanguage === 'zh' ? `和连续7天签到奖励${bonus}金币` : `and 7-day streak bonus ${bonus} coins`;
-            }
-            
-            // 随机获得模拟器
-            if (Math.random() > 0.7) {
-                currentUser.simulators += 1;
-                alert(currentLanguage === 'zh' ? 
-                    `签到成功！获得${reward}金币${bonusMessage}和1个模拟器` : 
-                    `Check-in successful! Got ${reward} coins${bonusMessage} and 1 simulator`);
-            } else {
-                alert(currentLanguage === 'zh' ? 
-                    `签到成功！获得${reward}金币${bonusMessage}` : 
-                    `Check-in successful! Got ${reward} coins${bonusMessage}`);
-            }
-            
-            // 保存更新
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            renderCheckinCalendar();
-        }
-        
-        // 添加模拟器
-        function addSimulator() {
-            if (currentUser.isQuick) {
-                alert(currentLanguage === 'zh' ? 
-                    '体验账号无法添加模拟器，请注册正式账号' : 
-                    'Trial account cannot add simulators, please register');
-                return;
-            }
-            
-            alert(currentLanguage === 'zh' ? 
-                '通过推广好友或完成任务可以获得更多模拟器' : 
-                'Get more simulators by inviting friends or completing tasks');
-        }
-        
-        // 重启模拟器
-        function restartSimulator(index) {
-            alert(currentLanguage === 'zh' ? 
-                `正在重启模拟器${index + 1}...` : 
-                `Restarting simulator ${index + 1}...`);
-            // 模拟重启过程
-            setTimeout(() => {
-                alert(currentLanguage === 'zh' ? 
-                    `模拟器${index + 1}重启成功` : 
-                    `Simulator ${index + 1} restarted successfully`);
-            }, 2000);
-        }
-        
-        // 优化模拟器
-        function optimizeSimulators() {
-            alert(currentLanguage === 'zh' ? 
-                '正在优化所有模拟器性能...' : 
-                'Optimizing all simulators...');
-            // 模拟优化过程
-            setTimeout(() => {
-                alert(currentLanguage === 'zh' ? 
-                    '优化完成！模拟器效率提升10%' : 
-                    'Optimization complete! Simulator efficiency increased by 10%');
-                // 这里可以添加实际的优化效果
-                updateUI();
-            }, 3000);
-        }
-        
-        // 新增：加速模拟器
-        function boostSimulators() {
-            if (currentUser.isQuick) {
-                alert(currentLanguage === 'zh' ? 
-                    '体验账号无法使用加速功能' : 
-                    'Trial account cannot use boost feature');
-                return;
-            }
-            
-            // 设置加速结束时间（1小时后）
-            simulatorBoostEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-            
-            alert(currentLanguage === 'zh' ? 
-                '模拟器已加速！1小时内收益翻倍' : 
-                'Simulators boosted! Double earnings for 1 hour');
-            
-            updateUI();
-            
-            // 1小时后自动取消加速
-            setTimeout(() => {
-                simulatorBoostEndTime = null;
-                updateUI();
-                alert(currentLanguage === 'zh' ? 
-                    '模拟器加速已结束' : 
-                    'Simulator boost has ended');
-            }, 60 * 60 * 1000);
-        }
-        
-        // 升级代理
-        function upgradeAgent() {
-            if (currentUser.isAgent) {
-                alert(currentLanguage === 'zh' ? '您已经是代理了' : 'You are already an agent');
-                return;
-            }
-            
-            if (currentUser.teamCount < 5) {
-                alert(currentLanguage === 'zh' ? 
-                    '需要邀请至少5位好友才能升级为代理' : 
-                    'Need to invite at least 5 friends to upgrade to agent');
-                return;
-            }
-            
-            if (currentUser.balance < 50) {
-                alert(currentLanguage === 'zh' ? '升级代理需要50元费用' : 'Agent upgrade requires ¥50');
-                return;
-            }
-            
-            currentUser.isAgent = true;
-            currentUser.balance -= 50;
-            currentUser.simulators += 3; // 代理奖励3个模拟器
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            alert(currentLanguage === 'zh' ? 
-                '恭喜您升级为代理！获得3个额外模拟器和20%收益加成' : 
-                'Congratulations! You are now an agent. Got 3 extra simulators and 20% earnings bonus');
-        }
-        
-        // 新增：购买VIP会员
-        function purchaseVIP() {
-            if (currentUser.isVip && new Date(currentUser.vipExpire) > new Date()) {
-                alert(currentLanguage === 'zh' ? 
-                    '您已经是VIP会员' : 
-                    'You are already a VIP member');
-                return;
-            }
-            
-            if (currentUser.balance < 30) {
-                alert(currentLanguage === 'zh' ? 
-                    '余额不足，开通VIP需要30元' : 
-                    'Insufficient balance, VIP requires ¥30');
-                return;
-            }
-            
-            currentUser.balance -= 30;
-            currentUser.isVip = true;
-            
-            // 设置VIP到期时间（30天后）
-            const expireDate = new Date();
-            expireDate.setDate(expireDate.getDate() + 30);
-            currentUser.vipExpire = expireDate.toISOString();
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            
-            alert(currentLanguage === 'zh' ? 
-                '恭喜您成为VIP会员！享受50%收益加成和其他特权' : 
-                'Congratulations! You are now a VIP member. Enjoy 50% earnings bonus and other privileges');
-        }
-        
-        // 新增：购买签到翻倍卡
-        function buyCheckinBoost() {
-            if (currentUser.balance < 8) {
-                alert(currentLanguage === 'zh' ? 
-                    '余额不足，购买签到翻倍卡需要8元' : 
-                    'Insufficient balance, check-in boost card costs ¥8');
-                return;
-            }
-            
-            currentUser.balance -= 8;
-            currentUser.hasCheckinBoost = true;
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            
-            alert(currentLanguage === 'zh' ? 
-                '购买成功！下次签到奖励将翻倍' : 
-                'Purchase successful! Next check-in reward will be doubled');
-        }
-        
-        // 新增：使用签到翻倍卡
-        function useCheckinBoost() {
-            if (!currentUser.hasCheckinBoost) {
-                alert(currentLanguage === 'zh' ? 
-                    '您没有签到翻倍卡' : 
-                    'You don\'t have a check-in boost card');
-                return;
-            }
-            
-            currentUser.hasCheckinBoost = true;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            
-            alert(currentLanguage === 'zh' ? 
-                '已激活签到翻倍卡，下次签到奖励将翻倍' : 
-                'Check-in boost activated, next check-in reward will be doubled');
-        }
-        
-        // 新增：切换任务自动完成
-        function toggleAutoCompleteTasks() {
-            autoCompleteTasks = document.getElementById('autoCompleteTasks').checked;
-            
-            if (autoCompleteTasks) {
-                // 自动完成所有未完成任务
-                tasks.forEach(task => {
-                    if (!task.completed) {
-                        completeTask(task.id);
+                    break;
+                case 'research':
+                    let researched = 0;
+                    for (const tech in game.tech) {
+                        if (game.tech[tech]) researched++;
                     }
-                });
-                
-                alert(currentLanguage === 'zh' ? 
-                    '已开启任务自动完成' : 
-                    'Auto complete tasks enabled');
-            }
-        }
-        
-        // 显示支付宝绑定模态框
-        function showAlipayModal() {
-            showModal('alipayModal');
-            document.getElementById('alipayAlert').style.display = 'none';
-            document.getElementById('alipayAccount').value = currentUser.alipayAccount || '';
-            document.getElementById('alipayName').value = currentUser.alipayName || '';
-        }
-        
-        // 绑定支付宝
-        function bindAlipay() {
-            const account = document.getElementById('alipayAccount').value;
-            const name = document.getElementById('alipayName').value;
-            const alertBox = document.getElementById('alipayAlert');
-            
-            if (!account || !name) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '请输入支付宝账号和姓名' : 'Please enter Alipay account and name', 'danger');
-                return;
-            }
-            
-            // 检查支付宝是否已被绑定
-            if (alipayBindings.includes(account) && (!currentUser.alipayAccount || currentUser.alipayAccount !== account)) {
-                showAlert(alertBox, currentLanguage === 'zh' ? '该支付宝账号已被其他账号绑定' : 'This Alipay account is already bound', 'danger');
-                return;
+                    completed = researched >= 3;
+                    if (completed) {
+                        game.resources.research += 20;
+                        addLog("任务完成: 科研先锋 - 获得20研究点数");
+                    }
+                    break;
+                case 'hack':
+                    completed = game.upgrades.firewall1;
+                    if (completed) {
+                        addLog("任务完成: 网络安全 - 获得防火墙升级");
+                    }
+                    break;
+                case 'bio':
+                    completed = game.resources.biochips >= 50;
+                    if (completed) {
+                        game.resources.research += 15;
+                        addLog("任务完成: 生物黑客 - 获得15研究点数");
+                    }
+                    break;
+                case 'ddos':
+                    completed = game.stats.ddosLaunched >= 5;
+                    if (completed) {
+                        game.resources.influence += 100;
+                        addLog("任务完成: 网络战争 - 获得100影响力");
+                    }
+                    break;
+                case 'stability':
+                    // 在游戏循环中检查
+                    break;
             }
             
-            // 更新绑定
-            if (currentUser.alipayAccount && currentUser.alipayAccount !== account) {
-                // 移除旧绑定
-                const index = alipayBindings.indexOf(currentUser.alipayAccount);
-                if (index > -1) {
-                    alipayBindings.splice(index, 1);
-                }
-            }
-            
-            currentUser.alipayAccount = account;
-            currentUser.alipayName = name;
-            alipayBindings.push(account);
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            showAlert(alertBox, currentLanguage === 'zh' ? '支付宝绑定成功' : 'Alipay binding successful', 'success');
-            
-            setTimeout(() => {
-                closeModal('alipayModal');
+            if (completed) {
+                game.missions[mission] = true;
                 updateUI();
-            }, 1000);
+                saveGame();
+            }
         }
-        
-        // 提现
-        function withdraw() {
-            if (!currentUser.alipayAccount) {
-                alert(currentLanguage === 'zh' ? '请先绑定支付宝账号' : 'Please bind Alipay account first');
-                showAlipayModal();
-                return;
+
+        // 更新成就
+        function updateAchievements() {
+            const achievements = ['start', 'hack', 'overload', 'quantum', 'singularity', 'bio', 'ddos', 'virus', 'cyberspace', 'time'];
+            achievements.forEach(achieve => {
+                const element = document.getElementById(`achieve-${achieve}`);
+                if (game.achievements[achieve]) {
+                    element.classList.add('unlocked');
+                }
+            });
+        }
+
+        // 解锁成就
+        function unlockAchievement(achieve) {
+            if (!game.achievements[achieve]) {
+                game.achievements[achieve] = true;
+                addLog(`成就解锁: ${getAchievementName(achieve)}`);
+                game.resources.reputation += 50;
+                updateUI();
+                saveGame();
             }
+        }
+
+        // 获取成就名称
+        function getAchievementName(achieve) {
+            const names = {
+                start: "初次启动",
+                hack: "防火墙测试",
+                overload: "冷静应对",
+                quantum: "量子跃迁",
+                singularity: "奇点临近",
+                bio: "生化电子人",
+                ddos: "网络恐怖分子",
+                virus: "杀毒专家",
+                cyberspace: "数字幽灵",
+                time: "时间领主"
+            };
+            return names[achieve];
+        }
+
+        // 更新义体改造
+        function updateCybernetics() {
+            const cybernetics = ['neural', 'memory', 'reflex', 'stability', 'ai'];
+            cybernetics.forEach(cyber => {
+                const element = document.getElementById(`cyber-${cyber}`);
+                if (game.cybernetics[cyber]) {
+                    element.classList.add('active');
+                } else {
+                    element.classList.remove('active');
+                    // 检查是否可以安装
+                    const canInstall = canInstallCyberware(cyber);
+                    element.classList.toggle('locked', !canInstall);
+                }
+            });
+            document.getElementById('biochips-cyber').textContent = Math.floor(game.resources.biochips);
+        }
+
+        // 检查是否可以安装义体
+        function canInstallCyberware(cyber) {
+            if (!game.tech.biotech) return false;
             
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const costs = {
+                neural: 10,
+                memory: 15,
+                reflex: 20,
+                stability: 25,
+                ai: 50
+            };
+            return game.resources.biochips >= costs[cyber] && !game.cybernetics[cyber];
+        }
+
+        // 安装义体
+        function installCyberware(cyber) {
+            if (!canInstallCyberware(cyber)) return;
             
-            if (currentUser.balance < amount) {
-                alert(currentLanguage === 'zh' ? '余额不足' : 'Insufficient balance');
-                return;
-            }
-            
-            if (amount < 10) {
-                alert(currentLanguage === 'zh' ? '最低提现金额为10元' : 'Minimum withdrawal amount is ¥10');
-                return;
-            }
-            
-            currentUser.balance -= amount;
-            currentUser.withdrawn += amount;
-            
-            // 记录提现历史
-            const withdrawRecord = {
-                id: Date.now().toString(),
-                userId: currentUser.id,
-                amount: amount,
-                time: new Date().toISOString(),
-                status: 'pending',
-                alipayAccount: currentUser.alipayAccount
+            const costs = {
+                neural: 10,
+                memory: 15,
+                reflex: 20,
+                stability: 25,
+                ai: 50
             };
             
-            withdrawHistory.push(withdrawRecord);
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            game.resources.biochips -= costs[cyber];
+            game.cybernetics[cyber] = true;
             
-            // 模拟提现处理
-            setTimeout(() => {
-                const record = withdrawHistory.find(w => w.id === withdrawRecord.id);
-                if (record) {
-                    record.status = 'completed';
-                    alert(currentLanguage === 'zh' ? 
-                        `提现成功，${amount}元已打入您的支付宝账户` : 
-                        `Withdrawal successful, ¥${amount} has been transferred to your Alipay account`);
-                    updateUI();
+            // 应用义体效果
+            switch(cyber) {
+                case 'neural':
+                    addLog("神经加速器安装完成 - 操作速度提升");
+                    break;
+                case 'memory':
+                    addLog("记忆增强器安装完成 - 研究效率提升");
+                    break;
+                case 'reflex':
+                    addLog("反射增强器安装完成 - 事件反应时间延长");
+                    break;
+                case 'stability':
+                    game.stability += 15;
+                    addLog("系统稳定器安装完成 - 系统稳定性提升");
+                    break;
+                case 'ai':
+                    addLog("AI协同处理器安装完成 - 自动化效率提升");
+                    break;
+            }
+            
+            updateUI();
+            saveGame();
+        }
+
+        // 更新企业关系
+        function updateCorporations() {
+            const corporations = ['neura', 'quant', 'cyber'];
+            corporations.forEach(corp => {
+                const element = document.getElementById(`corp-${corp}`);
+                if (game.corporations[corp]) {
+                    element.classList.add('unlocked');
+                    element.querySelector('button').style.display = 'none';
+                } else {
+                    element.classList.remove('unlocked');
+                    element.querySelector('button').style.display = 'inline-block';
+                    // 检查是否可以解锁
+                    const canUnlock = canUnlockCorporation(corp);
+                    element.querySelector('button').disabled = !canUnlock;
                 }
-            }, 5000);
-            
-            alert(currentLanguage === 'zh' ? 
-                `提现申请已提交，${amount}元将在24小时内打入您的支付宝账户` : 
-                `Withdrawal request submitted, ¥${amount} will be transferred within 24 hours`);
-            updateUI();
+            });
+            document.getElementById('reputation-corps').textContent = Math.floor(game.resources.reputation);
         }
-        
-        // 金币兑换
-        function exchangeGold() {
-            const goldInput = document.getElementById('exchangeGold');
-            const gold = parseInt(goldInput.value);
+
+        // 检查是否可以解锁企业
+        function canUnlockCorporation(corp) {
+            const requirements = {
+                neura: game.resources.reputation >= 500,
+                quant: game.resources.reputation >= 800,
+                cyber: game.resources.reputation >= 1200
+            };
+            return requirements[corp] && !game.corporations[corp];
+        }
+
+        // 解锁企业
+        function unlockCorporation(corp) {
+            if (!canUnlockCorporation(corp)) return;
             
-            if (isNaN(gold) || gold < 10000) {
-                alert(currentLanguage === 'zh' ? 
-                    '最低兑换10000金币(1元)' : 
-                    'Minimum exchange is 10000 coins (¥1)');
-                return;
+            game.corporations[corp] = true;
+            
+            // 应用企业效果
+            switch(corp) {
+                case 'neura':
+                    game.rates.biochips += 0.2;
+                    addLog("已与NeuraLink科技建立合作关系 - 生物芯片生产提升");
+                    break;
+                case 'quant':
+                    game.resources.maxCompute += 100;
+                    addLog("已与Quantum Dynamics建立合作关系 - 算力上限提升");
+                    break;
+                case 'cyber':
+                    game.stability += 20;
+                    addLog("已与CyberSys安全建立合作关系 - 系统稳定性提升");
+                    break;
             }
             
-            if (currentUser.todayEarnings < gold) {
-                alert(currentLanguage === 'zh' ? '今日收益不足' : 'Insufficient earnings today');
-                return;
+            updateUI();
+            saveGame();
+        }
+
+        // 更新赛博空间
+        function updateCyberspace() {
+            document.getElementById('influence-cyber').textContent = Math.floor(game.resources.influence);
+            
+            // 渲染赛博空间视图
+            const cyberspace = document.getElementById('cyberspace-view');
+            cyberspace.innerHTML = '';
+            
+            // 创建节点和连接
+            if (game.cyberspaceNodes.length === 0) {
+                generateCyberspace();
             }
             
-            currentUser.todayEarnings -= gold;
-            currentUser.balance += gold / 10000;
+            game.cyberspaceNodes.forEach(node => {
+                const element = document.createElement('div');
+                element.className = 'data-node';
+                element.style.left = `${node.x}%`;
+                element.style.top = `${node.y}%`;
+                element.style.backgroundColor = node.locked ? 'var(--neon-green)' : 'var(--neon-blue)';
+                cyberspace.appendChild(element);
+            });
             
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            alert(currentLanguage === 'zh' ? 
-                `成功兑换${gold}金币为${gold/10000}元` : 
-                `Successfully exchanged ${gold} coins for ¥${gold/10000}`);
-            goldInput.value = '';
+            game.cyberspaceLinks.forEach(link => {
+                const element = document.createElement('div');
+                element.className = 'data-link';
+                const x1 = game.cyberspaceNodes[link.from].x;
+                const y1 = game.cyberspaceNodes[link.from].y;
+                const x2 = game.cyberspaceNodes[link.to].x;
+                const y2 = game.cyberspaceNodes[link.to].y;
+                
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                element.style.width = `${length}%`;
+                element.style.left = `${x1}%`;
+                element.style.top = `${y1}%`;
+                element.style.transform = `rotate(${angle}deg)`;
+                
+                cyberspace.appendChild(element);
+            });
         }
-        
-        // 显示邀请模态框
-        function showInvite() {
-            showModal('inviteModal');
-            document.getElementById('myInviteCode').value = currentUser.inviteCode;
-            document.getElementById('inviteLink').value = `${window.location.href.split('?')[0]}?invite=${currentUser.inviteCode}`;
-        }
-        
-        // 查看团队
-        function viewTeam() {
-            showModal('teamModal');
+
+        // 生成赛博空间节点
+        function generateCyberspace() {
+            game.cyberspaceNodes = [];
+            game.cyberspaceLinks = [];
             
-            let teamHtml = '';
-            const teamMembers = users.filter(u => u.invitedBy === currentUser.inviteCode);
-            
-            if (teamMembers.length === 0) {
-                teamHtml = `<p>${currentLanguage === 'zh' ? '暂无团队成员' : 'No team members'}</p>`;
-            } else {
-                teamMembers.forEach(member => {
-                    teamHtml += `
-                        <div class="task-item">
-                            <div class="task-info">${member.phone.substr(0, 3)}***${member.phone.substr(7)}</div>
-                            <div class="task-reward">${member.simulators}${currentLanguage === 'zh' ? '模拟器' : 'simulators'}</div>
-                            <div class="simulator-status">${new Date(member.registerTime).toLocaleDateString()}</div>
-                        </div>
-                    `;
+            // 创建5-8个随机节点
+            const nodeCount = 5 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < nodeCount; i++) {
+                game.cyberspaceNodes.push({
+                    x: 10 + Math.random() * 80,
+                    y: 10 + Math.random() * 80,
+                    locked: false,
+                    value: 10 + Math.floor(Math.random() * 40)
                 });
             }
             
-            document.getElementById('teamList').innerHTML = teamHtml;
-            document.getElementById('teamCount').innerHTML = teamMembers.length;
-            
-            const teamEarnings = teamMembers.reduce((sum, member) => sum + member.totalEarnings * 0.1, 0);
-            document.getElementById('teamEarnings').innerHTML = teamEarnings.toFixed(2);
-        }
-        
-        // 分享邀请
-        function shareInvite() {
-            alert(currentLanguage === 'zh' ? 
-                '邀请链接已复制，可以粘贴到微信、QQ等社交平台' : 
-                'Invite link copied, you can share it on social media');
-            copyInviteLink();
-        }
-        
-        // 复制邀请链接
-        function copyInviteLink() {
-            const inviteLink = document.getElementById('inviteLink');
-            inviteLink.select();
-            document.execCommand('copy');
-            alert(currentLanguage === 'zh' ? '邀请链接已复制到剪贴板' : 'Invite link copied to clipboard');
-        }
-        
-        // 加入项目
-        function joinProject(projectId) {
-            if (!currentUser.joinProjects) {
-                currentUser.joinProjects = [];
+            // 创建连接
+            for (let i = 0; i < nodeCount - 1; i++) {
+                game.cyberspaceLinks.push({
+                    from: i,
+                    to: i + 1
+                });
             }
             
-            if (currentUser.joinProjects.includes(projectId)) {
-                alert(currentLanguage === 'zh' ? '您已加入该项目' : 'You already joined this project');
-                return;
-            }
-            
-            currentUser.joinProjects.push(projectId);
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            let projectName = '';
-            switch(projectId) {
-                case 1: projectName = currentLanguage === 'zh' ? '一键拉新日赚500' : 'Easy Invite Earn ¥500'; break;
-                case 2: projectName = currentLanguage === 'zh' ? 'AI慧算宝简单分红' : 'AI Profit Sharing'; break;
-                case 3: projectName = currentLanguage === 'zh' ? '视频号挂机' : 'Video Channel AFK'; break;
-            }
-            
-            alert(currentLanguage === 'zh' ? 
-                `成功加入${projectName}项目，收益将自动计算` : 
-                `Successfully joined ${projectName} project, earnings will be calculated automatically`);
-        }
-        
-        // 开始高级任务
-        function startAdvancedTask(taskId) {
-            const task = advancedTasks.find(t => t.id === taskId);
-            if (!task) return;
-            
-            currentAdvancedTask = {
-                ...task,
-                startTime: new Date(),
-                progress: 0
-            };
-            
-            showModal('advancedTaskModal');
-            document.getElementById('advancedTaskTitle').innerHTML = task.name;
-            document.getElementById('taskInstructions').innerHTML = task.instructions;
-            document.getElementById('taskCompleteBtn').style.display = 'none';
-            
-            // 更新进度条
-            updateTaskProgress();
-            
-            // 开始计时
-            taskInterval = setInterval(updateTaskProgress, 1000);
-        }
-        
-        // 新增：开始VIP任务
-        function startVipTask() {
-            if (!currentUser.isVip) {
-                alert(currentLanguage === 'zh' ? 
-                    '此任务仅限VIP会员' : 
-                    'This task is for VIP members only');
-                return;
-            }
-            
-            const task = {
-                id: 4,
-                name: currentLanguage === 'zh' ? 'VIP专属任务 - 观看广告' : 'VIP Task - Watch Ad',
-                reward: 150000,
-                time: 5,
-                instructions: currentLanguage === 'zh' ? '请观看完整广告视频以获得奖励' : 'Please watch the full ad video to get reward'
-            };
-            
-            currentAdvancedTask = {
-                ...task,
-                startTime: new Date(),
-                progress: 0
-            };
-            
-            showModal('advancedTaskModal');
-            document.getElementById('advancedTaskTitle').innerHTML = task.name;
-            document.getElementById('taskInstructions').innerHTML = task.instructions;
-            document.getElementById('taskCompleteBtn').style.display = 'none';
-            
-            // 更新进度条
-            updateTaskProgress();
-            
-            // 开始计时
-            taskInterval = setInterval(updateTaskProgress, 1000);
-        }
-        
-        // 更新任务进度
-        function updateTaskProgress() {
-            if (!currentAdvancedTask) return;
-            
-            const now = new Date();
-            const elapsed = (now - currentAdvancedTask.startTime) / 1000 / 60; // 分钟
-            currentAdvancedTask.progress = Math.min(elapsed / currentAdvancedTask.time * 100, 100);
-            
-            document.getElementById('taskProgress').style.width = `${currentAdvancedTask.progress}%`;
-            
-            const remaining = currentAdvancedTask.time * 60 - Math.floor(elapsed * 60);
-            const minutes = Math.floor(remaining / 60);
-            const seconds = remaining % 60;
-            document.getElementById('taskTime').innerHTML = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (currentAdvancedTask.progress >= 100) {
-                clearInterval(taskInterval);
-                document.getElementById('taskCompleteBtn').style.display = 'block';
-                document.getElementById('taskCancelBtn').style.display = 'none';
-            }
-        }
-        
-        // 完成高级任务
-        function completeAdvancedTask() {
-            if (!currentAdvancedTask) return;
-            
-            currentUser.todayEarnings += currentAdvancedTask.reward;
-            currentUser.balance += currentAdvancedTask.reward / 10000;
-            currentUser.totalEarnings += currentAdvancedTask.reward / 10000;
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            
-            alert(currentLanguage === 'zh' ? 
-                `任务完成！获得${currentAdvancedTask.reward}金币奖励` : 
-                `Task completed! Got ${currentAdvancedTask.reward} coins reward`);
-            closeModal('advancedTaskModal');
-            currentAdvancedTask = null;
-        }
-        
-        // 取消高级任务
-        function cancelAdvancedTask() {
-            if (taskInterval) clearInterval(taskInterval);
-            currentAdvancedTask = null;
-            closeModal('advancedTaskModal');
-            alert(currentLanguage === 'zh' ? '已取消任务' : 'Task canceled');
-        }
-        
-        // 关闭高级任务
-        function closeAdvancedTask() {
-            if (taskInterval) clearInterval(taskInterval);
-            currentAdvancedTask = null;
-            closeModal('advancedTaskModal');
-        }
-        
-        // 购买模拟器
-        function buySimulator(type) {
-            const item = shopItems.find(i => i.id === type && i.type === 'simulator');
-            if (!item) return;
-            
-            if (currentUser.balance < item.price) {
-                alert(currentLanguage === 'zh' ? 
-                    `余额不足，需要${item.price}元` : 
-                    `Insufficient balance, need ¥${item.price}`);
-                return;
-            }
-            
-            currentUser.balance -= item.price;
-            currentUser.simulators += 1;
-            
-            // 添加到道具列表
-            if (!currentUser.items) currentUser.items = [];
-            currentUser.items.push({
-                id: Date.now().toString(),
-                type: 'simulator',
-                name: item.name,
-                value: item.value,
-                buyTime: new Date().toISOString()
-            });
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            alert(currentLanguage === 'zh' ? 
-                `购买成功！获得1个${item.name}` : 
-                `Purchase successful! Got 1 ${item.name}`);
-        }
-        
-        // 购买特权卡
-        function buyCard(type) {
-            const item = shopItems.find(i => i.id === type + 3 && i.type === 'card');
-            if (!item) return;
-            
-            if (currentUser.balance < item.price) {
-                alert(currentLanguage === 'zh' ? 
-                    `余额不足，需要${item.price}元` : 
-                    `Insufficient balance, need ¥${item.price}`);
-                return;
-            }
-            
-            currentUser.balance -= item.price;
-            
-            // 计算到期时间
-            const expireTime = new Date();
-            expireTime.setDate(expireTime.getDate() + item.duration);
-            
-            // 添加到道具列表
-            if (!currentUser.items) currentUser.items = [];
-            currentUser.items.push({
-                id: Date.now().toString(),
-                type: 'card',
-                name: item.name,
-                value: item.value,
-                buyTime: new Date().toISOString(),
-                expireTime: expireTime.toISOString()
-            });
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            alert(currentLanguage === 'zh' ? 
-                `购买成功！${item.name}已生效，有效期${item.duration}天` : 
-                `Purchase successful! ${item.name} activated, valid for ${item.duration} days`);
-        }
-        
-        // 新增：购买签到翻倍卡
-        function buyCheckinBoost() {
-            const item = shopItems.find(i => i.id === 7 && i.type === 'boost');
-            if (!item) return;
-            
-            if (currentUser.balance < item.price) {
-                alert(currentLanguage === 'zh' ? 
-                    `余额不足，需要${item.price}元` : 
-                    `Insufficient balance, need ¥${item.price}`);
-                return;
-            }
-            
-            currentUser.balance -= item.price;
-            currentUser.hasCheckinBoost = true;
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateUI();
-            alert(currentLanguage === 'zh' ? 
-                '购买成功！下次签到奖励将翻倍' : 
-                'Purchase successful! Next check-in reward will be doubled');
-        }
-        
-        // 保存设置
-        function saveSettings() {
-            if (!currentUser.settings) currentUser.settings = {};
-            
-            currentUser.settings.autoCheckin = document.getElementById('autoCheckin').checked;
-            currentUser.settings.autoWithdraw = document.getElementById('autoWithdraw').checked;
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            alert(currentLanguage === 'zh' ? '设置已保存' : 'Settings saved');
-        }
-        
-        // 切换标签页
-        function switchTab(tabName) {
-            // 更新导航标签
-            const tabs = document.querySelectorAll('.nav-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // 更新内容区域
-            const tabContainers = document.querySelectorAll('.tab-container');
-            tabContainers.forEach(container => container.classList.remove('active'));
-            document.getElementById(`${tabName}Tab`).classList.add('active');
-        }
-        
-        // 退出登录
-        function logout() {
-            if (taskInterval) clearInterval(taskInterval);
-            if (earningInterval) clearInterval(earningInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            document.getElementById('mainContent').style.display = 'none';
-            showModal('loginModal');
-        }
-        
-        // 开始收益计时器
-        function startEarningInterval() {
-            if (earningInterval) clearInterval(earningInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            nextEarningTime = 60;
-            updateEarningCountdown();
-            
-            // 每分钟计算一次收益
-            earningInterval = setInterval(calculateEarnings, 60000);
-            
-            // 每秒更新倒计时
-            countdownInterval = setInterval(updateEarningCountdown, 1000);
-        }
-        
-        // 计算收益
-        function calculateEarnings() {
-            if (!currentUser) return;
-            
-            const efficiency = getEfficiencyMultiplier();
-            const earnings = currentUser.simulators * 1 * efficiency; // 每个模拟器每分钟1金币乘以效率
-            
-            currentUser.todayEarnings += earnings;
-            currentUser.balance += earnings / 10000;
-            currentUser.totalEarnings += earnings / 10000;
-            
-            // 检查自动提现
-            if (currentUser.settings?.autoWithdraw && currentUser.balance >= 10 && currentUser.alipayAccount) {
-                currentUser.balance -= 10;
-                currentUser.withdrawn += 10;
+            // 随机添加一些额外连接
+            const extraLinks = Math.floor(Math.random() * 3);
+            for (let i = 0; i < extraLinks; i++) {
+                const from = Math.floor(Math.random() * nodeCount);
+                let to;
+                do {
+                    to = Math.floor(Math.random() * nodeCount);
+                } while (to === from);
                 
-                const withdrawRecord = {
-                    id: Date.now().toString(),
-                    userId: currentUser.id,
-                    amount: 10,
-                    time: new Date().toISOString(),
-                    status: 'pending',
-                    alipayAccount: currentUser.alipayAccount
+                game.cyberspaceLinks.push({
+                    from,
+                    to
+                });
+            }
+        }
+
+        // 探索赛博空间
+        function exploreCyberspace() {
+            if (!game.tech.virtual) {
+                addLog("错误: 需要先研究虚拟现实技术");
+                return;
+            }
+            
+            if (game.resources.influence < 10) {
+                addLog("错误: 需要至少10影响力");
+                return;
+            }
+            
+            game.resources.influence -= 10;
+            game.stats.cyberspaceEntered++;
+            
+            // 随机奖励
+            const rewardType = Math.floor(Math.random() * 4);
+            let rewardAmount, rewardMessage;
+            
+            switch(rewardType) {
+                case 0:
+                    rewardAmount = 5 + Math.floor(Math.random() * 10);
+                    game.resources.data += rewardAmount;
+                    rewardMessage = `发现数据缓存: +${rewardAmount} 数据碎片`;
+                    break;
+                case 1:
+                    rewardAmount = 3 + Math.floor(Math.random() * 7);
+                    game.resources.research += rewardAmount;
+                    rewardMessage = `发现研究数据: +${rewardAmount} 研究点数`;
+                    break;
+                case 2:
+                    rewardAmount = 1 + Math.floor(Math.random() * 3);
+                    game.resources.biochips += rewardAmount;
+                    rewardMessage = `发现生物芯片: +${rewardAmount} 生物芯片`;
+                    break;
+                case 3:
+                    rewardAmount = 10 + Math.floor(Math.random() * 20);
+                    game.resources.influence += rewardAmount;
+                    rewardMessage = `网络影响力提升: +${rewardAmount} 影响力`;
+                    break;
+            }
+            
+            addLog(`赛博空间探索完成. ${rewardMessage}`);
+            
+            // 成就检查
+            if (game.stats.cyberspaceEntered >= 10) {
+                unlockAchievement('cyberspace');
+            }
+            
+            updateUI();
+            saveGame();
+        }
+
+        // 入侵企业网络
+        function hackCorporation() {
+            if (!game.tech.virtual) {
+                addLog("错误: 需要先研究虚拟现实技术");
+                return;
+            }
+            
+            if (game.resources.influence < 50) {
+                addLog("错误: 需要至少50影响力");
+                return;
+            }
+            
+            // 检查是否解锁了企业
+            const unlockedCorps = [];
+            if (game.corporations.neura) unlockedCorps.push('neura');
+            if (game.corporations.quant) unlockedCorps.push('quant');
+            if (game.corporations.cyber) unlockedCorps.push('cyber');
+            
+            if (unlockedCorps.length === 0) {
+                addLog("错误: 需要先与至少一家企业建立联系");
+                return;
+            }
+            
+            game.resources.influence -= 50;
+            
+            // 随机选择一家企业
+            const corp = unlockedCorps[Math.floor(Math.random() * unlockedCorps.length)];
+            let reward, message;
+            
+            switch(corp) {
+                case 'neura':
+                    reward = 2 + Math.floor(Math.random() * 3);
+                    game.resources.biochips += reward;
+                    message = `成功入侵NeuraLink网络: 获得${reward}生物芯片`;
+                    break;
+                case 'quant':
+                    reward = 20 + Math.floor(Math.random() * 30);
+                    game.resources.compute += reward;
+                    message = `成功入侵Quantum Dynamics网络: 获得${reward}算力`;
+                    break;
+                case 'cyber':
+                    reward = 5 + Math.floor(Math.random() * 10);
+                    game.stability += reward;
+                    message = `成功入侵CyberSys安全网络: 系统稳定性+${reward}%`;
+                    break;
+            }
+            
+            addLog(message);
+            updateUI();
+            saveGame();
+        }
+
+        // 防御网络节点
+        function defendNode() {
+            if (!game.tech.virtual) {
+                addLog("错误: 需要先研究虚拟现实技术");
+                return;
+            }
+            
+            if (game.resources.influence < 30) {
+                addLog("错误: 需要至少30影响力");
+                return;
+            }
+            
+            startCodeMinigame();
+        }
+
+        // 启动代码小游戏
+        function startCodeMinigame() {
+            game.minigameActive = true;
+            document.getElementById('minigame-container').style.display = 'flex';
+            
+            // 生成代码
+            const codeDisplay = document.getElementById('code-display');
+            codeDisplay.innerHTML = '';
+            
+            const lines = [
+                "function processData(data) {",
+                "  let result = [];",
+                "  for (let i = 0; i < data.length; i++) {",
+                "    if (data[i] > threshold) {",
+                "      result.push(data[i] * factor);",
+                "    } else {",
+                "      result.push(data[i]);",
+                "    }",
+                "  }",
+                "  return result;",
+                "}"
+            ];
+            
+            // 随机选择1-3行作为错误行
+            const errorLines = [];
+            const errorCount = 1 + Math.floor(Math.random() * 3);
+            while (errorLines.length < errorCount) {
+                const line = 2 + Math.floor(Math.random() * (lines.length - 3)); // 避开第一行和最后一行
+                if (!errorLines.includes(line)) {
+                    errorLines.push(line);
+                }
+            }
+            
+            // 显示代码
+            lines.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.textContent = line;
+                div.dataset.line = index;
+                if (errorLines.includes(index)) {
+                    div.dataset.error = 'true';
+                    // 随机修改这行代码
+                    const parts = line.split(' ');
+                    const randomIndex = Math.floor(Math.random() * parts.length);
+                    parts[randomIndex] = '#' + parts[randomIndex] + '#';
+                    div.textContent = parts.join(' ');
+                }
+                codeDisplay.appendChild(div);
+            });
+            
+            // 生成错误选项
+            const errorContainer = document.getElementById('code-errors');
+            errorContainer.innerHTML = '';
+            
+            // 添加正确错误行
+            errorLines.forEach(line => {
+                const button = document.createElement('button');
+                button.textContent = `第 ${line + 1} 行`;
+                button.onclick = function() {
+                    // 高亮显示错误行
+                    document.querySelector(`.code-line[data-line="${line}"]`).classList.add('error');
+                    button.disabled = true;
+                    
+                    // 检查是否找出了所有错误
+                    const remainingErrors = document.querySelectorAll('.code-line[data-error="true"]:not(.error)');
+                    if (remainingErrors.length === 0) {
+                        // 成功防御
+                        const reward = 50 + Math.floor(Math.random() * 50);
+                        game.resources.influence += reward;
+                        addLog(`成功防御网络攻击! 获得${reward}影响力`);
+                        closeMinigame();
+                    }
                 };
+                errorContainer.appendChild(button);
+            });
+            
+            // 添加一些干扰项
+            const fakeErrorCount = 3;
+            for (let i = 0; i < fakeErrorCount; i++) {
+                let fakeLine;
+                do {
+                    fakeLine = 2 + Math.floor(Math.random() * (lines.length - 3));
+                } while (errorLines.includes(fakeLine));
                 
-                withdrawHistory.push(withdrawRecord);
-                
-                // 模拟提现处理
-                setTimeout(() => {
-                    const record = withdrawHistory.find(w => w.id === withdrawRecord.id);
-                    if (record) {
-                        record.status = 'completed';
-                        updateUI();
-                    }
-                }, 5000);
+                const button = document.createElement('button');
+                button.textContent = `第 ${fakeLine + 1} 行`;
+                button.onclick = function() {
+                    // 错误选择惩罚
+                    game.stability -= 5;
+                    addLog("错误选择! 系统稳定性下降");
+                    button.disabled = true;
+                    checkStability();
+                };
+                errorContainer.appendChild(button);
+            }
+        }
+
+        // 关闭小游戏
+        function closeMinigame() {
+            game.minigameActive = false;
+            document.getElementById('minigame-container').style.display = 'none';
+            updateUI();
+            saveGame();
+        }
+
+        // 添加日志
+        function addLog(message) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('p');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // 清除日志
+        function clearLog() {
+            document.getElementById('log').innerHTML = '<p>日志已清除</p>';
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+        }
+
+        // 购买设施
+        function buyGenerator() {
+            if (game.resources.credits >= 50) {
+                game.resources.credits -= 50;
+                game.facilities.generators++;
+                game.rates.energy += 0.5;
+                if (game.upgrades.gen1) game.rates.energy += 0.25;
+                addLog("能源发生器建造完成");
+                if (game.facilities.generators === 1) {
+                    unlockAchievement('start');
+                    checkMission('start');
+                }
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 信用点不足");
+            }
+        }
+
+        function buyDataCenter() {
+            if (game.resources.credits >= 100) {
+                game.resources.credits -= 100;
+                game.facilities.dataCenters++;
+                game.rates.data += 0.3;
+                if (game.upgrades.data1) game.rates.data += 0.15;
+                addLog("数据中心建造完成");
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 信用点不足");
+            }
+        }
+
+        function buyQuantumComputer() {
+            if (game.resources.credits >= 500) {
+                game.resources.credits -= 500;
+                game.facilities.quantumComputers++;
+                game.resources.maxCompute += 50;
+                if (game.upgrades.quant1) game.resources.maxCompute += 25;
+                addLog("量子计算机上线");
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 信用点不足");
+            }
+        }
+
+        function buyFirewall() {
+            if (game.resources.data >= 200) {
+                game.resources.data -= 200;
+                game.facilities.firewalls++;
+                addLog("防火墙升级完成");
+                if (game.upgrades.firewall1) game.stability += 10;
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 数据碎片不足");
+            }
+        }
+
+        function buyBiochipLab() {
+            if (!game.tech.biotech) {
+                addLog("错误: 需要先研究生物科技");
+                return;
             }
             
-            // 检查自动签到
-            if (currentUser.settings?.autoCheckin) {
-                const today = new Date().toDateString();
-                const lastCheckinDate = currentUser.lastCheckinDate ? new Date(currentUser.lastCheckinDate).toDateString() : null;
+            if (game.resources.credits >= 1000) {
+                game.resources.credits -= 1000;
+                game.facilities.biochipLabs++;
+                game.rates.biochips += 0.1;
+                if (game.upgrades.bio1) game.rates.biochips += 0.05;
+                addLog("生物芯片实验室建造完成");
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 信用点不足");
+            }
+        }
+
+        function buyInfluenceNode() {
+            if (!game.tech.virtual) {
+                addLog("错误: 需要先研究虚拟现实技术");
+                return;
+            }
+            
+            if (game.resources.credits >= 500 && game.resources.data >= 200) {
+                game.resources.credits -= 500;
+                game.resources.data -= 200;
+                game.facilities.influenceNodes++;
+                game.rates.influence += 0.2;
+                if (game.upgrades.influence1) game.rates.influence += 0.1;
+                addLog("影响力节点部署完成");
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 资源不足");
+            }
+        }
+
+        // 玩家行动
+        function harvestEnergy() {
+            const amount = 5 + (game.tech.neural ? 3 : 0) + (game.cybernetics.neural ? 2 : 0);
+            game.resources.energy += amount;
+            addLog(`收集了 ${amount} 单位能源`);
+            updateUI();
+            saveGame();
+        }
+
+        function mineData() {
+            const amount = 3 + (game.tech.neural ? 2 : 0) + (game.cybernetics.neural ? 1 : 0);
+            game.resources.data += amount;
+            addLog(`挖掘了 ${amount} 数据碎片`);
+            updateUI();
+            saveGame();
+        }
+
+        function runComputation() {
+            if (game.resources.compute < game.resources.maxCompute) {
+                const amount = 10 + (game.tech.quantum ? 5 : 0) + (game.cybernetics.neural ? 3 : 0);
+                game.resources.compute = Math.min(game.resources.compute + amount, game.resources.maxCompute);
+                addLog(`执行了计算任务 (+${amount} 算力)`);
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 算力已达上限");
+            }
+        }
+
+        function sellData() {
+            if (game.resources.data >= 10) {
+                const amount = Math.floor(game.resources.data / 10);
+                game.resources.data -= amount * 10;
+                game.resources.credits += amount;
+                addLog(`出售了 ${amount * 10} 数据碎片，获得 ${amount} 信用点`);
+                updateUI();
+                saveGame();
+            } else {
+                addLog("错误: 数据碎片不足 (需要至少10)");
+            }
+        }
+
+        function buyCredits() {
+            if (!game.tech.darkweb) {
+                addLog("错误: 需要先研究暗网接入技术");
+                return;
+            }
+            
+            // 高风险交易
+            const success = Math.random() > 0.3;
+            if (success) {
+                const amount = 50 + Math.floor(Math.random() * 100);
+                game.resources.credits += amount;
+                addLog(`黑市交易成功! 获得 ${amount} 信用点`);
+            } else {
+                // 交易失败惩罚
+                const lost = Math.min(50, game.resources.credits);
+                game.resources.credits -= lost;
+                game.stability -= 10;
+                addLog(`黑市交易失败! 损失 ${lost} 信用点，系统稳定性下降`);
+                checkStability();
+            }
+            updateUI();
+            saveGame();
+        }
+
+        function launchDDoS() {
+            if (!game.tech.cyberwar) {
+                addLog("错误: 需要先研究网络战争技术");
+                return;
+            }
+            
+            if (game.resources.influence < 20) {
+                addLog("错误: 需要至少20影响力");
+                return;
+            }
+            
+            game.resources.influence -= 20;
+            game.stats.ddosLaunched++;
+            
+            // 随机奖励
+            const rewardType = Math.floor(Math.random() * 3);
+            let rewardAmount, rewardMessage;
+            
+            switch(rewardType) {
+                case 0:
+                    rewardAmount = 10 + Math.floor(Math.random() * 20);
+                    game.resources.data += rewardAmount;
+                    rewardMessage = `窃取数据: +${rewardAmount} 数据碎片`;
+                    break;
+                case 1:
+                    rewardAmount = 5 + Math.floor(Math.random() * 10);
+                    game.resources.credits += rewardAmount;
+                    rewardMessage = `勒索成功: +${rewardAmount} 信用点`;
+                    break;
+                case 2:
+                    rewardAmount = 15;
+                    game.resources.influence += rewardAmount;
+                    rewardMessage = `网络影响力提升: +${rewardAmount} 影响力`;
+                    break;
+            }
+            
+            addLog(`DDoS攻击完成. ${rewardMessage}`);
+            
+            // 成就检查
+            if (game.stats.ddosLaunched >= 10) {
+                unlockAchievement('ddos');
+            }
+            
+            // 任务检查
+            checkMission('ddos');
+            
+            updateUI();
+            saveGame();
+        }
+
+        function startVirusScan() {
+            if (game.virusActive || game.gameOver) return;
+            
+            // 随机触发病毒事件
+            const virusChance = 0.02;
+            if (Math.random() < virusChance) {
+                game.virusActive = true;
+                game.virusTime = 15;
                 
-                if (lastCheckinDate !== today) {
-                    dailyCheckin();
+                // 显示事件面板
+                document.getElementById('virus-event').style.display = 'block';
+                
+                // 开始扫描动画
+                let scanPos = 0;
+                const scanInterval = setInterval(() => {
+                    scanPos = (scanPos + 2 + Math.random() * 5) % 100;
+                    document.getElementById('virus-scan-pointer').style.left = `${scanPos}%`;
+                    
+                    game.virusTime--;
+                    document.getElementById('virus-timer').textContent = `倒计时: ${game.virusTime}秒`;
+                    
+                    if (game.virusTime <= 0) {
+                        clearInterval(scanInterval);
+                        resolveVirus(false);
+                    }
+                }, 1000);
+            } else {
+                addLog("病毒扫描完成: 未发现威胁");
+            }
+        }
+
+        function scanVirus() {
+            if (game.virusActive) {
+                const pointer = document.getElementById('virus-scan-pointer');
+                const pos = parseFloat(pointer.style.left || '0');
+                
+                if (pos >= 70 && pos <= 90) { // 绿色区域
+                    game.virusActive = false;
+                    document.getElementById('virus-event').style.display = 'none';
+                    addLog("病毒清除成功! 系统恢复");
+                    game.stats.virusesCleaned++;
+                    
+                    // 成就检查
+                    if (game.stats.virusesCleaned >= 5) {
+                        unlockAchievement('virus');
+                    }
+                } else {
+                    game.stability -= 5;
+                    addLog("病毒清除失败! 系统受损");
+                    checkStability();
+                }
+                
+                updateUI();
+                saveGame();
+            }
+        }
+
+        function enterCyberspace() {
+            if (!game.tech.virtual) {
+                addLog("错误: 需要先研究虚拟现实技术");
+                return;
+            }
+            
+            if (game.resources.compute < 30) {
+                addLog("错误: 需要至少30算力");
+                return;
+            }
+            
+            game.resources.compute -= 30;
+            game.stats.cyberspaceEntered++;
+            
+            // 随机奖励
+            const rewardType = Math.floor(Math.random() * 3);
+            let rewardAmount, rewardMessage;
+            
+            switch(rewardType) {
+                case 0:
+                    rewardAmount = 5 + Math.floor(Math.random() * 10);
+                    game.resources.research += rewardAmount;
+                    rewardMessage = `发现研究数据: +${rewardAmount} 研究点数`;
+                    break;
+                case 1:
+                    rewardAmount = 1 + Math.floor(Math.random() * 3);
+                    game.resources.biochips += rewardAmount;
+                    rewardMessage = `发现生物芯片: +${rewardAmount} 生物芯片`;
+                    break;
+                case 2:
+                    rewardAmount = 10 + Math.floor(Math.random() * 20);
+                    game.resources.influence += rewardAmount;
+                    rewardMessage = `网络影响力提升: +${rewardAmount} 影响力`;
+                    break;
+            }
+            
+            addLog(`赛博空间探索完成. ${rewardMessage}`);
+            
+            // 成就检查
+            if (game.stats.cyberspaceEntered >= 10) {
+                unlockAchievement('cyberspace');
+            }
+            
+            updateUI();
+            saveGame();
+        }
+
+        // 事件系统
+        function triggerHackEvent() {
+            if (game.hackActive || game.gameOver || game.minigameActive) return;
+            
+            // 防火墙减少黑客几率
+            let hackChance = 0.01 * (1 - (game.facilities.firewalls * 0.1));
+            if (game.tech.neural) hackChance *= 1.3; // 神经链接增加风险
+            if (game.tech.darkweb) hackChance *= 1.4; // 暗网接入增加风险
+            
+            if (Math.random() < hackChance) {
+                game.hackActive = true;
+                game.hackTime = 10 + (game.cybernetics.reflex ? 2 : 0);
+                
+                // 生成随机代码
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                let code = '';
+                for (let i = 0; i < 6; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                document.getElementById('hack-code').textContent = code;
+                document.getElementById('hack-input').value = '';
+                
+                // 显示事件面板
+                document.getElementById('hack-event').style.display = 'block';
+                
+                // 开始倒计时
+                const hackInterval = setInterval(() => {
+                    game.hackTime--;
+                    document.getElementById('hack-timer').textContent = `剩余时间: ${game.hackTime}秒`;
+                    
+                    if (game.hackTime <= 0) {
+                        clearInterval(hackInterval);
+                        resolveHack(false);
+                    }
+                }, 1000);
+            }
+        }
+
+        function resolveHack(success) {
+            game.hackActive = false;
+            document.getElementById('hack-event').style.display = 'none';
+            
+            if (success) {
+                const input = document.getElementById('hack-input').value.toUpperCase();
+                const code = document.getElementById('hack-code').textContent;
+                
+                if (input === code) {
+                    addLog("黑客攻击已成功抵御!");
+                    game.stats.hackDefended++;
+                    game.resources.research += 5;
+                    
+                    // 成就检查
+                    if (game.stats.hackDefended >= 1) {
+                        unlockAchievement('hack');
+                        checkMission('hack');
+                    }
+                } else {
+                    addLog("验证失败! 部分数据丢失");
+                    game.resources.data = Math.max(0, game.resources.data - 20);
+                    game.stability -= 10;
+                    checkStability();
+                }
+            } else {
+                addLog("黑客攻击成功! 系统受损");
+                game.resources.energy = Math.max(0, game.resources.energy - 30);
+                game.stability -= 15;
+                checkStability();
+            }
+            
+            updateUI();
+            saveGame();
+        }
+
+        function triggerOverloadEvent() {
+            if (game.overloadActive || game.gameOver || game.minigameActive) return;
+            
+            // 高算力使用时更易过载
+            let overloadChance = (game.resources.compute / game.resources.maxCompute) * 0.02;
+            if (game.tech.quantum) overloadChance *= 1.5; // 量子计算增加风险
+            if (game.tech.singularity) overloadChance *= 2; // 技术奇点大幅增加风险
+            
+            if (Math.random() < overloadChance) {
+                game.overloadActive = true;
+                game.overloadTime = 10 + (game.cybernetics.reflex ? 2 : 0);
+                
+                // 显示事件面板
+                document.getElementById('overload-event').style.display = 'block';
+                
+                // 开始过载动画
+                let overload = 0;
+                const overloadInterval = setInterval(() => {
+                    overload = (overload + 10 + Math.random() * 20) % 100;
+                    document.getElementById('overload-bar').style.width = `${overload}%`;
+                    
+                    game.overloadTime--;
+                    document.getElementById('overload-timer').textContent = `倒计时: ${game.overloadTime}秒`;
+                    
+                    if (game.overloadTime <= 0) {
+                        clearInterval(overloadInterval);
+                        resolveOverload(false);
+                    }
+                }, 1000);
+            }
+        }
+
+        function coolSystem() {
+            if (game.overloadActive) {
+                game.overloadActive = false;
+                document.getElementById('overload-event').style.display = 'none';
+                addLog("紧急降温成功! 系统恢复稳定");
+                game.stats.overloadPrevented++;
+                game.resources.compute = Math.max(0, game.resources.compute - 20);
+                
+                // 成就检查
+                if (game.stats.overloadPrevented >= 1) {
+                    unlockAchievement('overload');
+                }
+                
+                updateUI();
+                saveGame();
+            }
+        }
+
+        function resolveOverload(success) {
+            game.overloadActive = false;
+            document.getElementById('overload-event').style.display = 'none';
+            
+            if (!success) {
+                addLog("系统过载崩溃!");
+                game.stability -= 30;
+                game.resources.compute = 0;
+                checkStability();
+                updateUI();
+                saveGame();
+            }
+        }
+
+        function resolveVirus(success) {
+            game.virusActive = false;
+            document.getElementById('virus-event').style.display = 'none';
+            
+            if (!success) {
+                addLog("病毒清除失败! 系统严重受损");
+                game.stability -= 25;
+                game.resources.data = Math.max(0, game.resources.data - 50);
+                checkStability();
+                updateUI();
+                saveGame();
+            }
+        }
+
+        // 检查系统稳定性
+        function checkStability() {
+            if (game.stability <= 0) {
+                game.gameOver = true;
+                addLog("致命错误: 系统完全崩溃!");
+                document.getElementById('game-over').style.display = 'block';
+            }
+            
+            // 检查稳定性任务
+            if (game.stability > 80) {
+                if (game.stats.lastStabilityCheck === 0) {
+                    game.stats.lastStabilityCheck = Date.now();
+                } else {
+                    const stableTime = (Date.now() - game.stats.lastStabilityCheck) / 1000;
+                    if (stableTime >= 300) { // 5分钟
+                        checkMission('stability');
+                    }
+                }
+            } else {
+                game.stats.lastStabilityCheck = 0;
+            }
+        }
+
+        // 游戏主循环
+        function gameLoop() {
+            const now = Date.now();
+            const delta = (now - game.lastUpdate) / 1000; // 转换为秒
+            game.lastUpdate = now;
+            
+            if (game.gameOver) return;
+            
+            // 更新游戏时间
+            game.stats.playTime += delta;
+            
+            // 成就检查: 游戏时间
+            if (game.stats.playTime >= 3600 && !game.achievements.time) {
+                unlockAchievement('time');
+            }
+            
+            // 生物芯片成就检查
+            if (game.resources.biochips >= 100 && !game.achievements.bio) {
+                unlockAchievement('bio');
+            }
+            
+            // 资源生产
+            if (game.facilities.generators > 0) {
+                game.resources.energy += game.rates.energy * delta;
+            }
+            
+            if (game.facilities.dataCenters > 0) {
+                game.resources.data += game.rates.data * delta;
+            }
+            
+            if (game.facilities.biochipLabs > 0) {
+                game.resources.biochips += game.rates.biochips * delta;
+            }
+            
+            if (game.facilities.influenceNodes > 0) {
+                game.resources.influence += game.rates.influence * delta;
+            }
+            
+            // 自动化
+            if (game.tech.ai) {
+                // 自动分配能源
+                if (document.getElementById('auto-energy').checked && game.resources.energy > 20) {
+                    game.resources.energy -= 20 * delta;
+                    game.resources.compute = Math.min(game.resources.compute + 5 * delta, game.resources.maxCompute);
+                }
+                
+                // 自动分析数据
+                if (document.getElementById('auto-data').checked && game.resources.data > 10) {
+                    game.resources.data -= 10 * delta;
+                    game.resources.research += 0.5 * delta * (game.cybernetics.memory ? 1.3 : 1);
+                }
+                
+                // 自动生产生物芯片
+                if (document.getElementById('auto-biochips').checked && game.resources.energy > 5 && game.tech.biotech) {
+                    game.resources.energy -= 5 * delta;
+                    game.resources.biochips += 0.1 * delta * (game.cybernetics.ai ? 1.4 : 1);
                 }
             }
             
-            // 检查VIP是否到期
-            if (currentUser.isVip && new Date(currentUser.vipExpire) < new Date()) {
-                currentUser.isVip = false;
-                alert(currentLanguage === 'zh' ? 
-                    '您的VIP会员已到期' : 
-                    'Your VIP membership has expired');
-            }
+            // 随机事件
+            triggerHackEvent();
+            triggerOverloadEvent();
             
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
             updateUI();
+            saveGame();
             
-            nextEarningTime = 60;
-            document.getElementById('earningProgress').style.width = '0%';
+            requestAnimationFrame(gameLoop);
         }
-        
-        // 更新收益倒计时
-        function updateEarningCountdown() {
-            if (!currentUser) return;
+
+        // 初始化游戏
+        window.onload = function() {
+            loadGame();
+            gameLoop();
             
-            nextEarningTime--;
-            document.getElementById('nextEarningTime').innerHTML = nextEarningTime;
+            // 设置自动保存
+            setInterval(saveGame, 30000); // 每30秒自动保存
             
-            const progress = (60 - nextEarningTime) / 60 * 100;
-            document.getElementById('earningProgress').style.width = `${progress}%`;
+            // 绑定黑客输入事件
+            document.getElementById('hack-input').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    resolveHack(true);
+                }
+            });
             
-            if (nextEarningTime <= 0) {
-                nextEarningTime = 60;
-            }
-        }
-        
-        // 页面加载时初始化
-        window.onload = init;
+            // 绑定存档导入
+            document.getElementById('import-save').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        Object.assign(game, data);
+                        updateUI();
+                        saveGame();
+                        addLog("存档已导入");
+                    } catch (err) {
+                        addLog("导入失败: 存档文件损坏");
+                    }
+                };
+                reader.readAsText(file);
+            });
+        };
     </script>
 </body>
 </html>
